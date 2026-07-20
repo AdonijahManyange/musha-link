@@ -1,20 +1,23 @@
+import Image from "next/image";
 import SearchBar from "./SearchBar";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-slate-50">
-      {/* Hero Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-blue-700/70" />
+    <section className="relative min-h-[700px] overflow-hidden">
 
       {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-20"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1600')",
-        }}
+      <Image
+        src="/images/student-hero.jpg"
+        alt="Students moving into accommodation"
+        fill
+        priority
+        className="object-cover"
       />
 
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-blue-950/65 to-slate-900/40" />
+
+      {/* Content */}
       <div className="relative mx-auto flex min-h-[700px] max-w-7xl flex-col items-center justify-center px-6 text-center text-white">
 
         <span className="mb-6 rounded-full bg-white/20 px-5 py-2 text-sm font-medium backdrop-blur">
@@ -28,8 +31,7 @@ export default function Hero() {
         </h1>
 
         <p className="mt-8 max-w-2xl text-xl text-slate-200">
-          Verified student accommodation near Zimbabwe's leading
-          universities.
+          Verified student accommodation near Zimbabwe's leading universities.
         </p>
 
         <SearchBar />
