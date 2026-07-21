@@ -1,35 +1,5 @@
 import { listings } from "@/lib/listings";
-//import { BUDGET_OPTIONS } from "./constants";
-
-const BUDGET_OPTIONS = [
-  {
-    label: "Any Budget",
-    value: "",
-    matches: (_price: number) => true,
-  },
-  {
-    label: "Under $100",
-    value: "under-100",
-    matches: (price: number) => price < 100,
-  },
-  {
-    label: "$100 - $150",
-    value: "100-150",
-    matches: (price: number) =>
-      price >= 100 && price <= 150,
-  },
-  {
-    label: "$150 - $200",
-    value: "150-200",
-    matches: (price: number) =>
-      price >= 150 && price <= 200,
-  },
-  {
-    label: "$200+",
-    value: "200+",
-    matches: (price: number) => price >= 200,
-  },
-];
+import { BUDGET_OPTIONS } from "@/lib/constants";
 
 export function getUniversities() {
     return [...new Set(listings.map((listing) => listing.university))].sort();
