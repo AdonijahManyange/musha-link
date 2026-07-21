@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
+import { getUniversities, getRoomTypes, getBudgetRanges } from "@/lib/filters";
 
 export default function SearchBar() {
   const router = useRouter();
@@ -9,6 +11,11 @@ export default function SearchBar() {
   const [university, setUniversity] = useState("");
   const [budget, setBudget] = useState("");
   const [roomType, setRoomType] = useState("");
+  const universities = getUniversities();
+  const roomTypes = getRoomTypes(university);
+
+  const budgetRanges = getBudgetRanges(university);
+
   const handleSearch = () => {
 
   if (!university) {
@@ -40,16 +47,19 @@ export default function SearchBar() {
 
           <select 
             value={university}
-            onChange={(e) => setUniversity(e.target.value)}
+            onChange={(e) => {
+              setUniversity(e.target.value);
+              setRoomType("");
+            }}
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none"
           >
-            <option>Select University</option>
-            <option>University of Zimbabwe</option>
-            <option>NUST</option>
-            <option>Midlands State University</option>
-            <option>Chinhoyi University</option>
-            <option>HIT</option>
-            <option>Africa University</option>
+            <option value="">Select University</option>
+
+            {universities.map((uni) => (
+              <option key={uni} value={uni}>
+                {uni}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -59,15 +69,16 @@ export default function SearchBar() {
             Monthly Budget
           </label>
 
-          <select 
+          <select
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
-           className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none">
-            <option>Any Budget</option>
-            <option>Under $100</option>
-            <option>$100 - $150</option>
-            <option>$150 - $200</option>
-            <option>$200+</option>
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none"
+          >
+            {budgetRanges.map((range) => (
+              <option key={range.value} value={range.value}>
+                {range.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -81,22 +92,24 @@ export default function SearchBar() {
             value={roomType}
             onChange={(e) => setRoomType(e.target.value)}
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none">
-            <option>Any</option>
-            <option>Private Room</option>
-            <option>Shared Room</option>
-            <option>Apartment</option>
-            <option>House</option>
+            <option value="">Any</option>
+
+            {roomTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
           </select>
         </div>
 
         {/* Search Button */}
         <div className="flex items-end">
-          <button
-            onClick={handleSearch}
-            className="rounded-xl bg-[#1C3769] px-8 py-4 font-semibold text-white transition hover:bg-[#254B8C]"
-          >
-            Find Accommodation
-          </button>
+          <Button
+          onClick={handleSearch}
+          className="px-8 py-4"
+        >
+          Find Accommodation
+        </Button>
         </div>
       </div>
     </div>
