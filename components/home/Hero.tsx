@@ -3,8 +3,12 @@ import SearchBar from "./SearchBar";
 
 export default function Hero() {
   return (
-    <section className="relative min-h-[700px] overflow-hidden">
+    <section
+      id="top"
+      className="relative min-h-[700px] overflow-hidden"
+    >
 
+      
       {/* Background Image */}
       <Image
         src="/images/student-hero.jpg"

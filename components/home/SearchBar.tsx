@@ -1,14 +1,48 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation"; 
+
 export default function SearchBar() {
+  const router = useRouter();
+
+  const [university, setUniversity] = useState("");
+  const [budget, setBudget] = useState("");
+  const [roomType, setRoomType] = useState("");
+  const handleSearch = () => {
+
+  if (!university) {
+    alert("Please select a university.");
+    return;
+  }
+  const params = new URLSearchParams();
+  params.set("university", university);
+  if (budget) {
+    params.set("budget", budget);
+  }
+
+  if (roomType) {
+    params.set("roomType", roomType);
+  }
+
+  router.push(`/browse?${params.toString()}`);
+};
+
   return (
     <div className="mx-auto mt-12 max-w-5xl rounded-2xl border border-slate-200 bg-white p-4 shadow-lg">
       <div className="grid gap-4 md:grid-cols-4">
+
         {/* University */}
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-700">
             University
           </label>
 
-          <select className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none">
+          <select 
+            value={university}
+            onChange={(e) => setUniversity(e.target.value)}
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none"
+          >
             <option>Select University</option>
             <option>University of Zimbabwe</option>
             <option>NUST</option>
@@ -25,7 +59,10 @@ export default function SearchBar() {
             Monthly Budget
           </label>
 
-          <select className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none">
+          <select 
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+           className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none">
             <option>Any Budget</option>
             <option>Under $100</option>
             <option>$100 - $150</option>
@@ -40,7 +77,10 @@ export default function SearchBar() {
             Room Type
           </label>
 
-          <select className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none">
+          <select 
+            value={roomType}
+            onChange={(e) => setRoomType(e.target.value)}
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none">
             <option>Any</option>
             <option>Private Room</option>
             <option>Shared Room</option>
@@ -51,7 +91,10 @@ export default function SearchBar() {
 
         {/* Search Button */}
         <div className="flex items-end">
-          <button className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700">
+          <button
+            onClick={handleSearch}
+            className="rounded-xl bg-[#1C3769] px-8 py-4 font-semibold text-white transition hover:bg-[#254B8C]"
+          >
             Find Accommodation
           </button>
         </div>

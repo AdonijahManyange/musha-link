@@ -76,14 +76,14 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
         <div className="mt-6 flex items-center justify-between">
 
-          <span className="text-3xl font-bold text-blue-900">
+          <span className="text-3xl font-bold text-[#1C3769]">
             US${listing.price}
             <span className="text-base text-slate-500">
               /month
             </span>
           </span>
 
-          <button className="rounded-xl bg-blue-900 px-5 py-3 font-semibold text-white transition hover:bg-blue-800">
+          <button className="rounded-xl bg-[#1C3769] px-5 py-3 font-semibold text-white transition hover:bg-[#162D57]">
             View Details
           </button>
 

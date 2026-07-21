@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function LandlordCTA() {
   return (
-    <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-24">
+    <section className="bg-gradient-to-r from-[#1C3769] via-[#23427D] to-[#2A4D8F] py-24">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row">
 
         {/* Left Side */}

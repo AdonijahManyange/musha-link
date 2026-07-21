@@ -3,7 +3,9 @@ import { listings } from "@/lib/listings";
 
 export default function FeaturedListings() {
   return (
-    <section className="bg-slate-50 py-20">
+    <section 
+      id="browse"
+      className="bg-slate-50 py-20">
       <div className="mx-auto max-w-7xl px-6">
 
         <div className="mb-14 text-center">
