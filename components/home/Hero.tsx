@@ -11,7 +11,7 @@ export default function Hero() {
       
       {/* Background Image */}
       <Image
-        src="/images/student-hero.jpg"
+        src="/images/new hero bg.png"
         alt="Students moving into accommodation"
         fill
         priority
