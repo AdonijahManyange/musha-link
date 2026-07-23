@@ -29,7 +29,7 @@ export default function Hero() {
           🇿🇼 Zimbabwe's number 1 Student Housing Platform
         </span>
 
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
+        <h1 className="text-5xl sm:text-6xl lg:text-5xl font-bold leading-tight">
           Find Your Home
           <br />
           Away From Home
