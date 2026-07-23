@@ -1,6 +1,5 @@
 "use client";
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { getUniversities, getRoomTypes, getBudgetRanges } from "@/lib/filters";
@@ -10,23 +9,19 @@ export default function SearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [university, setUniversity] = useState(
-    searchParams.get("university") || ""
-  );
+  const [university, setUniversity] = useState("");
+  const [budget, setBudget] = useState("");
+  const [roomType, setRoomType] = useState("");
 
-  const [budget, setBudget] = useState(
-    searchParams.get("budget") || ""
-  );
+  useEffect(() => {
+    setUniversity(searchParams.get("university") || "");
+    setBudget(searchParams.get("budget") || "");
+    setRoomType(searchParams.get("roomType") || "");
+  }, [searchParams]);
 
-  const [roomType, setRoomType] = useState(
-    searchParams.get("roomType") || ""
-  );
   const universities = getUniversities();
   const roomTypes = getRoomTypes(university);
-  
-
   const budgetRanges = getBudgetRanges(university);
-
   const handleSearch = () => {
 
   if (!university) {

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import SearchBar from "./SearchBar";
+import { Suspense } from "react";
 
 export default function Hero() {
   return (
@@ -38,7 +39,9 @@ export default function Hero() {
           Verified student accommodation near Zimbabwe's leading universities.
         </p>
 
-        <SearchBar />
+       <Suspense fallback={<div>Loading...</div>}>
+         <SearchBar />
+       </Suspense>
       </div>
     </section>
   );
