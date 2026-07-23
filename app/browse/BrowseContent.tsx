@@ -4,6 +4,7 @@ import { filterListings } from "@/lib/filters";
 import ListingCard from "@/components/listing/ListingCard";
 import { useSearchParams } from "next/navigation";
 import SearchBar from "@/components/home/SearchBar";
+import Link from "next/link";
 
 export default function BrowsePage() {
   const searchParams = useSearchParams();
@@ -19,26 +20,42 @@ export default function BrowsePage() {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-16">
-      <h1 className="text-4xl font-bold">
+      <h1 className="text-5xl font-bold tracking-tight text-slate-900">
         Browse Accommodation
       </h1>
-      <div className="mt-8">
+
+      <p className="mt-3 max-w-2xl text-lg text-slate-600">
+        Find verified student accommodation near your university across Zimbabwe.
+      </p>
+
+      <div className="mt-10 rounded-3xl bg-white p-6 shadow-lg">
         <SearchBar />
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold">
-            {filteredListings.length} Listings Found
+      <div className="mt-14 flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-slate-900">
+          {filteredListings.length} Listings Found
         </h2>
 
-        <div className="mt-8 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredListings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-              />
-            ))}
-         </div>
+        {(university || budget || roomType) && (
+          <Link
+            href="/browse"
+            className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+          >
+            Reset Filters
+          </Link>
+        )}
+      </div>
+
+      {/* Listings Grid */}
+
+      <div className="mt-8 grid gap-10 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-500">
+        {filteredListings.map((listing) => (
+          <ListingCard
+            key={listing.id}
+            listing={listing}
+          />
+        ))}
       </div>
     </main>
   );

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
 
 type Listing = {
   id: number;
@@ -11,7 +10,8 @@ type Listing = {
   city: string;
   roomType: string;
   price: number;
-  image: string;
+  images: string[];
+  description: string;
   amenities: string[];
   featured: boolean;
   verified: boolean;
@@ -23,28 +23,27 @@ export default function ListingCard({
   listing: Listing;
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
 
-      <Image
-        src={listing.image}
-        alt={listing.title}
-        width={500}
-        height={300}
-        className="h-56 w-full object-cover"
-      />
-
-      <div className="p-5">
+      <div className="relative">
+        <Image
+          src={listing.images[0]}
+          alt={listing.title}
+          width={500}
+          height={300}
+          className="h-56 w-full object-cover"
+        />
 
         {listing.verified && (
-          <div className="mb-3 flex items-center gap-2 text-green-600">
-            <ShieldCheck size={18} />
-            <span className="text-sm font-medium">
-              Verified Listing
-            </span>
+          <div className="absolute left-4 top-4 rounded-full bg-green-600 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">
+            ✓ Verified
           </div>
         )}
+      </div>
 
-        <h3 className="text-3xl font-bold text-slate-900">
+      <div className="flex flex-1 flex-col p-6">
+
+        <h3 className="text-2xl font-bold text-slate-900">
           {listing.title}
         </h3>
 
@@ -56,21 +55,21 @@ export default function ListingCard({
           {listing.suburb}, {listing.city}
         </p>
 
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-auto flex items-end justify-between pt-6">
 
           <div>
-            <span className="text-4xl font-bold text-brand-blue">
+            <p className="text-4xl font-bold text-brand-blue">
               US${listing.price}
-            </span>
+            </p>
 
-            <span className="text-slate-500">
-              /month
-            </span>
+            <p className="text-sm text-slate-500">
+              per month
+            </p>
           </div>
 
           <Link
             href={`/listing/${listing.slug}`}
-            className="rounded-xl bg-brand-blue px-6 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
+            className="rounded-xl bg-brand-blue px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark"
           >
             View Details
           </Link>

@@ -48,7 +48,19 @@ export function filterListings({
   roomType,
   budget,
 }: FilterOptions) {
+
+  console.log({
+    university,
+    roomType,
+    budget,
+  });
   return listings.filter((listing) => {
+    console.log(
+      listing.title,
+      listing.university,
+      listing.price
+    );
+
     const matchesUniversity =
       !university || listing.university === university;
 
