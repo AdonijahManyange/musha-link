@@ -17,7 +17,7 @@ export default function SearchBar() {
     setUniversity(searchParams.get("university") || "");
     setBudget(searchParams.get("budget") || "");
     setRoomType(searchParams.get("roomType") || "");
-  }, [searchParams]);
+  }, [searchParams.toString()]);
 
   const universities = getUniversities();
   const roomTypes = getRoomTypes(university);
