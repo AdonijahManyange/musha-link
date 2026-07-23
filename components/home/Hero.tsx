@@ -6,7 +6,7 @@ export default function Hero() {
   return (
     <section
       id="top"
-      className="relative min-h-[700px] overflow-hidden"
+      className="relative min-h-screen overflow-hidden"
     >
 
       
@@ -25,23 +25,25 @@ export default function Hero() {
       {/* Content */}
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-6 text-center text-white">
 
-        <span className="mb-6 rounded-full bg-white/20 px-5 py-2 text-sm font-medium backdrop-blur">
+        <span className="mb-4 rounded-full bg-white/20 px-5 py-2 text-sm font-medium backdrop-blur">
           🇿🇼 Zimbabwe's number 1 Student Housing Platform
         </span>
 
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
           Find Your Home
           <br />
           Away From Home
         </h1>
 
-        <p className="mt-8 max-w-2xl text-xl text-slate-200">
+        <p className="mt-6 max-w-2xl text-lg md:text-xl text-slate-200">
           Verified student accommodation near Zimbabwe's leading universities.
         </p>
 
-       <Suspense fallback={<div>Loading...</div>}>
-         <SearchBar />
-       </Suspense>
+       <div className="mt-8 w-full">
+         <Suspense fallback={<div>Loading...</div>}>
+           <SearchBar />
+         </Suspense>
+       </div>
       </div>
     </section>
   );
