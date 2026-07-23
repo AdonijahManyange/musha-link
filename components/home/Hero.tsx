@@ -23,13 +23,13 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-blue-950/65 to-slate-900/40" />
 
       {/* Content */}
-      <div className="relative mx-auto flex min-h-[700px] max-w-7xl flex-col items-center justify-center px-6 text-center text-white">
+      <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-6 text-center text-white">
 
         <span className="mb-6 rounded-full bg-white/20 px-5 py-2 text-sm font-medium backdrop-blur">
           🇿🇼 Zimbabwe's number 1 Student Housing Platform
         </span>
 
-        <h1 className="max-w-4xl text-6xl font-bold leading-tight">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight">
           Find Your Home
           <br />
           Away From Home
