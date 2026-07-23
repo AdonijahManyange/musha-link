@@ -4,15 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { getUniversities, getRoomTypes, getBudgetRanges } from "@/lib/filters";
+import { useSearchParams } from "next/navigation";
 
 export default function SearchBar() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [university, setUniversity] = useState("");
-  const [budget, setBudget] = useState("");
-  const [roomType, setRoomType] = useState("");
+  const [university, setUniversity] = useState(
+    searchParams.get("university") || ""
+  );
+
+  const [budget, setBudget] = useState(
+    searchParams.get("budget") || ""
+  );
+
+  const [roomType, setRoomType] = useState(
+    searchParams.get("roomType") || ""
+  );
   const universities = getUniversities();
   const roomTypes = getRoomTypes(university);
+  
 
   const budgetRanges = getBudgetRanges(university);
 

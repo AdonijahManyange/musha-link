@@ -3,6 +3,7 @@
 import { filterListings } from "@/lib/filters";
 import ListingCard from "@/components/listing/ListingCard";
 import { useSearchParams } from "next/navigation";
+import SearchBar from "@/components/home/SearchBar";
 
 export default function BrowsePage() {
   const searchParams = useSearchParams();
@@ -21,6 +22,9 @@ export default function BrowsePage() {
       <h1 className="text-4xl font-bold">
         Browse Accommodation
       </h1>
+      <div className="mt-8">
+        <SearchBar />
+      </div>
 
       <div className="mt-8">
         <h2 className="text-xl font-semibold">

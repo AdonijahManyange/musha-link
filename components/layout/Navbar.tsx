@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
-      <nav className="mx-auto flex h-29 w-full items-center justify-between px-4 py-1">
+      <nav className="mx-auto flex w-full items-center justify-between px-4 py-3 md:h-28">
 
         {/* Logo */}
         <div>
@@ -15,6 +15,7 @@ export default function Navbar() {
               width={260}
               height={82}
               priority
+              className="h-12 w-auto md:h-20"
             />
           </Link>
         </div>
@@ -47,12 +48,12 @@ export default function Navbar() {
         </ul>
 
         {/* Buttons */}
-        <div className="flex gap-3">
-          <button className="rounded-lg px-4 py-2 text-slate-700 hover:bg-slate-100">
+        <div className="flex items-center gap-2 md:gap-3">
+          <button className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 md:px-4 md:text-base">
             Login
           </button>
 
-          <button className="rounded-lg bg-[#1C3769] px-5 py-2 font-medium text-white hover:bg-[#162D57]">
+          <button className="rounded-lg bg-[#1C3769] px-4 py-2 text-sm font-medium text-white hover:bg-[#162D57] md:px-5 md:text-base">
             Sign Up
           </button>
         </div>
