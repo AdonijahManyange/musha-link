@@ -19,7 +19,7 @@ export default function ImageGallery({
   return (
     <div>
       {/* Main Image */}
-      <div className="relative h-[560px] w-full overflow-hidden rounded-3xl shadow-lg">
+      <div className="relative h-[320px] sm:h-[420px] lg:h-[560px] w-full overflow-hidden rounded-3xl shadow-lg">
         <Image
           src={selectedImage}
           alt={title}
@@ -31,13 +31,13 @@ export default function ImageGallery({
 
       {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="mt-4 flex gap-4 overflow-x-auto">
+        <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
           {images.map((image, index) => (
             <button
               type="button"
               key={index}
               onClick={() => setSelectedImage(image)}
-              className={`relative h-24 w-32 overflow-hidden rounded-xl border-2 transition ${
+              className={`relative h-16 w-20 md:h-24 md:w-32 overflow-hidden rounded-xl border-2 transition ${
                 selectedImage === image
                   ? "border-brand-blue scale-105"
                   : "border-transparent hover:border-slate-300"
