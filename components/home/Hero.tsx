@@ -25,7 +25,7 @@ export default function Hero() {
       {/* Content */}
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col items-center justify-center px-6 text-center text-white">
 
-        <span className="mb-4 rounded-full bg-white/20 px-5 py-2 text-sm font-medium">
+        <span className="mb-4 rounded-full bg-white/20 px-5 py-1 text-sm font-medium">
           🇿🇼 Zimbabwe's number 1 Student Housing Platform
         </span>
 

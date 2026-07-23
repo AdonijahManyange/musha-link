@@ -3,7 +3,6 @@
 import { filterListings } from "@/lib/filters";
 import ListingCard from "@/components/listing/ListingCard";
 import SearchBar from "@/components/home/SearchBar";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function BrowsePage() {
@@ -41,7 +40,15 @@ export default function BrowsePage() {
         {(university || budget || roomType) && (
           <button
             type="button"
-            onClick={() => router.replace("/browse")}
+            onClick={() => {
+              console.log("Before:", window.location.href);
+
+              router.replace("/browse");
+
+              setTimeout(() => {
+                console.log("After:", window.location.href);
+              }, 300);
+            }}
             className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
           >
             Reset Filters
