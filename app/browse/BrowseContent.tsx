@@ -2,12 +2,13 @@
 
 import { filterListings } from "@/lib/filters";
 import ListingCard from "@/components/listing/ListingCard";
-import { useSearchParams } from "next/navigation";
 import SearchBar from "@/components/home/SearchBar";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function BrowsePage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const university = searchParams.get("university");
   const budget = searchParams.get("budget");
@@ -38,12 +39,13 @@ export default function BrowsePage() {
         </h2>
 
         {(university || budget || roomType) && (
-          <Link
-            href="/browse"
+          <button
+            type="button"
+            onClick={() => router.replace("/browse")}
             className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
           >
             Reset Filters
-          </Link>
+          </button>
         )}
       </div>
 
