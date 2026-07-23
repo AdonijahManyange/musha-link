@@ -10,7 +10,7 @@ export default function Navbar() {
         <div>
           <Link href="/#top">
             <Image
-            src="/images/MushaLink logo.png"
+            src="/images/MushaLink Logo.png"
             alt="MushaLink"
             width={220}
             height={70}
