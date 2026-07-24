@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Listing } from "@/types/listing";
 import { getAmenityIcon } from "@/lib/amenityIcons";
+import FavoriteButton from "@/components/shared/FavoriteButton";
 
 export default function ListingCard({
   listing,
@@ -19,6 +20,10 @@ export default function ListingCard({
           height={300}
           className="h-56 w-full object-cover"
         />
+
+        <div className="absolute right-4 top-4 z-10">
+          <FavoriteButton listingId={listing.id} />
+        </div>
 
         {listing.verified && (
           <div className="absolute left-4 top-4 rounded-full bg-green-600 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white">

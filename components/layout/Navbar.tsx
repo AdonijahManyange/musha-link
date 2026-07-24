@@ -1,7 +1,34 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Heart } from "lucide-react";
+import { getFavorites } from "@/lib/favorites";
 
 export default function Navbar() {
+  const [favoriteCount, setFavoriteCount] = useState(0);
+
+  useEffect(() => {
+    function updateFavorites() {
+      setFavoriteCount(getFavorites().length);
+    }
+
+    updateFavorites();
+
+    window.addEventListener(
+      "favoritesUpdated",
+      updateFavorites
+    );
+
+    return () => {
+      window.removeEventListener(
+        "favoritesUpdated",
+        updateFavorites
+      );
+    };
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
       <nav className="mx-auto flex w-full items-center justify-between px-4 py-3 md:h-28">
@@ -22,25 +49,45 @@ export default function Navbar() {
         {/* Navigation */}
         <ul className="hidden gap-8 font-medium text-slate-700 md:flex">
           <li>
-            <a href="#top" className="hover:text-[#1C3769]">
+            <Link href="/" className="hover:text-[#1C3769]">
               Home
-            </a>
+            </Link>
           </li>
 
           <li>
-            <a href="#browse" className="hover:text-[#1C3769]">
+            <Link href="/browse" className="hover:text-[#1C3769]">
               Browse
-            </a>
+            </Link>
           </li>
 
           <li>
-            <a href="#universities" className="hover:text-[#1C3769]">
+            <Link
+              href="/saved"
+              className="flex items-center gap-2 hover:text-[#1C3769]"
+            >
+              <Heart
+                size={16}
+                className="fill-red-500 text-red-500"
+              />
+
+              Saved
+
+              {favoriteCount > 0 && (
+                <span className="rounded-full bg-brand-blue px-2 py-0.5 text-xs font-semibold text-white">
+                  {favoriteCount}
+                </span>
+              )}
+            </Link>
+          </li>
+
+          <li>
+            <a href="/#universities" className="hover:text-[#1C3769]">
               Universities
             </a>
           </li>
 
           <li>
-            <a href="#about" className="hover:text-[#1C3769]">
+            <a href="/#about" className="hover:text-[#1C3769]">
               About
             </a>
           </li>
