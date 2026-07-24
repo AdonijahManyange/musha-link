@@ -1,4 +1,6 @@
-export const listings = [
+import type { Listing } from "@/types/listing";
+
+export const listings: Listing[] = [
   {
     id: 1,
     slug: "modern-student-room",
