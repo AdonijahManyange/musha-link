@@ -16,9 +16,9 @@ type Listing = {
   featured: boolean;
   verified: boolean;
   landlord: {
-    name: "John Doe",
-    phone: "+263771234567",
-    email: "john@example.com",
+    name: string;
+    phone: string;
+    email: string;
   };
 }
 
