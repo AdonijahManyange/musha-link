@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
+import { getAmenityIcon } from "@/lib/amenityIcons";
 
 import Navbar from "@/components/layout/Navbar";
 import ImageGallery from "@/components/listing/ImageGallery";
 import { listings } from "@/lib/listings";
 import ListingActions from "@/components/listing/ListingActions";
+
 
 export default async function ListingPage({
   params,
@@ -76,13 +78,15 @@ export default async function ListingPage({
               </h2>
 
               <div className="mt-6 flex flex-wrap gap-3">
+
                 {listing.amenities.map((amenity) => (
-                  <span
+                    <span
                     key={amenity}
-                    className="rounded-full bg-green-100 px-5 py-2 font-medium text-green-700"
-                  >
+                    className="flex items-center gap-2 rounded-full bg-green-100 px-5 py-2 font-medium text-green-700"
+                    >
+                    {getAmenityIcon(amenity)}
                     {amenity}
-                  </span>
+                    </span>
                 ))}
               </div>
             </section>

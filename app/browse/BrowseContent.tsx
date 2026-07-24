@@ -9,14 +9,13 @@ export default function BrowsePage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const university = searchParams.get("university");
-  const budget = searchParams.get("budget");
-  const roomType = searchParams.get("roomType");
-  const filteredListings = filterListings({
-    university: university || undefined,
-    roomType: roomType || undefined,
-    budget: budget || undefined,
-  });
+  const filters = {
+  university: searchParams.get("university") || undefined,
+  roomType: searchParams.get("roomType") || undefined,
+  budget: searchParams.get("budget") || undefined,
+};
+  const filteredListings =
+  filterListings(filters);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-16">
@@ -37,7 +36,7 @@ export default function BrowsePage() {
           {filteredListings.length} Listings Found
         </h2>
 
-        {(university || budget || roomType) && (
+        {(filters.university || filters.budget || filters.roomType) && (
           <button
             type="button"
             onClick={() => {

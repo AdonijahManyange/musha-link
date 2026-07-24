@@ -1,26 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-
-type Listing = {
-  id: number;
-  slug: string;
-  title: string;
-  university: string;
-  suburb: string;
-  city: string;
-  roomType: string;
-  price: number;
-  images: string[];
-  description: string;
-  amenities: string[];
-  featured: boolean;
-  verified: boolean;
-  landlord: {
-    name: string;
-    phone: string;
-    email: string;
-  };
-}
+import type { Listing } from "@/types/listing";
+import { getAmenityIcon } from "@/lib/amenityIcons";
 
 export default function ListingCard({
   listing,
@@ -60,6 +41,18 @@ export default function ListingCard({
           {listing.suburb}, {listing.city}
         </p>
 
+        <div className="mt-5 flex flex-wrap gap-2">
+          {listing.amenities.slice(0, 3).map((amenity) => (
+            <span
+              key={amenity}
+              className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-green-600"
+            >
+              {getAmenityIcon(amenity)}
+              {amenity}
+            </span>
+          ))}
+        </div>
+
         <div className="mt-auto flex items-end justify-between pt-6">
 
           <div>
@@ -80,7 +73,6 @@ export default function ListingCard({
           </Link>
 
         </div>
-
       </div>
 
     </div>

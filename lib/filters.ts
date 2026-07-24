@@ -1,5 +1,6 @@
 import { listings } from "@/lib/listings";
 import { BUDGET_OPTIONS } from "@/lib/constants";
+import type { SearchFilters } from "@/types/search";
 
 export function getUniversities() {
     return [...new Set(listings.map((listing) => listing.university))].sort();
@@ -36,18 +37,11 @@ export function getBudgetRanges(university?: string) {
   });
 }
 
-// 4. Filter Listings
-type FilterOptions = {
-  university?: string;
-  roomType?: string;
-  budget?: string;
-};
-
 export function filterListings({
   university,
   roomType,
   budget,
-}: FilterOptions) {
+}: SearchFilters) {
 
   console.log({
     university,
