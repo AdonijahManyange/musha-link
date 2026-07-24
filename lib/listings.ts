@@ -17,6 +17,11 @@ export const listings = [
     amenities: ["Solar", "Borehole", "Wi-Fi"],
     featured: true,
     verified: true,
+    landlord: {
+      name: "John Doe",
+      phone: "+263771234567",
+      email: "john@example.com",
+    },
     description:
       "A fully furnished private room located in Fairbridge Park, just minutes from Africa University. The property offers reliable Wi-Fi, solar power, borehole water, and a quiet environment ideal for studying.",
   },
@@ -39,6 +44,11 @@ export const listings = [
     amenities: ["Borehole", "Wi-Fi"],
     featured: true,
     verified: true,
+    landlord: {
+      name: "Jane Smith",
+      phone: "+263771234568",
+      email: "jane@example.com",
+    },
     description:
       "Affordable shared accommodation in Chikanga with comfortable living spaces and dependable Wi-Fi. Perfect for students looking for a friendly environment close to Africa University."
   },
@@ -61,6 +71,11 @@ export const listings = [
     amenities: ["Solar", "Wi-Fi"],
     featured: true,
     verified: true,
+    landlord: {
+      name: "Alice Johnson",
+      phone: "+263771234569",
+      email: "alice@example.com",
+    },
     description:
       "A fully furnished private room in Fernhill, conveniently located near MSUAS. Enjoy a peaceful neighborhood, reliable Wi-Fi, and solar power for uninterrupted study sessions."
   },
@@ -83,6 +98,11 @@ export const listings = [
     amenities: ["Solar", "Borehole", "Wi-Fi"],
     featured: false,
     verified: true,
+    landlord: {
+      name: "Michael Brown",
+      phone: "+263771234570",
+      email: "michael@example.com",
+    },
     description:
       "Spacious student apartment in Avondale, only minutes from the University of Zimbabwe. The property features solar power, borehole water, and high-speed Wi-Fi in a secure and convenient location."
   },
@@ -105,6 +125,11 @@ export const listings = [
     amenities: ["Wi-Fi"],
     featured: false,
     verified: true,
+    landlord: {
+      name: "Sarah Williams",
+      phone: "+263771234571",
+      email: "sarah@example.com",
+    },
     description:
       "An affordable shared room designed for students who want quality accommodation on a budget. Located in Ascot with reliable Wi-Fi and easy access to NUST campus."
   },
@@ -127,6 +152,11 @@ export const listings = [
     amenities: ["Solar", "Borehole", "Wi-Fi"],
     featured: true,
     verified: true,
+    landlord: {
+      name: "David Thompson",
+      phone: "+263771234572",
+      email: "david@example.com",
+    },
     description:
       "A modern flat in Murambi offering spacious rooms and excellent amenities for student living. Includes solar backup, borehole water, and high-speed internet in a safe neighborhood."
   },
@@ -149,6 +179,11 @@ export const listings = [
     amenities: ["Solar", "Borehole", "Wi-Fi"],
     featured: true,
     verified: true,
+    landlord: {
+      name: "Emily Davis",
+      phone: "+263771234573",
+      email: "emily@example.com",
+    },
     description:
       "Comfortable shared apartment in Mt Pleasant, one of Harare's most sought-after student neighborhoods. Enjoy spacious rooms, reliable utilities, and convenient access to the University of Zimbabwe."
   },
@@ -172,6 +207,11 @@ export const listings = [
     amenities: ["Solar", "Borehole", "Wi-Fi"],
     featured: true,
     verified: true,
+    landlord: {
+      name: "Robert Wilson",
+      phone: "+263771234574",
+      email: "robert@example.com",
+    },
     description:
       "A comfortable private room in Fairbridge Park, ideal for students seeking privacy and a quiet place to study. The property includes Wi-Fi, solar backup, and borehole water for everyday convenience."
   },

@@ -15,7 +15,12 @@ type Listing = {
   amenities: string[];
   featured: boolean;
   verified: boolean;
-};
+  landlord: {
+    name: "John Doe",
+    phone: "+263771234567",
+    email: "john@example.com",
+  };
+}
 
 export default function ListingCard({
   listing,

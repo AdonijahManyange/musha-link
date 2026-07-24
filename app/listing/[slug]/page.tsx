@@ -4,6 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import ImageGallery from "@/components/listing/ImageGallery";
 import { listings } from "@/lib/listings";
+import ListingActions from "@/components/listing/ListingActions";
 
 export default async function ListingPage({
   params,
@@ -101,17 +102,10 @@ export default async function ListingPage({
                 per month
               </p>
 
-              <div className="mt-8 space-y-4">
-
-                <button className="w-full rounded-xl bg-brand-blue py-4 text-lg font-semibold text-white transition hover:bg-brand-blue-dark">
-                  Contact Landlord
-                </button>
-
-                <button className="w-full rounded-xl border border-slate-300 py-4 text-lg font-semibold text-brand-blue transition hover:bg-slate-100">
-                  Schedule Viewing
-                </button>
-
-              </div>
+              <ListingActions
+                landlord={listing.landlord}
+                listingTitle={listing.title}
+              />
 
               <div className="mt-8 space-y-5 border-t border-slate-200 pt-6">
 
