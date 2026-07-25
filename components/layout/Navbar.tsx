@@ -1,35 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart } from "lucide-react";
-import { getFavorites } from "@/lib/favorites";
 import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
 
 export default function Navbar() {
-  const [favoriteCount, setFavoriteCount] = useState(0);
-
-  useEffect(() => {
-    function updateFavorites() {
-      setFavoriteCount(getFavorites().length);
-    }
-
-    updateFavorites();
-
-    window.addEventListener(
-      "favoritesUpdated",
-      updateFavorites
-    );
-
-    return () => {
-      window.removeEventListener(
-        "favoritesUpdated",
-        updateFavorites
-      );
-    };
-  }, []);
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
