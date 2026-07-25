@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart } from "lucide-react";
 import { getFavorites } from "@/lib/favorites";
+import MobileMenu from "./MobileMenu";
+import NavLinks from "./NavLinks";
 
 export default function Navbar() {
   const [favoriteCount, setFavoriteCount] = useState(0);
@@ -47,61 +49,21 @@ export default function Navbar() {
         </div>
 
         {/* Navigation */}
-        <ul className="hidden gap-8 font-medium text-slate-700 md:flex">
-          <li>
-            <Link href="/" className="hover:text-[#1C3769]">
-              Home
-            </Link>
-          </li>
-
-          <li>
-            <Link href="/browse" className="hover:text-[#1C3769]">
-              Browse
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              href="/saved"
-              className="flex items-center gap-2 hover:text-[#1C3769]"
-            >
-              <Heart
-                size={16}
-                className="fill-red-500 text-red-500"
-              />
-
-              Saved
-
-              {favoriteCount > 0 && (
-                <span className="rounded-full bg-brand-blue px-2 py-0.5 text-xs font-semibold text-white">
-                  {favoriteCount}
-                </span>
-              )}
-            </Link>
-          </li>
-
-          <li>
-            <a href="/#universities" className="hover:text-[#1C3769]">
-              Universities
-            </a>
-          </li>
-
-          <li>
-            <a href="/#about" className="hover:text-[#1C3769]">
-              About
-            </a>
-          </li>
-        </ul>
+        <div className="hidden items-center gap-8 font-medium text-slate-700 md:flex">
+          <NavLinks />
+        </div>
 
         {/* Buttons */}
-        <div className="flex items-center gap-2 md:gap-3">
-          <button className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 md:px-4 md:text-base">
+        <div className="flex items-center gap-3">
+          <button className="hidden rounded-lg px-4 py-2 text-slate-700 hover:bg-slate-100 md:block">
             Login
           </button>
 
-          <button className="rounded-lg bg-[#1C3769] px-4 py-2 text-sm font-medium text-white hover:bg-[#162D57] md:px-5 md:text-base">
+          <button className="hidden rounded-lg bg-brand-blue px-5 py-2 text-white hover:bg-brand-blue-dark md:block">
             Sign Up
           </button>
+
+          <MobileMenu />
         </div>
       </nav>
     </header>
