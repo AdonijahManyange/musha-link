@@ -26,7 +26,7 @@ export default function MobileMenu() {
           />
 
           {/* Drawer */}
-          <div className="fixed right-0 top-0 z-50 flex h-screen w-[85%] max-w-sm flex-col bg-white shadow-2xl">
+          <div className="fixed right-0 top-0 z-50 flex h-dvh w-[85%] max-w-sm flex-col bg-white shadow-2xl">
 
             <div className="flex items-center justify-between border-b px-6 py-4">
                 <Image
