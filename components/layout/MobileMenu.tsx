@@ -12,9 +12,13 @@ export default function MobileMenu() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg p-2 hover:bg-slate-100 md:hidden"
+        className="rounded-lg p-2 text-slate-900 transition hover:bg-slate-100 md:hidden"
       >
-        <Menu size={28} />
+        <Menu
+            size={28}
+            strokeWidth={2.5}
+            className="text-brand-blue"
+        />
       </button>
 
       {open && (
@@ -26,9 +30,9 @@ export default function MobileMenu() {
           />
 
           {/* Drawer */}
-          <div className="fixed right-0 top-0 z-50 flex h-dvh w-[85%] max-w-sm flex-col bg-white shadow-2xl">
+          <div className="fixed inset-y-0 right-0 z-50 flex w-[85%] max-w-sm flex-col bg-white shadow-2xl">
 
-            <div className="flex items-center justify-between border-b px-6 py-4">
+            <div className="flex items-center translate-x-0 justify-between border-b px-6 py-4">
                 <Image
                     src="/images/MushaLink Logo.png"
                     alt="MushaLink"
@@ -39,9 +43,13 @@ export default function MobileMenu() {
 
                 <button
                     onClick={() => setOpen(false)}
-                    className="rounded-lg p-2 transition hover:bg-slate-100"
+                    className="rounded-lg p-2 transition hover:bg-slate-700"
                 >
-                    <X size={24} />
+                    <X
+                        size={28}
+                        strokeWidth={2.5}
+                        className="text-slate-900"
+                    />
                 </button>
                 </div>
 
