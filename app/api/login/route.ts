@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { comparePassword } from "@/lib/hash";
+import { createSession } from "@/lib/session";
 
 export async function POST(request: Request) {
   try {
@@ -50,7 +51,12 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(
+    const sessionToken = await createSession({
+      userId: user.id,
+      role: user.role,
+    });
+
+    const response = NextResponse.json(
       {
         message: "Login successful.",
         user: {
@@ -64,6 +70,18 @@ export async function POST(request: Request) {
         status: 200,
       }
     );
+
+    response.cookies.set({
+      name: "musha_session",
+      value: sessionToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
   } catch (error) {
     console.error(error);
 
