@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +74,14 @@ export default function LoginPage() {
             onSubmit={handleSubmit}
             className="space-y-6"
         >
+          <GoogleSignInButton />
 
+          <div className="flex items-center gap-4">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-sm text-slate-400">OR</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+          
           <div>
             <label className="mb-2 block font-medium text-slate-700">
               Email Address
