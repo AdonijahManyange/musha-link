@@ -31,13 +31,19 @@ export default function Navbar() {
 
         {/* Buttons */}
         <div className="flex items-center gap-3">
-          <button className="hidden rounded-lg px-4 py-2 text-slate-700 hover:bg-slate-100 md:block">
+          <Link
+            href="/auth/login"
+            className="hidden rounded-lg px-4 py-2 text-slate-700 hover:bg-slate-100 md:block"
+          >
             Login
-          </button>
+          </Link>
 
-          <button className="hidden rounded-lg bg-brand-blue px-5 py-2 text-white hover:bg-brand-blue-dark md:block">
+          <Link
+            href="/auth/signup"
+            className="hidden rounded-lg bg-brand-blue px-5 py-2 text-white hover:bg-brand-blue-dark md:block"
+          >
             Sign Up
-          </button>
+          </Link>
 
           <MobileMenu />
         </div>

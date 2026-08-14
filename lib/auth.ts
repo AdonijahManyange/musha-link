@@ -1,25 +1,16 @@
-import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { verifySession } from "@/lib/session";
+import { auth } from "@/auth";
 
 export async function getCurrentUser() {
-  const cookieStore = await cookies();
+  const session = await auth();
 
-  const sessionToken = cookieStore.get("musha_session")?.value;
-
-  if (!sessionToken) {
-    return null;
-  }
-
-  const session = await verifySession(sessionToken);
-
-  if (!session) {
+  if (!session?.user?.email) {
     return null;
   }
 
   const user = await prisma.user.findUnique({
     where: {
-      id: session.userId,
+      email: session.user.email,
     },
     select: {
       id: true,

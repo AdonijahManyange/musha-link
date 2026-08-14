@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 import {
   generateResetToken,
@@ -25,10 +26,7 @@ export async function POST(request: Request) {
       },
     });
 
-    /*
-     * Always return the same response whether the account exists
-     * or not. This prevents email/account enumeration.
-     */
+    // Don't reveal whether an account exists.
     if (!user) {
       return NextResponse.json({
         message:
@@ -40,7 +38,7 @@ export async function POST(request: Request) {
     const tokenHash = hashResetToken(token);
     const expiresAt = getResetTokenExpiration();
 
-    // Remove any previous reset tokens for this user.
+    // Remove previous reset tokens.
     await prisma.passwordResetToken.deleteMany({
       where: {
         userId: user.id,
@@ -55,11 +53,78 @@ export async function POST(request: Request) {
       },
     });
 
-    /*
-     * We are intentionally not sending the email yet.
-     * The token is created and stored securely first.
-     */
-    console.log("Password reset token generated for:", normalizedEmail);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+    if (!appUrl) {
+      throw new Error("NEXT_PUBLIC_APP_URL is not configured.");
+    }
+
+    const resetUrl = `${appUrl}/auth/reset-password?token=${token}`;
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    const { error } = await resend.emails.send({
+      from: "MushaLink <onboarding@resend.dev>",
+      to: normalizedEmail,
+      subject: "Reset your MushaLink password",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
+          <h1 style="color: #1f3b73;">Reset your MushaLink password</h1>
+
+          <p>Hi ${user.name || "there"},</p>
+
+          <p>
+            We received a request to reset your MushaLink password.
+          </p>
+
+          <p>
+            Click the button below to choose a new password.
+          </p>
+
+          <p style="margin: 32px 0;">
+            <a
+              href="${resetUrl}"
+              style="
+                display: inline-block;
+                padding: 14px 24px;
+                background-color: #1f3b73;
+                color: white;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: bold;
+              "
+            >
+              Reset Password
+            </a>
+          </p>
+
+          <p>
+            This link will expire in 1 hour.
+          </p>
+
+          <p>
+            If you didn't request a password reset, you can safely ignore this email.
+          </p>
+
+          <p>
+            — The MushaLink Team
+          </p>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error("Resend error:", error);
+
+      // Don't leave an unusable token in the database.
+      await prisma.passwordResetToken.deleteMany({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      throw new Error("Failed to send password reset email.");
+    }
 
     return NextResponse.json({
       message:
