@@ -35,6 +35,19 @@ export async function POST(request: Request) {
       );
     }
 
+    // Google accounts don't have a password.
+    if (!user.password) {
+      return NextResponse.json(
+        {
+          error:
+            "This account uses Google sign-in. Please continue with Google.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
     const passwordMatches = await comparePassword(
       password,
       user.password
