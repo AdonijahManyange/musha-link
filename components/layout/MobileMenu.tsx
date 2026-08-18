@@ -1,9 +1,12 @@
 "use client";
 
+"use client";
+
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import NavLinks from "./NavLinks";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false);
@@ -62,13 +65,21 @@ export default function MobileMenu() {
 
             <div className="mt-auto border-t p-5 space-y-3">
 
-              <button className="w-full rounded-xl border border-slate-300 py-3 font-medium text-slate-700 transition hover:bg-slate-100">
+              <Link
+                href="/auth/login"
+                onClick={() => setOpen(false)}
+                className="block w-full rounded-xl border border-slate-300 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-100"
+              >
                 Login
-              </button>
+              </Link>
 
-              <button className="w-full rounded-xl bg-brand-blue py-3 font-medium text-white transition hover:bg-brand-blue-dark">
+              <Link
+                href="/auth/signup"
+                onClick={() => setOpen(false)}
+                className="block w-full rounded-xl bg-brand-blue py-3 text-center font-medium text-white transition hover:bg-brand-blue-dark"
+              >
                 Sign Up
-              </button>
+              </Link>
 
             </div>
 
