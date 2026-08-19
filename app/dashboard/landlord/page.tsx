@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import LogoutButton from "@/components/LogoutButton";
+import Link from "next/link";
 
 export default async function LandlordDashboard() {
   const user = await getCurrentUser();
@@ -50,9 +51,12 @@ export default async function LandlordDashboard() {
               Create and manage your student accommodation listings.
             </p>
 
-            <button className="mt-6 rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark">
+            <Link
+              href="/dashboard/landlord/listings"
+              className="mt-6 inline-block rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
+            >
               Manage Listings
-            </button>
+            </Link>
           </div>
 
           {/* Add Property */}
@@ -66,9 +70,12 @@ export default async function LandlordDashboard() {
               List a new property and make it available to students.
             </p>
 
-            <button className="mt-6 rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50">
+            <Link
+              href="/dashboard/landlord/listings/new"
+              className="mt-6 inline-block rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
               Add Listing
-            </button>
+            </Link>
           </div>
 
           {/* Viewing Requests */}
@@ -82,9 +89,12 @@ export default async function LandlordDashboard() {
               Review students interested in viewing your properties.
             </p>
 
-            <button className="mt-6 rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50">
+            <Link
+              href="/dashboard/landlord/requests"
+              className="mt-6 inline-block rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
               View Requests
-            </button>
+            </Link>
           </div>
 
         </div>

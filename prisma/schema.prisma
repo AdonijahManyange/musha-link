@@ -1,7 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// This is your Prisma schema file.
+// Learn more: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -24,6 +22,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   passwordResetTokens PasswordResetToken[]
+  listings            Listing[]
 }
 
 enum Role {
@@ -43,4 +42,73 @@ model PasswordResetToken {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model University {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  city      String
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings Listing[]
+}
+
+model Listing {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Landlord
+  landlordId String
+  landlord   User   @relation(fields: [landlordId], references: [id], onDelete: Cascade)
+
+  // Property information
+  title       String
+  address     String
+  city        String
+  province    String
+  country     String
+  description String
+
+  // Property coordinates
+  latitude  Float?
+  longitude Float?
+
+  // University
+  universityId String
+  university   University @relation(fields: [universityId], references: [id])
+
+  // Calculated distance from property to university
+  distanceToUniversityKm Float?
+
+  // Rental information
+  monthlyRent Int
+
+  roomType         RoomType
+  genderPreference GenderPreference
+
+  // Future listing controls
+  isActive Boolean @default(true)
+
+  @@index([landlordId])
+  @@index([universityId])
+  @@index([monthlyRent])
+  @@index([roomType])
+  @@index([genderPreference])
+  @@index([isActive])
+}
+
+enum RoomType {
+  PRIVATE
+  SHARED
+  ENTIRE_PROPERTY
+}
+
+enum GenderPreference {
+  ANY
+  MALE
+  FEMALE
 }
