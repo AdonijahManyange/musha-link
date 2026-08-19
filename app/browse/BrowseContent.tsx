@@ -10,12 +10,18 @@ export default function BrowsePage() {
   const router = useRouter();
 
   const filters = {
-  university: searchParams.get("university") || undefined,
-  roomType: searchParams.get("roomType") || undefined,
-  budget: searchParams.get("budget") || undefined,
-};
+    university:
+      searchParams.get("university") || undefined,
+
+    roomType:
+      searchParams.get("roomType") || undefined,
+
+    budget:
+      searchParams.get("budget") || undefined,
+  };
+
   const filteredListings =
-  filterListings(filters);
+    filterListings(filters);
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-16">
@@ -36,17 +42,13 @@ export default function BrowsePage() {
           {filteredListings.length} Listings Found
         </h2>
 
-        {(filters.university || filters.budget || filters.roomType) && (
+        {(filters.university ||
+          filters.budget ||
+          filters.roomType) && (
           <button
             type="button"
             onClick={() => {
-              console.log("Before:", window.location.href);
-
               router.replace("/browse");
-
-              setTimeout(() => {
-                console.log("After:", window.location.href);
-              }, 300);
             }}
             className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
           >
@@ -54,8 +56,6 @@ export default function BrowsePage() {
           </button>
         )}
       </div>
-
-      {/* Listings Grid */}
 
       <div className="mt-8 grid gap-10 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-500">
         {filteredListings.map((listing) => (

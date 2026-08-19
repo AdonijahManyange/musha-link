@@ -2,26 +2,48 @@ import { listings } from "@/lib/listings";
 import { BUDGET_OPTIONS } from "@/lib/constants";
 import type { SearchFilters } from "@/types/search";
 
-export function getUniversities() {
-    return [...new Set(listings.map((listing) => listing.university))].sort();
+/**
+ * Convert a university name into the URL-friendly slug
+ *
+ * Example:
+ * "Africa University" → "africa-university"
+ * "University of Zimbabwe" → "university-of-zimbabwe"
+ * "NUST" → "nust"
+ * "MSUAS" → "msuas"
+ */
+export function universitySlug(name: string) {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-");
 }
 
-export function getRoomTypes(university?: string) {
+/**
+ * Get all universities used by listings
+ */
+export function getUniversities() {
+  return [...new Set(listings.map((listing) => listing.university))].sort();
+}
 
+/**
+ * Get room types available for a university
+ */
+export function getRoomTypes(university?: string) {
   return [
     ...new Set(
-
       listings
         .filter(
           (listing) =>
             !university || listing.university === university
         )
-
         .map((listing) => listing.roomType)
     ),
   ].sort();
 }
 
+/**
+ * Get budget ranges available for a university
+ */
 export function getBudgetRanges(university?: string) {
   const filteredListings = listings.filter(
     (listing) =>
@@ -37,29 +59,32 @@ export function getBudgetRanges(university?: string) {
   });
 }
 
+/**
+ * Filter listings
+ *
+ * University can come from either:
+ *
+ * 1. The search UI:
+ *    "Africa University"
+ *
+ * 2. The URL:
+ *    "africa-university"
+ */
 export function filterListings({
   university,
   roomType,
   budget,
 }: SearchFilters) {
-
-  console.log({
-    university,
-    roomType,
-    budget,
-  });
   return listings.filter((listing) => {
-    console.log(
-      listing.title,
-      listing.university,
-      listing.price
-    );
 
     const matchesUniversity =
-      !university || listing.university === university;
+      !university ||
+      listing.university === university ||
+      universitySlug(listing.university) === university;
 
     const matchesRoom =
-      !roomType || listing.roomType === roomType;
+      !roomType ||
+      listing.roomType === roomType;
 
     let matchesBudget = true;
 
@@ -81,7 +106,8 @@ export function filterListings({
         break;
 
       case "200+":
-        matchesBudget = listing.price >= 200;
+        matchesBudget =
+          listing.price >= 200;
         break;
     }
 

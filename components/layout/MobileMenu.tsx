@@ -5,11 +5,10 @@ import { Menu, X } from "lucide-react";
 import NavLinks from "./NavLinks";
 import Image from "next/image";
 import Link from "next/link";
-import LogoutButton from "@/components/LogoutButton";
 
-type MobileMenuProps = {
+interface MobileMenuProps {
   isLoggedIn: boolean;
-};
+}
 
 export default function MobileMenu({
   isLoggedIn,
@@ -18,7 +17,6 @@ export default function MobileMenu({
 
   return (
     <>
-      {/* Menu Button */}
       <button
         onClick={() => setOpen(true)}
         className="rounded-lg p-2 text-slate-900 transition hover:bg-slate-100 md:hidden"
@@ -43,7 +41,6 @@ export default function MobileMenu({
 
             {/* Header */}
             <div className="flex items-center justify-between border-b px-6 py-4">
-
               <Image
                 src="/images/MushaLink Logo.png"
                 alt="MushaLink"
@@ -62,7 +59,6 @@ export default function MobileMenu({
                   className="text-slate-900"
                 />
               </button>
-
             </div>
 
             {/* Navigation */}
@@ -76,19 +72,7 @@ export default function MobileMenu({
             {/* Authentication */}
             <div className="mt-auto space-y-3 border-t p-5">
 
-              {isLoggedIn ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setOpen(false)}
-                    className="block w-full rounded-xl border border-slate-300 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-100"
-                  >
-                    Dashboard
-                  </Link>
-
-                  <LogoutButton />
-                </>
-              ) : (
+              {!isLoggedIn ? (
                 <>
                   <Link
                     href="/auth/login"
@@ -106,10 +90,17 @@ export default function MobileMenu({
                     Sign Up
                   </Link>
                 </>
+              ) : (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="block w-full rounded-xl bg-brand-blue py-3 text-center font-medium text-white transition hover:bg-brand-blue-dark"
+                >
+                  Dashboard
+                </Link>
               )}
 
             </div>
-
           </div>
         </>
       )}

@@ -71,7 +71,7 @@ export default async function StudentDashboard() {
             </p>
 
             <Link
-              href="/dashboard/student/saved"
+              href="/saved"
               className="mt-auto inline-block w-fit rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               View Favorites

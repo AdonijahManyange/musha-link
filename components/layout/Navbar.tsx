@@ -1,12 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getCurrentUser } from "@/lib/auth";
 import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
-import LogoutButton from "@/components/LogoutButton";
-import { getCurrentUser } from "@/lib/auth";
+import LogoutButton from "@/components/auth/LogoutButton";
 
 export default async function Navbar() {
   const user = await getCurrentUser();
+  const isLoggedIn = !!user;
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
@@ -30,42 +31,41 @@ export default async function Navbar() {
           <NavLinks />
         </div>
 
-        {/* Authentication Buttons */}
+        {/* Desktop Buttons */}
         <div className="flex items-center gap-3">
 
-          {user ? (
-            <>
-              <Link
-                href="/dashboard"
-                className="hidden rounded-lg px-4 py-2 text-slate-700 hover:bg-slate-100 md:block"
-              >
-                Dashboard
-              </Link>
-
-              <LogoutButton />
-            </>
-          ) : (
+          {!isLoggedIn ? (
             <>
               <Link
                 href="/auth/login"
-                className="hidden rounded-lg px-4 py-2 text-slate-700 hover:bg-slate-100 md:block"
+                className="hidden rounded-lg px-4 py-2 text-slate-700 transition hover:bg-slate-100 md:block"
               >
                 Login
               </Link>
 
               <Link
                 href="/auth/signup"
-                className="hidden rounded-lg bg-brand-blue px-5 py-2 text-white hover:bg-brand-blue-dark md:block"
+                className="hidden rounded-lg bg-brand-blue px-5 py-2 text-white transition hover:bg-brand-blue-dark md:block"
               >
                 Sign Up
               </Link>
             </>
+          ) : (
+            <>
+              <Link
+                href="/dashboard"
+                className="hidden rounded-lg bg-brand-blue px-5 py-2 font-medium text-white transition hover:bg-brand-blue-dark md:block"
+              >
+                Dashboard
+              </Link>
+
+              <LogoutButton />
+            </>
           )}
 
           {/* Mobile Navigation */}
-          <MobileMenu />
+          <MobileMenu isLoggedIn={isLoggedIn} />
         </div>
-
       </nav>
     </header>
   );

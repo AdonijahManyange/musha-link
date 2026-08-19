@@ -6,32 +6,70 @@ export default function Universities() {
       id="universities"
       className="bg-slate-50 py-24"
     >
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto max-w-6xl px-6">
 
+        {/* Section Header */}
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-slate-900">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand-blue">
+            Find Your University
+          </p>
+
+          <h2 className="mt-2 text-4xl font-bold text-slate-900">
             Browse by University
           </h2>
 
           <p className="mt-4 text-lg text-slate-600">
-            Find accommodation near Zimbabwe's leading universities.
+            Find student accommodation close to Zimbabwe's leading universities.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {/* University Cards */}
+        <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 
-          <div className="rounded-xl bg-red-200 p-6">
-            Test Card
+          <UniversityCard
+            name="Africa University"
+            city="Mutare"
+            description="Find student accommodation near Africa University."
+            logo="/images/universities/africa-university.jpeg"
+            href="/browse?university=Africa%20University"
+          />
+
+          <UniversityCard
+            name="University of Zimbabwe"
+            city="Harare"
+            description="Explore accommodation options around UZ."
+            logo="/images/universities/uz.png"
+            href="/browse?university=University%20of%20Zimbabwe"
+          />
+
+          <UniversityCard
+            name="NUST"
+            city="Bulawayo"
+            description="Find accommodation close to NUST."
+            logo="/images/universities/nust.png"
+            href="/browse?university=NUST"
+          />
+
+          <UniversityCard
+            name="MSUAS"
+            city="Mutare"
+            description="Browse student accommodation around MSUAS."
+            logo="/images/universities/msuas.png"
+            href="/browse?university=MSUAS"
+          />
+
         </div>
 
-        <div className="rounded-xl bg-red-200 p-6">Card 1</div>
-        <div className="rounded-xl bg-red-200 p-6">Card 2</div>
-        <div className="rounded-xl bg-red-200 p-6">Card 3</div>
-        <div className="rounded-xl bg-red-200 p-6">Card 4</div>
-        <div className="rounded-xl bg-red-200 p-6">Card 5</div>
-        <div className="rounded-xl bg-red-200 p-6">Card 6</div>
-
+        {/* Browse Everything */}
+        <div className="mt-10 flex justify-center">
+          <a
+            href="/browse"
+            className="rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Browse All Listings
+          </a>
         </div>
+
       </div>
     </section>
   );

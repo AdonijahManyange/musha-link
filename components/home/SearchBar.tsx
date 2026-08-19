@@ -1,9 +1,14 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import Button from "@/components/ui/Button";
-import { getUniversities, getRoomTypes, getBudgetRanges } from "@/lib/filters";
-import { useSearchParams } from "next/navigation";
+import {
+  getUniversities,
+  getRoomTypes,
+  getBudgetRanges,
+} from "@/lib/filters";
 
 export default function SearchBar() {
   const router = useRouter();
@@ -13,36 +18,79 @@ export default function SearchBar() {
   const [budget, setBudget] = useState("");
   const [roomType, setRoomType] = useState("");
 
+  /*
+   * Read filters from the URL.
+   *
+   * Example:
+   * /browse?university=MSUAS
+   *
+   * This will automatically select MSUAS.
+   */
   useEffect(() => {
-    setUniversity(searchParams.get("university") || "");
-    setBudget(searchParams.get("budget") || "");
-    setRoomType(searchParams.get("roomType") || "");
-  }, [searchParams.toString()]);
+    setUniversity(
+      searchParams.get("university") || ""
+    );
+
+    setBudget(
+      searchParams.get("budget") || ""
+    );
+
+    setRoomType(
+      searchParams.get("roomType") || ""
+    );
+  }, [searchParams]);
 
   const universities = getUniversities();
-  const roomTypes = getRoomTypes(university);
-  const budgetRanges = getBudgetRanges(university);
+
+  const roomTypes = getRoomTypes(
+    university || undefined
+  );
+
+  const budgetRanges = getBudgetRanges(
+    university || undefined
+  );
+
+  /*
+   * When the user changes university,
+   * reset budget and room type.
+   */
+  const handleUniversityChange = (
+    value: string
+  ) => {
+    setUniversity(value);
+    setBudget("");
+    setRoomType("");
+  };
+
+  /*
+   * Apply filters.
+   */
   const handleSearch = () => {
+    if (!university) {
+      alert("Please select a university.");
+      return;
+    }
 
-  if (!university) {
-    alert("Please select a university.");
-    return;
-  }
-  const params = new URLSearchParams();
-  params.set("university", university);
-  if (budget) {
-    params.set("budget", budget);
-  }
+    const params = new URLSearchParams();
 
-  if (roomType) {
-    params.set("roomType", roomType);
-  }
+    params.set("university", university);
 
-  router.push(`/browse?${params.toString()}`);
-};
+    if (budget) {
+      params.set("budget", budget);
+    }
+
+    if (roomType) {
+      params.set("roomType", roomType);
+    }
+
+    router.push(
+      `/browse?${params.toString()}`
+    );
+  };
 
   return (
     <div className="mx-auto max-w-5xl rounded-2xl border border-slate-200 bg-white p-4 shadow-lg">
+
       <div className="grid gap-4 md:grid-cols-4">
 
         {/* University */}
@@ -51,25 +99,31 @@ export default function SearchBar() {
             University
           </label>
 
-          <select 
+          <select
             value={university}
-            onChange={(e) => {
-              setUniversity(e.target.value);
-              setRoomType("");
-            }}
+            onChange={(e) =>
+              handleUniversityChange(
+                e.target.value
+              )
+            }
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none"
           >
-            <option value="">Select University</option>
+            <option value="">
+              Select University
+            </option>
 
             {universities.map((uni) => (
-              <option key={uni} value={uni}>
+              <option
+                key={uni}
+                value={uni}
+              >
                 {uni}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Budget */}
+        {/* Monthly Budget */}
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-700">
             Monthly Budget
@@ -77,11 +131,16 @@ export default function SearchBar() {
 
           <select
             value={budget}
-            onChange={(e) => setBudget(e.target.value)}
+            onChange={(e) =>
+              setBudget(e.target.value)
+            }
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none"
           >
             {budgetRanges.map((range) => (
-              <option key={range.value} value={range.value}>
+              <option
+                key={range.value}
+                value={range.value}
+              >
                 {range.label}
               </option>
             ))}
@@ -94,14 +153,22 @@ export default function SearchBar() {
             Room Type
           </label>
 
-          <select 
+          <select
             value={roomType}
-            onChange={(e) => setRoomType(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none">
-            <option value="">Any</option>
+            onChange={(e) =>
+              setRoomType(e.target.value)
+            }
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none"
+          >
+            <option value="">
+              Any
+            </option>
 
             {roomTypes.map((type) => (
-              <option key={type} value={type}>
+              <option
+                key={type}
+                value={type}
+              >
                 {type}
               </option>
             ))}
@@ -111,12 +178,13 @@ export default function SearchBar() {
         {/* Search Button */}
         <div className="flex items-end">
           <Button
-          onClick={handleSearch}
-          className="px-8 py-4"
-        >
-          Find Accommodation
-        </Button>
+            onClick={handleSearch}
+            className="w-full px-8 py-4"
+          >
+            Find Accommodation
+          </Button>
         </div>
+
       </div>
     </div>
   );

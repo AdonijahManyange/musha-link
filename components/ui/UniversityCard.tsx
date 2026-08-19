@@ -1,43 +1,61 @@
+import Image from "next/image";
 import Link from "next/link";
-import { GraduationCap, MapPin } from "lucide-react";
-
 
 type UniversityCardProps = {
   name: string;
   city: string;
-  listings: number;
+  description: string;
+  logo: string;
+  href: string;
 };
 
 export default function UniversityCard({
   name,
   city,
-  listings,
+  description,
+  logo,
+  href,
 }: UniversityCardProps) {
   return (
-    <Link
-      href="/browse"
-      className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
-    >
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-[#1C3769]/10">
-        <GraduationCap className="h-7 w-7 text-[#1C3769]" />
+    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+
+      {/* Logo */}
+      <div className="flex h-28 items-center justify-center rounded-xl bg-slate-50 p-4">
+        <Image
+          src={logo}
+          alt={`${name} logo`}
+          width={180}
+          height={100}
+          className="h-24 w-auto object-contain"
+        />
       </div>
 
-      <h3 className="text-xl font-bold text-slate-900">
-        {name}
-      </h3>
+      {/* Content */}
+      <div className="flex flex-1 flex-col pt-5">
 
-      <div className="mt-2 flex items-center gap-2 text-slate-500">
-        <MapPin className="h-4 w-4" />
-        <span>{city}</span>
+        <h3 className="text-lg font-bold leading-6 text-slate-900">
+          {name}
+        </h3>
+
+        <p className="mt-3 text-sm font-medium text-brand-blue">
+          {city}
+        </p>
+
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          {description}
+        </p>
+
+        {/* CTA */}
+        <div className="mt-auto border-t border-slate-100 pt-4">
+          <Link
+            href={href}
+            className="text-sm font-semibold text-slate-700 transition hover:text-brand-blue"
+          >
+            View accommodation →
+          </Link>
+        </div>
+
       </div>
-
-      <p className="mt-4 text-sm text-slate-600">
-        {listings} Listings
-      </p>
-
-      <div className="mt-6 font-semibold text-[#1C3769] transition group-hover:translate-x-1">
-        Browse →
-      </div>
-    </Link>
+    </div>
   );
 }
