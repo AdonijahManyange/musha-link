@@ -33,16 +33,42 @@ export default async function LandlordDashboard() {
             Manage your properties and connect with students.
           </p>
 
-            <LogoutButton />
+          <LogoutButton />
         </div>
 
         {/* Dashboard Cards */}
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+
+          {/* Account Verification */}
+
+          <div className="flex h-full flex-col rounded-2xl border border-amber-200 bg-white p-6 shadow-sm">
+            <div>
+              <p className="text-sm font-semibold text-amber-600">
+                Account Security
+              </p>
+
+              <h2 className="mt-1 text-lg font-semibold text-slate-900">
+                Verify Account
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-600">
+                Verify your identity so students can trust that you are a
+                legitimate landlord.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/landlord/verification"
+              className="mt-auto inline-block w-fit rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
+            >
+              Start Verification
+            </Link>
+          </div>
 
           {/* Listings */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
               My Listings
             </h2>
@@ -53,7 +79,7 @@ export default async function LandlordDashboard() {
 
             <Link
               href="/dashboard/landlord/listings"
-              className="mt-6 inline-block rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
+              className="mt-auto inline-block w-fit rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
             >
               Manage Listings
             </Link>
@@ -61,7 +87,7 @@ export default async function LandlordDashboard() {
 
           {/* Add Property */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
               Add Property
             </h2>
@@ -72,7 +98,7 @@ export default async function LandlordDashboard() {
 
             <Link
               href="/dashboard/landlord/listings/new"
-              className="mt-6 inline-block rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="mt-auto inline-block w-fit rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               Add Listing
             </Link>
@@ -80,7 +106,7 @@ export default async function LandlordDashboard() {
 
           {/* Viewing Requests */}
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
               Viewing Requests
             </h2>
@@ -91,7 +117,7 @@ export default async function LandlordDashboard() {
 
             <Link
               href="/dashboard/landlord/requests"
-              className="mt-6 inline-block rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="mt-auto inline-block w-fit rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               View Requests
             </Link>
@@ -107,6 +133,7 @@ export default async function LandlordDashboard() {
           </h2>
 
           <div className="mt-4 space-y-2 text-sm text-slate-600">
+
             <p>
               <span className="font-medium text-slate-900">
                 Name:
@@ -127,6 +154,7 @@ export default async function LandlordDashboard() {
               </span>{" "}
               Landlord
             </p>
+
           </div>
         </div>
 

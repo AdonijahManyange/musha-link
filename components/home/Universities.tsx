@@ -38,7 +38,7 @@ export default function Universities() {
             name="University of Zimbabwe"
             city="Harare"
             description="Explore accommodation options around UZ."
-            logo="/images/universities/uz.jpeg"
+            logo="/images/universities/uz.png"
             href="/browse?university=University%20of%20Zimbabwe"
           />
 

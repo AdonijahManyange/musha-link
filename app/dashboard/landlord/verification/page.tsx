@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import Link from "next/link";
+import StartVerificationButton from "@/components/StartVerificationButton";
 
 export default async function LandlordVerificationPage() {
   const user = await getCurrentUser();
@@ -42,7 +43,7 @@ export default async function LandlordVerificationPage() {
         </div>
 
         {/* Status */}
-        <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+        <div className="mt-8 rounded-2xl border border-amber-500 bg-amber-50 p-5">
           <div className="flex items-start gap-3">
             <div className="mt-1 h-3 w-3 rounded-full bg-amber-500" />
 
@@ -93,7 +94,7 @@ export default async function LandlordVerificationPage() {
         </div>
 
         {/* Upload Form */}
-        <form className="mt-8 space-y-6">
+        <div className="mt-8 space-y-6">
 
           {/* Government ID */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -113,7 +114,7 @@ export default async function LandlordVerificationPage() {
               name="governmentId"
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
-              className="mt-4 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:font-medium file:text-slate-700 hover:file:bg-slate-200"
+              className="mt-4 block w-full rounded-xl border border-slate-900 bg-white p-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:font-medium file:text-slate-700 hover:file:bg-slate-200"
             />
           </div>
 
@@ -135,21 +136,16 @@ export default async function LandlordVerificationPage() {
               name="utilityBill"
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
-              className="mt-4 block w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:font-medium file:text-slate-700 hover:file:bg-slate-200"
+              className="mt-4 block w-full rounded-xl border border-slate-900 bg-white p-3 text-sm text-slate-700 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-4 file:py-2 file:font-medium file:text-slate-700 hover:file:bg-slate-200"
             />
           </div>
 
           {/* Submit */}
           <div className="flex justify-end">
-            <button
-              type="submit"
-              className="rounded-xl bg-brand-blue px-6 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
-            >
-              Submit for Verification
-            </button>
+            <StartVerificationButton />
           </div>
 
-        </form>
+        </div>
 
         {/* Privacy Notice */}
         <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
