@@ -5,7 +5,7 @@ export type Landlord = {
 };
 
 export type Listing = {
-  id: number;
+  id: string;
   slug: string;
   title: string;
   university: string;

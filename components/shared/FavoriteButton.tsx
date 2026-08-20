@@ -1,48 +1,56 @@
 "use client";
 
-
 import { useEffect, useState } from "react";
-import { Heart } from "lucide-react";
 import {
-  isFavorite,
+  getFavorites,
   toggleFavorite,
 } from "@/lib/favorites";
 
 type FavoriteButtonProps = {
-  listingId: number;
+  listingId: string;
 };
 
 export default function FavoriteButton({
   listingId,
 }: FavoriteButtonProps) {
-  const [favorite, setFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] =
+    useState(false);
 
   useEffect(() => {
-    setFavorite(isFavorite(listingId));
+    const favorites = getFavorites();
+
+    setIsFavorite(
+      favorites.includes(listingId)
+    );
   }, [listingId]);
 
-  function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    e.stopPropagation();
+  function handleToggleFavorite() {
+    const updatedFavorites =
+      toggleFavorite(listingId);
 
-    toggleFavorite(listingId);
-    setFavorite(isFavorite(listingId));
+    setIsFavorite(
+      updatedFavorites.includes(listingId)
+    );
   }
 
   return (
     <button
-        onClick={handleClick}
-        aria-label="Save listing"
-        className="rounded-full bg-white p-2 shadow-lg transition duration-200 hover:scale-110 hover:shadow-xl"
+      type="button"
+      onClick={handleToggleFavorite}
+      aria-label={
+        isFavorite
+          ? "Remove from saved listings"
+          : "Save listing"
+      }
+      className={`flex h-10 w-10 items-center justify-center rounded-full backdrop-blur-sm transition ${
+        isFavorite
+          ? "bg-white text-red-500 shadow-md"
+          : "bg-white/90 text-slate-700 shadow-sm hover:bg-white hover:text-red-500"
+      }`}
     >
-      <Heart
-        size={22}
-        className={`transition-all duration-200 ${
-            favorite
-            ? "fill-red-500 text-red-500 scale-110"
-            : "text-slate-700"
-        }`}
-      />
+      <span className="text-xl leading-none">
+        {isFavorite ? "♥" : "♡"}
+      </span>
     </button>
   );
 }

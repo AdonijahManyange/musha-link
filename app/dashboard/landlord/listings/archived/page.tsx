@@ -31,105 +31,26 @@ type Listing = {
   photos: ListingPhoto[];
 };
 
-export default function LandlordListingsPage() {
+export default function ArchivedListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [archivingId, setArchivingId] =
+  const [restoringId, setRestoringId] =
     useState<string | null>(null);
-
-  const [publishingId, setPublishingId] =
+  const [deletingId, setDeletingId] =
     useState<string | null>(null);
-
   const [error, setError] = useState("");
 
   // ============================================================
-  // LOAD LISTINGS
+  // LOAD ARCHIVED LISTINGS
   // ============================================================
 
-  async function loadListings() {
+  async function loadArchivedListings() {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch("/api/listings");
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.error ||
-            "Failed to load listings."
-        );
-      }
-
-      setListings(data);
-    } catch (error) {
-      console.error(error);
-
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to load your listings."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadListings();
-  }, []);
-
-  // ============================================================
-  // PUBLISH LISTING
-  // ============================================================
-
-  async function publishListing(
-    listingId: string
-  ) {
-    const listing = listings.find(
-      (item) => item.id === listingId
-    );
-
-    if (!listing) {
-      return;
-    }
-
-    const photoCount =
-      listing.photos.length;
-
-    if (photoCount < 5) {
-      setError(
-        `You need at least 5 photos before publishing this listing. You currently have ${photoCount}.`
-      );
-
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Are you sure you want to publish this listing? Students will be able to see it."
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setPublishingId(listingId);
-    setError("");
-
-    try {
       const response = await fetch(
-        `/api/listings/${listingId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            status: "PUBLISHED",
-          }),
-        }
+        "/api/listings?status=ARCHIVED"
       );
 
       const data = await response.json();
@@ -137,19 +58,14 @@ export default function LandlordListingsPage() {
       if (!response.ok) {
         throw new Error(
           data.error ||
-            "Failed to publish listing."
+            "Failed to load archived listings."
         );
       }
 
-      setListings((currentListings) =>
-        currentListings.map((item) =>
-          item.id === listingId
-            ? {
-                ...item,
-                status: "PUBLISHED",
-                isActive: true,
-              }
-            : item
+      setListings(
+        data.filter(
+          (listing: Listing) =>
+            listing.status === "ARCHIVED"
         )
       );
     } catch (error) {
@@ -158,29 +74,33 @@ export default function LandlordListingsPage() {
       setError(
         error instanceof Error
           ? error.message
-          : "Something went wrong while publishing the listing."
+          : "Unable to load archived listings."
       );
     } finally {
-      setPublishingId(null);
+      setLoading(false);
     }
   }
 
+  useEffect(() => {
+    loadArchivedListings();
+  }, []);
+
   // ============================================================
-  // ARCHIVE LISTING
+  // RESTORE LISTING
   // ============================================================
 
-  async function archiveListing(
+  async function restoreListing(
     listingId: string
   ) {
     const confirmed = window.confirm(
-      "Are you sure you want to archive this listing? It will no longer be visible to students."
+      "Restore this listing? It will become a draft and will not be visible to students until you publish it again."
     );
 
     if (!confirmed) {
       return;
     }
 
-    setArchivingId(listingId);
+    setRestoringId(listingId);
     setError("");
 
     try {
@@ -192,7 +112,7 @@ export default function LandlordListingsPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            status: "ARCHIVED",
+            status: "DRAFT",
           }),
         }
       );
@@ -202,7 +122,7 @@ export default function LandlordListingsPage() {
       if (!response.ok) {
         throw new Error(
           data.error ||
-            "Failed to archive listing."
+            "Failed to restore listing."
         );
       }
 
@@ -218,10 +138,64 @@ export default function LandlordListingsPage() {
       setError(
         error instanceof Error
           ? error.message
-          : "Something went wrong while archiving the listing."
+          : "Something went wrong while restoring the listing."
       );
     } finally {
-      setArchivingId(null);
+      setRestoringId(null);
+    }
+  }
+
+  // ============================================================
+  // DELETE LISTING
+  // ============================================================
+
+  async function deleteListing(
+    listingId: string
+  ) {
+    const confirmed = window.confirm(
+      "Permanently delete this listing? This action cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(listingId);
+    setError("");
+
+    try {
+      const response = await fetch(
+        `/api/listings/${listingId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Failed to delete listing."
+        );
+      }
+
+      setListings((currentListings) =>
+        currentListings.filter(
+          (listing) =>
+            listing.id !== listingId
+        )
+      );
+    } catch (error) {
+      console.error(error);
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while deleting the listing."
+      );
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -264,20 +238,6 @@ export default function LandlordListingsPage() {
     );
   }
 
-  function getStatusStyles(
-    status: Listing["status"]
-  ) {
-    if (status === "PUBLISHED") {
-      return "bg-emerald-50 text-emerald-700 border-emerald-200";
-    }
-
-    if (status === "DRAFT") {
-      return "bg-amber-50 text-amber-700 border-amber-200";
-    }
-
-    return "bg-slate-100 text-slate-600 border-slate-200";
-  }
-
   // ============================================================
   // PAGE
   // ============================================================
@@ -292,10 +252,10 @@ export default function LandlordListingsPage() {
 
           <div>
             <Link
-              href="/dashboard/landlord"
+              href="/dashboard/landlord/listings"
               className="text-sm font-medium text-slate-600 transition hover:text-brand-blue"
             >
-              ← Back to Dashboard
+              ← Back to My Listings
             </Link>
 
             <p className="mt-6 text-sm font-semibold uppercase tracking-wide text-brand-blue">
@@ -303,30 +263,21 @@ export default function LandlordListingsPage() {
             </p>
 
             <h1 className="mt-2 text-3xl font-bold text-slate-900">
-              My Listings
+              Archived Listings
             </h1>
 
             <p className="mt-2 text-slate-600">
-              Create and manage your student
-              accommodation properties.
+              Manage properties that are no longer
+              active.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/dashboard/landlord/listings/archived"
-              className="inline-flex items-center rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-              Archives
-            </Link>
-
-            <Link
-              href="/dashboard/landlord/listings/new"
-              className="inline-flex items-center rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
-            >
-              + Add Property
-            </Link>
-          </div>
+          <Link
+            href="/dashboard/landlord/listings"
+            className="inline-flex w-fit items-center rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            My Listings
+          </Link>
 
         </div>
 
@@ -351,7 +302,7 @@ export default function LandlordListingsPage() {
         {loading && (
           <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
             <p className="text-slate-600">
-              Loading your listings...
+              Loading archived listings...
             </p>
           </div>
         )}
@@ -363,30 +314,29 @@ export default function LandlordListingsPage() {
             <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
 
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-2xl">
-                🏠
+                📦
               </div>
 
               <h2 className="mt-5 text-xl font-semibold text-slate-900">
-                No listings yet
+                No archived listings
               </h2>
 
               <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-                Add your first property and
-                start connecting with students
-                looking for accommodation.
+                Listings that you archive will
+                appear here.
               </p>
 
               <Link
-                href="/dashboard/landlord/listings/new"
+                href="/dashboard/landlord/listings"
                 className="mt-6 inline-flex rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
               >
-                Add Your First Property
+                Back to My Listings
               </Link>
 
             </div>
           )}
 
-        {/* Listings */}
+        {/* Archived Listings */}
 
         {!loading &&
           listings.length > 0 && (
@@ -403,15 +353,12 @@ export default function LandlordListingsPage() {
                 const photoCount =
                   listing.photos.length;
 
-                const canPublish =
-                  photoCount >= 5;
-
-                const isPublishing =
-                  publishingId ===
+                const isRestoring =
+                  restoringId ===
                   listing.id;
 
-                const isArchiving =
-                  archivingId ===
+                const isDeleting =
+                  deletingId ===
                   listing.id;
 
                 return (
@@ -430,7 +377,7 @@ export default function LandlordListingsPage() {
                           <img
                             src={coverPhoto.url}
                             alt={listing.title}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover grayscale-[15%]"
                           />
                         ) : (
                           <div className="flex h-full min-h-64 items-center justify-center text-slate-400">
@@ -440,7 +387,7 @@ export default function LandlordListingsPage() {
                               </div>
 
                               <p className="mt-2 text-sm">
-                                No photos yet
+                                No photos
                               </p>
                             </div>
                           </div>
@@ -476,18 +423,8 @@ export default function LandlordListingsPage() {
                             </p>
                           </div>
 
-                          <span
-                            className={`w-fit rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyles(
-                              listing.status
-                            )}`}
-                          >
-                            {listing.status ===
-                            "DRAFT"
-                              ? "Draft"
-                              : listing.status ===
-                                  "PUBLISHED"
-                                ? "Published"
-                                : "Archived"}
+                          <span className="w-fit rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                            Archived
                           </span>
 
                         </div>
@@ -526,7 +463,8 @@ export default function LandlordListingsPage() {
                             </p>
 
                             <p className="mt-1 font-medium text-slate-900">
-                              ${listing.monthlyRent}
+                              US$
+                              {listing.monthlyRent}
                             </p>
                           </div>
 
@@ -541,67 +479,6 @@ export default function LandlordListingsPage() {
                           </div>
 
                         </div>
-
-                        {/* Photo Requirement */}
-
-                        {listing.status ===
-                          "DRAFT" && (
-                          <div className="mt-5 rounded-xl bg-slate-50 p-4">
-
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-
-                              <div>
-                                <p className="text-sm font-semibold text-slate-900">
-                                  Listing photos
-                                </p>
-
-                                <p className="mt-1 text-xs text-slate-600">
-                                  {photoCount < 1
-                                    ? "Add at least 1 photo to save your listing."
-                                    : photoCount < 5
-                                      ? `Add ${
-                                          5 -
-                                          photoCount
-                                        } more ${
-                                          5 -
-                                            photoCount ===
-                                          1
-                                            ? "photo"
-                                            : "photos"
-                                        } before publishing.`
-                                      : "You have enough photos to publish your listing."}
-                                </p>
-                              </div>
-
-                              <span className="text-sm font-semibold text-slate-700">
-                                {photoCount}/10
-                              </span>
-
-                            </div>
-
-                            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
-
-                              <div
-                                className="h-full rounded-full bg-brand-blue transition-all"
-                                style={{
-                                  width: `${Math.min(
-                                    (photoCount /
-                                      10) *
-                                      100,
-                                    100
-                                  )}%`,
-                                }}
-                              />
-
-                            </div>
-
-                            <p className="mt-2 text-xs text-slate-500">
-                              We recommend 10 photos
-                              for the best listing.
-                            </p>
-
-                          </div>
-                        )}
 
                         {/* Actions */}
 
@@ -625,63 +502,45 @@ export default function LandlordListingsPage() {
                             Manage Photos
                           </Link>
 
-                          {/* View Published Listing */}
+                          {/* Restore */}
 
-                          {listing.status ===
-                            "PUBLISHED" && (
-                            <Link
-                              href={`/listings/${listing.id}?from=dashboard`}
-                              className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                            >
-                              View Listing
-                            </Link>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              restoreListing(
+                                listing.id
+                              )
+                            }
+                            disabled={
+                              isRestoring ||
+                              isDeleting
+                            }
+                            className="rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {isRestoring
+                              ? "Restoring..."
+                              : "Restore Listing"}
+                          </button>
 
-                          {/* Publish */}
+                          {/* Delete */}
 
-                          {listing.status ===
-                            "DRAFT" && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                publishListing(
-                                  listing.id
-                                )
-                              }
-                              disabled={
-                                !canPublish ||
-                                isPublishing
-                              }
-                              className="rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {isPublishing
-                                ? "Publishing..."
-                                : "Publish Listing"}
-                            </button>
-                          )}
-
-                          {/* Archive */}
-
-                          {listing.status !==
-                            "ARCHIVED" && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                archiveListing(
-                                  listing.id
-                                )
-                              }
-                              disabled={
-                                isArchiving ||
-                                isPublishing
-                              }
-                              className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {isArchiving
-                                ? "Archiving..."
-                                : "Archive Listing"}
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              deleteListing(
+                                listing.id
+                              )
+                            }
+                            disabled={
+                              isDeleting ||
+                              isRestoring
+                            }
+                            className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isDeleting
+                              ? "Deleting..."
+                              : "Delete Permanently"}
+                          </button>
 
                         </div>
 

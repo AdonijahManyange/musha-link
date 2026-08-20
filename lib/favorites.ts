@@ -1,29 +1,79 @@
-const STORAGE_KEY = "favoriteListings";
+const FAVORITES_KEY = "musha-favorites";
 
-export function getFavorites(): number[] {
-  if (typeof window === "undefined") return [];
+export function getFavorites(): string[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
 
-  const favorites = localStorage.getItem(STORAGE_KEY);
+  try {
+    const stored = localStorage.getItem(
+      FAVORITES_KEY
+    );
 
-  return favorites ? JSON.parse(favorites) : [];
+    if (!stored) {
+      return [];
+    }
+
+    const parsed = JSON.parse(stored);
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.map(String);
+  } catch (error) {
+    console.error(
+      "Failed to load favorites:",
+      error
+    );
+
+    return [];
+  }
 }
 
-export function isFavorite(id: number) {
-  return getFavorites().includes(id);
-}
-
-export function toggleFavorite(id: number) {
-  const favorites = getFavorites();
-
-  const updated = favorites.includes(id)
-    ? favorites.filter((favoriteId) => favoriteId !== id)
-    : [...favorites, id];
+function saveFavorites(
+  favoriteIds: string[]
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
 
   localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(updated)
+    FAVORITES_KEY,
+    JSON.stringify(favoriteIds)
   );
+}
 
-  window.dispatchEvent(new Event("favoritesUpdated"));
-  return updated;
+export function toggleFavorite(
+  listingId: string
+): string[] {
+  const favorites = getFavorites();
+
+  if (favorites.includes(listingId)) {
+    const updatedFavorites =
+      favorites.filter(
+        (id) => id !== listingId
+      );
+
+    saveFavorites(updatedFavorites);
+
+    return updatedFavorites;
+  }
+
+  const updatedFavorites = [
+    ...favorites,
+    listingId,
+  ];
+
+  saveFavorites(updatedFavorites);
+
+  return updatedFavorites;
+}
+
+export function isFavorite(
+  listingId: string
+): boolean {
+  return getFavorites().includes(
+    listingId
+  );
 }

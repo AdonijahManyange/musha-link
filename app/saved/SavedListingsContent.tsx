@@ -7,14 +7,15 @@ import { getFavorites } from "@/lib/favorites";
 import ListingCard from "@/components/listing/ListingCard";
 
 export default function SavedListingsContent() {
-  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+  const [favoriteIds, setFavoriteIds] =
+    useState<string[]>([]);
 
   useEffect(() => {
     setFavoriteIds(getFavorites());
   }, []);
 
   const savedListings = listings.filter((listing) =>
-    favoriteIds.includes(listing.id)
+    favoriteIds.includes(String(listing.id))
   );
 
   return (
@@ -45,11 +46,15 @@ export default function SavedListingsContent() {
           {savedListings.map((listing) => (
             <ListingCard
               key={listing.id}
-              listing={listing}
+              listing={{
+                ...listing,
+                id: String(listing.id),
+              }}
             />
           ))}
         </div>
       )}
+
     </div>
   );
 }
