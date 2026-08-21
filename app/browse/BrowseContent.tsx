@@ -209,7 +209,8 @@ export default function BrowseContent() {
   );
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-16">
+    <main className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-7xl px-6 py-16">
 
       {/* ======================================================
           HEADER
@@ -352,6 +353,7 @@ export default function BrowseContent() {
           </div>
         )}
 
+      </div>
     </main>
   );
 }

@@ -11,7 +11,7 @@ export const listings: Listing[] = [
     roomType: "Private Room",
     price: 120,
     images: [
-      "/images/listings/room2.png",
+      "/images/listings/shared-apartment.jpg",
     ],
     description:
       "A modern and comfortable student room located close to Africa University.",
@@ -35,12 +35,12 @@ export const listings: Listing[] = [
     roomType: "Shared Room",
     price: 100,
     images: [
-      "/images/listings/room2.png",
+      "/images/listings/room3.png",
     ],
     description:
       "Affordable student accommodation with convenient access to Africa University.",
     amenities: [],
-    featured: false,
+    featured: true,
     verified: true,
     landlord: {
       name: "Musha Verified Landlord",
@@ -88,7 +88,7 @@ export const listings: Listing[] = [
     description:
       "Student-friendly accommodation near Midlands State University.",
     amenities: [],
-    featured: false,
+    featured: true,
     verified: true,
     landlord: {
       name: "Musha Verified Landlord",
