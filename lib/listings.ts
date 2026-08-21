@@ -11,7 +11,7 @@ export const listings: Listing[] = [
     roomType: "Private Room",
     price: 120,
     images: [
-      "/images/listings/shared-apartment.jpg",
+      "/images/listings/room1.png",
     ],
     description:
       "A modern and comfortable student room located close to Africa University.",

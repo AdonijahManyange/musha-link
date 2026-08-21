@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { createSoveraVerificationSession } from "@/lib/sovera";
+import { createDiditVerificationSession } from "@/lib/didit";
 
 export async function POST() {
   try {
@@ -22,27 +22,28 @@ export async function POST() {
       );
     }
 
-    const session =
-      await createSoveraVerificationSession(user.id);
+    const session = await createDiditVerificationSession(
+      user.id
+    );
 
-    if (!session.hostedUrl) {
-      console.error("Unexpected Sovera response:", session);
+    if (!session.url) {
+      console.error("Unexpected Didit response:", session);
 
       return NextResponse.json(
         {
           error:
-            "Sovera did not return a hosted verification URL.",
+            "Didit did not return a hosted verification URL.",
         },
         { status: 502 }
       );
     }
 
     return NextResponse.json({
-      url: session.hostedUrl,
-      sessionId: session.id,
+      url: session.url,
+      sessionId: session.session_id,
     });
   } catch (error) {
-    console.error("Sovera verification error:", error);
+    console.error("Didit verification error:", error);
 
     return NextResponse.json(
       {

@@ -7,6 +7,13 @@ export default function StartVerificationButton() {
   const [error, setError] = useState("");
 
   async function startVerification() {
+    // Open the window immediately while we're still inside
+    // the user's click event. This prevents popup blockers.
+    const verificationWindow = window.open(
+      "about:blank",
+      "_blank"
+    );
+
     try {
       setLoading(true);
       setError("");
@@ -28,13 +35,24 @@ export default function StartVerificationButton() {
 
       if (!data.url) {
         throw new Error(
-          "Sovera did not return a verification URL."
+          "Didit did not return a verification URL."
         );
       }
 
-      window.location.href = data.url;
+      // Send the newly opened window to Didit.
+      if (verificationWindow) {
+        verificationWindow.location.href = data.url;
+      } else {
+        // Fallback if the browser blocked the popup.
+        window.location.href = data.url;
+      }
     } catch (error) {
       console.error(error);
+
+      // Close the blank window if something went wrong.
+      if (verificationWindow) {
+        verificationWindow.close();
+      }
 
       setError(
         error instanceof Error
@@ -54,7 +72,9 @@ export default function StartVerificationButton() {
         disabled={loading}
         className="rounded-xl bg-brand-blue px-6 py-3 font-semibold text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? "Starting verification..." : "Start Identity Verification"}
+        {loading
+          ? "Starting verification..."
+          : "Start Identity Verification"}
       </button>
 
       {error && (
