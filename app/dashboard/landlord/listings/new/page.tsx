@@ -10,6 +10,69 @@ type University = {
   city: string;
 };
 
+const AMENITIES = [
+  {
+    value: "WIFI",
+    label: "Wi-Fi",
+  },
+  {
+    value: "SOLAR_POWER",
+    label: "Solar Power",
+  },
+  {
+    value: "BOREHOLE",
+    label: "Borehole",
+  },
+  {
+    value: "ELECTRICITY",
+    label: "Electricity",
+  },
+  {
+    value: "BACKUP_GENERATOR",
+    label: "Backup Generator",
+  },
+  {
+    value: "WATER",
+    label: "Water",
+  },
+  {
+    value: "SECURITY",
+    label: "Security",
+  },
+  {
+    value: "PARKING",
+    label: "Parking",
+  },
+  {
+    value: "FURNISHED",
+    label: "Furnished",
+  },
+  {
+    value: "LAUNDRY",
+    label: "Laundry",
+  },
+  {
+    value: "KITCHEN",
+    label: "Kitchen",
+  },
+  {
+    value: "STUDY_AREA",
+    label: "Study Area",
+  },
+  {
+    value: "GARDEN",
+    label: "Garden",
+  },
+  {
+    value: "SWIMMING_POOL",
+    label: "Swimming Pool",
+  },
+  {
+    value: "DSTV",
+    label: "DSTV",
+  },
+];
+
 export default function NewListingPage() {
   const router = useRouter();
 
@@ -46,6 +109,9 @@ export default function NewListingPage() {
   const [description, setDescription] =
     useState("");
 
+  const [amenities, setAmenities] =
+    useState<string[]>([]);
+
   const [universities, setUniversities] =
     useState<University[]>([]);
 
@@ -54,6 +120,10 @@ export default function NewListingPage() {
 
   const [loading, setLoading] =
     useState(false);
+
+  // ============================================================
+  // LOAD UNIVERSITIES
+  // ============================================================
 
   useEffect(() => {
     async function loadUniversities() {
@@ -85,6 +155,26 @@ export default function NewListingPage() {
     loadUniversities();
   }, []);
 
+  // ============================================================
+  // TOGGLE AMENITY
+  // ============================================================
+
+  function toggleAmenity(
+    amenity: string
+  ) {
+    setAmenities((current) =>
+      current.includes(amenity)
+        ? current.filter(
+            (item) => item !== amenity
+          )
+        : [...current, amenity]
+    );
+  }
+
+  // ============================================================
+  // SUBMIT
+  // ============================================================
+
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
   ) {
@@ -96,10 +186,12 @@ export default function NewListingPage() {
       const response =
         await fetch("/api/listings", {
           method: "POST",
+
           headers: {
             "Content-Type":
               "application/json",
           },
+
           body: JSON.stringify({
             title: propertyTitle,
             address,
@@ -112,6 +204,7 @@ export default function NewListingPage() {
             roomType,
             genderPreference,
             description,
+            amenities,
           }),
         });
 
@@ -182,7 +275,9 @@ export default function NewListingPage() {
           className="space-y-8"
         >
 
-          {/* Property Information */}
+          {/* ================================================== */}
+          {/* PROPERTY INFORMATION */}
+          {/* ================================================== */}
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
@@ -197,7 +292,7 @@ export default function NewListingPage() {
 
             <div className="mt-6 space-y-5">
 
-              {/* Property Title */}
+              {/* Title */}
 
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
@@ -218,7 +313,7 @@ export default function NewListingPage() {
                 />
               </div>
 
-              {/* Property Address */}
+              {/* Address */}
 
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
@@ -226,8 +321,6 @@ export default function NewListingPage() {
                 </label>
 
                 <div className="space-y-4">
-
-                  {/* House Number & Street */}
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-600">
@@ -247,8 +340,6 @@ export default function NewListingPage() {
                       className="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
                     />
                   </div>
-
-                  {/* City + Province */}
 
                   <div className="grid gap-4 md:grid-cols-2">
 
@@ -292,8 +383,6 @@ export default function NewListingPage() {
 
                   </div>
 
-                  {/* Country */}
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-600">
                       Country
@@ -316,13 +405,6 @@ export default function NewListingPage() {
                   </div>
 
                 </div>
-
-                <p className="mt-3 text-xs text-slate-500">
-                  We'll use this address to
-                  automatically calculate the
-                  distance from the selected
-                  university.
-                </p>
               </div>
 
               {/* University */}
@@ -369,7 +451,7 @@ export default function NewListingPage() {
 
               <div className="grid gap-5 md:grid-cols-3">
 
-                {/* Monthly Rent */}
+                {/* Rent */}
 
                 <div>
                   <label className="mb-2 block font-medium text-slate-700">
@@ -479,7 +561,7 @@ export default function NewListingPage() {
 
               </div>
 
-              {/* Gender Preference */}
+              {/* Gender */}
 
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
@@ -514,31 +596,107 @@ export default function NewListingPage() {
                 </select>
               </div>
 
-              {/* Description */}
-
-              <div>
-                <label className="mb-2 block font-medium text-slate-700">
-                  Description
-                </label>
-
-                <textarea
-                  value={description}
-                  onChange={(e) =>
-                    setDescription(
-                      e.target.value
-                    )
-                  }
-                  placeholder="Describe the property, location, facilities, and anything students should know..."
-                  rows={6}
-                  required
-                  className="w-full resize-none rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
-                />
-              </div>
-
             </div>
           </section>
 
-          {/* Actions */}
+          {/* ================================================== */}
+          {/* AMENITIES */}
+          {/* ================================================== */}
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+            <h2 className="text-lg font-semibold text-slate-900">
+              Amenities & Facilities
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-600">
+              Select everything available at
+              the property.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+
+              {AMENITIES.map(
+                (amenity) => {
+                  const selected =
+                    amenities.includes(
+                      amenity.value
+                    );
+
+                  return (
+                    <label
+                      key={amenity.value}
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition ${
+                        selected
+                          ? "border-brand-blue bg-blue-50"
+                          : "border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() =>
+                          toggleAmenity(
+                            amenity.value
+                          )
+                        }
+                        className="h-4 w-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                      />
+
+                      <span className="text-sm font-medium text-slate-700">
+                        {amenity.label}
+                      </span>
+                    </label>
+                  );
+                }
+              )}
+
+            </div>
+
+            {amenities.length > 0 && (
+              <p className="mt-4 text-sm text-slate-500">
+                {amenities.length}{" "}
+                {amenities.length === 1
+                  ? "amenity"
+                  : "amenities"}{" "}
+                selected.
+              </p>
+            )}
+
+          </section>
+
+          {/* ================================================== */}
+          {/* DESCRIPTION */}
+          {/* ================================================== */}
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+            <h2 className="text-lg font-semibold text-slate-900">
+              Description
+            </h2>
+
+            <div className="mt-6">
+
+              <textarea
+                value={description}
+                onChange={(e) =>
+                  setDescription(
+                    e.target.value
+                  )
+                }
+                placeholder="Describe the property, location, facilities, and anything students should know..."
+                rows={6}
+                required
+                className="w-full resize-none rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              />
+
+            </div>
+
+          </section>
+
+          {/* ================================================== */}
+          {/* ACTIONS */}
+          {/* ================================================== */}
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 

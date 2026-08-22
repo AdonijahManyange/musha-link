@@ -63,7 +63,11 @@ export default function BrowseContent() {
         setError("");
 
         const response = await fetch(
-          "/api/listings?status=PUBLISHED",
+          `/api/listings?status=PUBLISHED${
+            university
+              ? `&university=${encodeURIComponent(university)}`
+              : ""
+          }`,
           {
             cache: "no-store",
           }
@@ -94,7 +98,7 @@ export default function BrowseContent() {
     }
 
     loadListings();
-  }, []);
+  }, [university]);
 
   // ============================================================
   // FILTER DATABASE LISTINGS
@@ -102,14 +106,6 @@ export default function BrowseContent() {
 
   const filteredListings = listings.filter(
     (listing) => {
-      const matchesUniversity =
-        !university ||
-        listing.university.name ===
-          university ||
-        listing.university.name
-          .toLowerCase()
-          .replace(/\s+/g, "-") ===
-          university.toLowerCase();
 
       const matchesRoomType =
         !roomType ||
@@ -142,7 +138,6 @@ export default function BrowseContent() {
       }
 
       return (
-        matchesUniversity &&
         matchesRoomType &&
         matchesBudget
       );

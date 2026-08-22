@@ -11,6 +11,9 @@ export async function GET() {
         id: true,
         name: true,
         city: true,
+        logo: true,
+        latitude: true,
+        longitude: true,
       },
     });
 

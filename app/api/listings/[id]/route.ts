@@ -31,7 +31,8 @@ export async function GET(
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error: "Only landlords can access listings.",
+          error:
+            "Only landlords can access listings.",
         },
         { status: 403 }
       );
@@ -39,20 +40,23 @@ export async function GET(
 
     const { id } = await context.params;
 
-    const listing = await prisma.listing.findFirst({
-      where: {
-        id,
-        landlordId: user.id,
-      },
-      include: {
-        university: true,
-        photos: {
-          orderBy: {
-            sortOrder: "asc",
+    const listing =
+      await prisma.listing.findFirst({
+        where: {
+          id,
+          landlordId: user.id,
+        },
+
+        include: {
+          university: true,
+
+          photos: {
+            orderBy: {
+              sortOrder: "asc",
+            },
           },
         },
-      },
-    });
+      });
 
     if (!listing) {
       return NextResponse.json(
@@ -74,7 +78,8 @@ export async function GET(
 
     return NextResponse.json(
       {
-        error: "Something went wrong while loading the listing.",
+        error:
+          "Something went wrong while loading the listing.",
       },
       { status: 500 }
     );
@@ -112,7 +117,8 @@ export async function PUT(
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error: "Only landlords can modify listings.",
+          error:
+            "Only landlords can modify listings.",
         },
         { status: 403 }
       );
@@ -142,6 +148,7 @@ export async function PUT(
       genderPreference,
       universityId,
       description,
+      amenities,
     } = body;
 
     // ----------------------------------------------------------
@@ -173,12 +180,13 @@ export async function PUT(
     // Find listing and verify ownership
     // ----------------------------------------------------------
 
-    const listing = await prisma.listing.findFirst({
-      where: {
-        id,
-        landlordId: user.id,
-      },
-    });
+    const listing =
+      await prisma.listing.findFirst({
+        where: {
+          id,
+          landlordId: user.id,
+        },
+      });
 
     if (!listing) {
       return NextResponse.json(
@@ -204,23 +212,26 @@ export async function PUT(
     if (!university) {
       return NextResponse.json(
         {
-          error: "Selected university was not found.",
+          error:
+            "Selected university was not found.",
         },
         { status: 400 }
       );
     }
 
     // ----------------------------------------------------------
+    // Normalize amenities
+    // ----------------------------------------------------------
+
+    const selectedAmenities =
+      Array.isArray(amenities)
+        ? amenities
+        : [];
+
+    // ----------------------------------------------------------
     // Update listing
     //
-    // IMPORTANT:
-    // We intentionally DO NOT update:
-    //
-    // distanceToUniversityKm
-    // latitude
-    // longitude
-    //
-    // Those values are protected/read-only.
+    // Coordinates and distance remain protected.
     // ----------------------------------------------------------
 
     const updatedListing =
@@ -228,17 +239,25 @@ export async function PUT(
         where: {
           id: listing.id,
         },
+
         data: {
           title: title.trim(),
+
           propertyType,
+
           address: address.trim(),
+
           city: city.trim(),
+
           province: province.trim(),
+
           country: country.trim(),
 
-          monthlyRent: Number(monthlyRent),
+          monthlyRent:
+            Number(monthlyRent),
 
           roomType,
+
           genderPreference,
 
           universityId,
@@ -247,9 +266,17 @@ export async function PUT(
             typeof description === "string"
               ? description.trim()
               : "",
+
+          // ----------------------------------------------------
+          // Replace amenities
+          // ----------------------------------------------------
+
+          amenities: selectedAmenities,
         },
+
         include: {
           university: true,
+
           photos: {
             orderBy: {
               sortOrder: "asc",
@@ -259,7 +286,9 @@ export async function PUT(
       });
 
     return NextResponse.json({
-      message: "Listing updated successfully.",
+      message:
+        "Listing updated successfully.",
+
       listing: updatedListing,
     });
   } catch (error) {
@@ -343,7 +372,8 @@ export async function PATCH(
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
         {
-          error: "Invalid listing status.",
+          error:
+            "Invalid listing status.",
         },
         { status: 400 }
       );
@@ -359,6 +389,7 @@ export async function PATCH(
           id,
           landlordId: user.id,
         },
+
         include: {
           photos: {
             orderBy: {
@@ -396,7 +427,9 @@ export async function PATCH(
         );
       }
 
-      if (listing.status === "ARCHIVED") {
+      if (
+        listing.status === "ARCHIVED"
+      ) {
         return NextResponse.json(
           {
             error:
@@ -411,6 +444,7 @@ export async function PATCH(
           where: {
             id: listing.id,
           },
+
           data: {
             status: "PUBLISHED",
             isActive: true,
@@ -420,6 +454,7 @@ export async function PATCH(
       return NextResponse.json({
         message:
           "Listing published successfully.",
+
         listing: updatedListing,
       });
     }
@@ -429,7 +464,9 @@ export async function PATCH(
     // ==========================================================
 
     if (status === "ARCHIVED") {
-      if (listing.status === "ARCHIVED") {
+      if (
+        listing.status === "ARCHIVED"
+      ) {
         return NextResponse.json(
           {
             error:
@@ -444,6 +481,7 @@ export async function PATCH(
           where: {
             id: listing.id,
           },
+
           data: {
             status: "ARCHIVED",
             isActive: false,
@@ -453,6 +491,7 @@ export async function PATCH(
       return NextResponse.json({
         message:
           "Listing archived successfully.",
+
         listing: updatedListing,
       });
     }
@@ -467,6 +506,7 @@ export async function PATCH(
           where: {
             id: listing.id,
           },
+
           data: {
             status: "DRAFT",
             isActive: false,
@@ -476,6 +516,7 @@ export async function PATCH(
       return NextResponse.json({
         message:
           "Listing moved back to draft.",
+
         listing: updatedListing,
       });
     }

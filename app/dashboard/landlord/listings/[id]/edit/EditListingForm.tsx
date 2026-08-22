@@ -10,6 +10,11 @@ type University = {
   city: string;
 };
 
+type ListingAmenity = {
+  id: string;
+  amenity: string;
+};
+
 type Listing = {
   id: string;
   title: string;
@@ -23,11 +28,16 @@ type Listing = {
   genderPreference: string;
   description: string;
   universityId: string;
+
+  amenities: ListingAmenity[];
+
   distanceToUniversityKm:
     | number
     | null;
+
   latitude: number | null;
   longitude: number | null;
+
   status:
     | "DRAFT"
     | "PUBLISHED"
@@ -39,11 +49,78 @@ type Props = {
   universities: University[];
 };
 
+const AMENITIES = [
+  {
+    value: "WIFI",
+    label: "Wi-Fi",
+  },
+  {
+    value: "SOLAR_POWER",
+    label: "Solar Power",
+  },
+  {
+    value: "BOREHOLE",
+    label: "Borehole",
+  },
+  {
+    value: "ELECTRICITY",
+    label: "Electricity",
+  },
+  {
+    value: "BACKUP_GENERATOR",
+    label: "Backup Generator",
+  },
+  {
+    value: "WATER",
+    label: "Water",
+  },
+  {
+    value: "SECURITY",
+    label: "Security",
+  },
+  {
+    value: "PARKING",
+    label: "Parking",
+  },
+  {
+    value: "FURNISHED",
+    label: "Furnished",
+  },
+  {
+    value: "LAUNDRY",
+    label: "Laundry",
+  },
+  {
+    value: "KITCHEN",
+    label: "Kitchen",
+  },
+  {
+    value: "STUDY_AREA",
+    label: "Study Area",
+  },
+  {
+    value: "GARDEN",
+    label: "Garden",
+  },
+  {
+    value: "SWIMMING_POOL",
+    label: "Swimming Pool",
+  },
+  {
+    value: "DSTV",
+    label: "DSTV",
+  },
+];
+
 export default function EditListingForm({
   listing,
   universities,
 }: Props) {
   const router = useRouter();
+
+  // ============================================================
+  // BASIC INFORMATION
+  // ============================================================
 
   const [title, setTitle] =
     useState(listing.title);
@@ -60,13 +137,17 @@ export default function EditListingForm({
   const [country, setCountry] =
     useState(listing.country);
 
+  const [propertyType, setPropertyType] =
+    useState(listing.propertyType);
+
+  // ============================================================
+  // RENTAL INFORMATION
+  // ============================================================
+
   const [monthlyRent, setMonthlyRent] =
     useState(
       String(listing.monthlyRent)
     );
-
-  const [propertyType, setPropertyType] =
-    useState(listing.propertyType);
 
   const [roomType, setRoomType] =
     useState(listing.roomType);
@@ -78,12 +159,9 @@ export default function EditListingForm({
     listing.genderPreference
   );
 
-  const [
-    description,
-    setDescription,
-  ] = useState(
-    listing.description
-  );
+  // ============================================================
+  // UNIVERSITY
+  // ============================================================
 
   const [
     universityId,
@@ -91,6 +169,34 @@ export default function EditListingForm({
   ] = useState(
     listing.universityId
   );
+
+  // ============================================================
+  // DESCRIPTION
+  // ============================================================
+
+  const [
+    description,
+    setDescription,
+  ] = useState(
+    listing.description
+  );
+
+  // ============================================================
+  // AMENITIES
+  // ============================================================
+
+  const [
+    amenities,
+    setAmenities,
+  ] = useState<string[]>(
+    listing.amenities?.map(
+      (item) => item.amenity
+    ) ?? []
+  );
+
+  // ============================================================
+  // PROTECTED LOCATION VALUES
+  // ============================================================
 
   const [
     distanceToUniversityKm,
@@ -118,6 +224,10 @@ export default function EditListingForm({
         : ""
     );
 
+  // ============================================================
+  // UI STATE
+  // ============================================================
+
   const [saving, setSaving] =
     useState(false);
 
@@ -126,6 +236,22 @@ export default function EditListingForm({
 
   const [success, setSuccess] =
     useState("");
+
+  // ============================================================
+  // TOGGLE AMENITY
+  // ============================================================
+
+  function toggleAmenity(
+    amenity: string
+  ) {
+    setAmenities((current) =>
+      current.includes(amenity)
+        ? current.filter(
+            (item) => item !== amenity
+          )
+        : [...current, amenity]
+    );
+  }
 
   // ============================================================
   // SUBMIT
@@ -141,45 +267,63 @@ export default function EditListingForm({
     setSuccess("");
 
     try {
-      const response = await fetch(
-        `/api/listings/${listing.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            title,
-            address,
-            city,
-            province,
-            country,
-            monthlyRent:
-              Number(monthlyRent),
-            propertyType,
-            roomType,
-            genderPreference,
-            description,
-            universityId,
-            distanceToUniversityKm:
-              distanceToUniversityKm ===
-              ""
-                ? null
-                : Number(
-                    distanceToUniversityKm
-                  ),
-            latitude:
-              latitude === ""
-                ? null
-                : Number(latitude),
-            longitude:
-              longitude === ""
-                ? null
-                : Number(longitude),
-          }),
-        }
-      );
+      const response =
+        await fetch(
+          `/api/listings/${listing.id}`,
+          {
+            method: "PUT",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              title,
+              address,
+              city,
+              province,
+              country,
+
+              monthlyRent:
+                Number(monthlyRent),
+
+              propertyType,
+
+              roomType,
+
+              genderPreference,
+
+              description,
+
+              universityId,
+
+              amenities,
+
+              // These are included for
+              // completeness, but the API
+              // intentionally does not modify
+              // them.
+              distanceToUniversityKm:
+                distanceToUniversityKm ===
+                ""
+                  ? null
+                  : Number(
+                      distanceToUniversityKm
+                    ),
+
+              latitude:
+                latitude === ""
+                  ? null
+                  : Number(latitude),
+
+              longitude:
+                longitude === ""
+                  ? null
+                  : Number(longitude),
+            }),
+          }
+        );
 
       const data =
         await response.json();
@@ -195,8 +339,6 @@ export default function EditListingForm({
         "Listing updated successfully."
       );
 
-      // Give the user a moment to see
-      // the success message.
       setTimeout(() => {
         router.push(
           "/dashboard/landlord/listings"
@@ -223,7 +365,9 @@ export default function EditListingForm({
       className="space-y-6"
     >
 
-      {/* Error */}
+      {/* ====================================================== */}
+      {/* ERROR */}
+      {/* ====================================================== */}
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -231,7 +375,9 @@ export default function EditListingForm({
         </div>
       )}
 
-      {/* Success */}
+      {/* ====================================================== */}
+      {/* SUCCESS */}
+      {/* ====================================================== */}
 
       {success && (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
@@ -239,7 +385,9 @@ export default function EditListingForm({
         </div>
       )}
 
-      {/* Basic Information */}
+      {/* ====================================================== */}
+      {/* PROPERTY INFORMATION */}
+      {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 
@@ -423,10 +571,11 @@ export default function EditListingForm({
           </div>
 
         </div>
-
       </section>
 
-      {/* Rental Information */}
+      {/* ====================================================== */}
+      {/* RENTAL INFORMATION */}
+      {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 
@@ -450,7 +599,7 @@ export default function EditListingForm({
               id="monthlyRent"
               type="number"
               min="1"
-              step="0.01"
+              step="1"
               value={monthlyRent}
               onChange={(event) =>
                 setMonthlyRent(
@@ -533,10 +682,77 @@ export default function EditListingForm({
           </div>
 
         </div>
+      </section>
+
+      {/* ====================================================== */}
+      {/* AMENITIES */}
+      {/* ====================================================== */}
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+
+        <h2 className="text-lg font-semibold text-slate-900">
+          Amenities & Facilities
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          Select everything available at
+          the property.
+        </p>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+
+          {AMENITIES.map(
+            (amenity) => {
+              const selected =
+                amenities.includes(
+                  amenity.value
+                );
+
+              return (
+                <label
+                  key={amenity.value}
+                  className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition ${
+                    selected
+                      ? "border-brand-blue bg-blue-50"
+                      : "border-slate-200 hover:bg-slate-50"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() =>
+                      toggleAmenity(
+                        amenity.value
+                      )
+                    }
+                    className="h-4 w-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                  />
+
+                  <span className="text-sm font-medium text-slate-700">
+                    {amenity.label}
+                  </span>
+                </label>
+              );
+            }
+          )}
+
+        </div>
+
+        {amenities.length > 0 && (
+          <p className="mt-4 text-sm text-slate-500">
+            {amenities.length}{" "}
+            {amenities.length === 1
+              ? "amenity"
+              : "amenities"}{" "}
+            selected.
+          </p>
+        )}
 
       </section>
 
-      {/* University */}
+      {/* ====================================================== */}
+      {/* UNIVERSITY */}
+      {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 
@@ -605,10 +821,11 @@ export default function EditListingForm({
           </div>
 
         </div>
-
       </section>
 
-      {/* Description */}
+      {/* ====================================================== */}
+      {/* DESCRIPTION */}
+      {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 
@@ -632,10 +849,11 @@ export default function EditListingForm({
           />
 
         </div>
-
       </section>
 
-      {/* Coordinates */}
+      {/* ====================================================== */}
+      {/* COORDINATES */}
+      {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
 
@@ -695,10 +913,11 @@ export default function EditListingForm({
           </div>
 
         </div>
-
       </section>
 
-      {/* Actions */}
+      {/* ====================================================== */}
+      {/* ACTIONS */}
+      {/* ====================================================== */}
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 

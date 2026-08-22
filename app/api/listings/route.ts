@@ -4,17 +4,6 @@ import { getCurrentUser } from "@/lib/auth";
 
 // ============================================================
 // GET — Listings
-//
-// Public:
-//   GET /api/listings?status=PUBLISHED
-//
-// Landlord:
-//   GET /api/listings
-//      → DRAFT + PUBLISHED listings
-//
-//   GET /api/listings?status=ARCHIVED
-//      → ARCHIVED listings only
-//
 // ============================================================
 
 export async function GET(request: Request) {
@@ -22,33 +11,39 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const status = searchParams.get("status");
+    const universityId = searchParams.get("university");
 
     // ==========================================================
     // PUBLIC PUBLISHED LISTINGS
     // ==========================================================
 
     if (status === "PUBLISHED") {
-      const listings =
-        await prisma.listing.findMany({
-          where: {
-            status: "PUBLISHED",
-            isActive: true,
-          },
+      const listings = await prisma.listing.findMany({
+        where: {
+          status: "PUBLISHED",
+          isActive: true,
 
-          include: {
-            university: true,
+          ...(universityId
+            ? {
+                universityId,
+              }
+            : {}),
+        },
 
-            photos: {
-              orderBy: {
-                sortOrder: "asc",
-              },
+        include: {
+          university: true,
+
+          photos: {
+            orderBy: {
+              sortOrder: "asc",
             },
           },
+        },
 
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
 
       return NextResponse.json(listings);
     }
@@ -77,8 +72,7 @@ export async function GET(request: Request) {
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error:
-            "Only landlords can access their listings.",
+          error: "Only landlords can access their listings.",
         },
         {
           status: 403,
@@ -87,52 +81,14 @@ export async function GET(request: Request) {
     }
 
     // ==========================================================
-    // LANDLORD ARCHIVES
+    // LANDLORD ARCHIVED LISTINGS
     // ==========================================================
 
     if (status === "ARCHIVED") {
-      const listings =
-        await prisma.listing.findMany({
-          where: {
-            landlordId: user.id,
-            status: "ARCHIVED",
-          },
-
-          include: {
-            university: true,
-
-            photos: {
-              orderBy: {
-                sortOrder: "asc",
-              },
-            },
-          },
-
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
-
-      return NextResponse.json(listings);
-    }
-
-    // ==========================================================
-    // LANDLORD ACTIVE LISTINGS
-    //
-    // Only DRAFT and PUBLISHED listings appear in
-    // "My Listings".
-    //
-    // Archived listings are intentionally excluded.
-    // ==========================================================
-
-    const listings =
-      await prisma.listing.findMany({
+      const listings = await prisma.listing.findMany({
         where: {
           landlordId: user.id,
-
-          status: {
-            in: ["DRAFT", "PUBLISHED"],
-          },
+          status: "ARCHIVED",
         },
 
         include: {
@@ -150,17 +106,44 @@ export async function GET(request: Request) {
         },
       });
 
+      return NextResponse.json(listings);
+    }
+
+    // ==========================================================
+    // LANDLORD ACTIVE LISTINGS
+    // ==========================================================
+
+    const listings = await prisma.listing.findMany({
+      where: {
+        landlordId: user.id,
+
+        status: {
+          in: ["DRAFT", "PUBLISHED"],
+        },
+      },
+
+      include: {
+        university: true,
+
+        photos: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
     return NextResponse.json(listings);
   } catch (error) {
-    console.error(
-      "Failed to load listings:",
-      error
-    );
+    console.error("Failed to load listings:", error);
 
     return NextResponse.json(
       {
-        error:
-          "Something went wrong while loading listings.",
+        error: "Something went wrong while loading listings.",
       },
       {
         status: 500,
@@ -199,8 +182,7 @@ export async function POST(request: Request) {
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error:
-            "Only landlords can create listings.",
+          error: "Only landlords can create listings.",
         },
         {
           status: 403,
@@ -215,71 +197,66 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // ----------------------------------------------------------
+    // Amenities
+    // ----------------------------------------------------------
+
+    const amenities = Array.isArray(body.amenities)
+      ? body.amenities
+      : [];
+
+    // ----------------------------------------------------------
     // Create listing
     // ----------------------------------------------------------
 
-    const listing =
-      await prisma.listing.create({
-        data: {
-          landlordId: user.id,
+    const listing = await prisma.listing.create({
+      data: {
+        landlordId: user.id,
 
-          title: body.title,
-          address: body.address,
-          city: body.city,
-          province: body.province,
-          country: body.country,
+        title: body.title,
+        address: body.address,
+        city: body.city,
+        province: body.province,
+        country: body.country,
 
-          description:
-            body.description,
+        description: body.description,
 
-          propertyType:
-            body.propertyType,
+        propertyType: body.propertyType,
 
-          latitude:
-            body.latitude ?? null,
+        latitude: body.latitude ?? null,
+        longitude: body.longitude ?? null,
 
-          longitude:
-            body.longitude ?? null,
+        universityId: body.universityId,
 
-          universityId:
-            body.universityId,
+        distanceToUniversityKm:
+          body.distanceToUniversityKm ?? null,
 
-          distanceToUniversityKm:
-            body.distanceToUniversityKm ??
-            null,
+        monthlyRent: Number(body.monthlyRent),
 
-          monthlyRent:
-            Number(body.monthlyRent),
+        roomType: body.roomType,
 
-          roomType:
-            body.roomType,
+        genderPreference: body.genderPreference,
 
-          genderPreference:
-            body.genderPreference,
+        status: "DRAFT",
 
-          status: "DRAFT",
+        isActive: true,
 
-          isActive: true,
-        },
+        // Amenities are now stored directly
+        // as an Amenity[] enum array.
+        amenities,
+      },
 
-        include: {
-          university: true,
+      include: {
+        university: true,
 
-          photos: true,
-        },
-      });
+        photos: true,
+      },
+    });
 
-    return NextResponse.json(
-      listing,
-      {
-        status: 201,
-      }
-    );
+    return NextResponse.json(listing, {
+      status: 201,
+    });
   } catch (error) {
-    console.error(
-      "Failed to create listing:",
-      error
-    );
+    console.error("Failed to create listing:", error);
 
     return NextResponse.json(
       {

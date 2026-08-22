@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================
@@ -101,6 +102,7 @@ model University {
   id        String   @id @default(cuid())
   name      String   @unique
   city      String
+  logo      String?
   latitude  Float
   longitude Float
   createdAt DateTime @default(now())
@@ -108,10 +110,6 @@ model University {
 
   listings Listing[]
 }
-
-// ============================================================
-// LISTING
-// ============================================================
 
 model Listing {
   id        String   @id @default(cuid())
@@ -143,10 +141,13 @@ model Listing {
   roomType         RoomType
   genderPreference GenderPreference
 
+  amenities Amenity[]
+
   status   ListingStatus @default(DRAFT)
   isActive Boolean       @default(true)
 
-  photos ListingPhoto[]
+  photos           ListingPhoto[]
+  listingAmenities ListingAmenity[]
 
   @@index([landlordId])
   @@index([universityId])
@@ -156,6 +157,19 @@ model Listing {
   @@index([propertyType])
   @@index([status])
   @@index([isActive])
+}
+
+model ListingAmenity {
+  id        String   @id @default(cuid())
+  listingId String
+  amenity   Amenity
+  createdAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, amenity])
+  @@index([listingId])
+  @@index([amenity])
 }
 
 // ============================================================
@@ -229,4 +243,22 @@ enum GenderPreference {
   ANY
   MALE
   FEMALE
+}
+
+enum Amenity {
+  WIFI
+  SOLAR_POWER
+  BOREHOLE
+  ELECTRICITY
+  BACKUP_GENERATOR
+  WATER
+  SECURITY
+  PARKING
+  FURNISHED
+  LAUNDRY
+  KITCHEN
+  STUDY_AREA
+  GARDEN
+  SWIMMING_POOL
+  DSTV
 }
