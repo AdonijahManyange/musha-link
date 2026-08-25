@@ -14,7 +14,7 @@ const universities = [
   {
     name: "National University of Science and Technology",
     city: "Bulawayo",
-    logo: "/images/universities/nust.png",
+    logo: "/images/universities/nust1.png",
     latitude: -20.145,
     longitude: 28.587,
   },

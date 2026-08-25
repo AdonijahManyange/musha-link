@@ -2,51 +2,66 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
+import { signIn } from "next-auth/react";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleSubmit(
+  e: FormEvent<HTMLFormElement>
+) {
+  e.preventDefault();
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-        const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            email,
-            password,
-        }),
-        });
+  try {
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-        alert(data.error);
-        return;
-        }
-
-        alert("Login successful!");
-
-        console.log(data.user);
-
-    } catch (error) {
-        console.error(error);
-        alert("Something went wrong.");
-    } finally {
-        setLoading(false);
+    if (!result || result.error) {
+      alert("Invalid email or password.");
+      return;
     }
+
+    const sessionResponse = await fetch(
+      "/api/auth/session",
+      {
+        cache: "no-store",
+      }
+    );
+
+    const session = await sessionResponse.json();
+
+    if (session?.user?.role === "LANDLORD") {
+      router.push("/dashboard/landlord");
+      return;
+    }
+
+    if (session?.user?.role === "ADMIN") {
+      router.push("/dashboard");
+      return;
+    }
+
+    router.push("/dashboard/student");
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("Something went wrong while logging in.");
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-16">
@@ -124,6 +139,15 @@ export default function LoginPage() {
               </button>
 
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm font-medium text-brand-blue hover:underline"
+            >
+              Forgot your password?
+            </Link>
           </div>
 
           <button
