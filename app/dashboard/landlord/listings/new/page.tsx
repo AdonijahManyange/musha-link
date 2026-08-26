@@ -121,6 +121,45 @@ export default function NewListingPage() {
   const [loading, setLoading] =
     useState(false);
 
+  const [checkingVerification, setCheckingVerification] =
+    useState(true);
+
+  const [verificationStatus, setVerificationStatus] =
+    useState<string | null>(null);
+
+
+    // ============================================================
+// CHECK LANDLORD VERIFICATION
+// ============================================================
+
+useEffect(() => {
+  async function checkVerification() {
+    try {
+      const response = await fetch(
+        "/api/landlord/verification/status"
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Unable to check verification status."
+        );
+      }
+
+      setVerificationStatus(data.status);
+    } catch (error) {
+      console.error(error);
+
+      setVerificationStatus("UNKNOWN");
+    } finally {
+      setCheckingVerification(false);
+    }
+  }
+
+  checkVerification();
+}, []);
+
   // ============================================================
   // LOAD UNIVERSITIES
   // ============================================================
