@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import LogoutButton from "@/components/LogoutButton";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
 export default async function LandlordDashboard() {
@@ -14,11 +14,33 @@ export default async function LandlordDashboard() {
     redirect("/dashboard");
   }
 
+  // ============================================================
+  // LANDLORD VERIFICATION STATUS
+  // ============================================================
+
+  const verification =
+    await prisma.landlordVerification.findUnique({
+      where: {
+        landlordId: user.id,
+      },
+      select: {
+        status: true,
+      },
+    });
+
+  const verificationStatus =
+    verification?.status ?? "NOT_STARTED";
+
+  const isVerified =
+    user.verified || verificationStatus === "APPROVED";
+
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12">
       <div className="mx-auto max-w-6xl">
 
-        {/* Header */}
+        {/* ================================================== */}
+        {/* HEADER */}
+        {/* ================================================== */}
 
         <div className="mb-10">
           <p className="text-sm font-medium text-brand-blue">
@@ -26,47 +48,24 @@ export default async function LandlordDashboard() {
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-slate-900">
-            Welcome back{user.name ? `, ${user.name}` : ""}! 👋
+            Welcome back
+            {user.name ? `, ${user.name}` : ""}! 👋
           </h1>
 
           <p className="mt-2 text-slate-600">
             Manage your properties and connect with students.
           </p>
-
-          <LogoutButton />
         </div>
 
-        {/* Dashboard Cards */}
+        {/* ================================================== */}
+        {/* DASHBOARD CARDS */}
+        {/* ================================================== */}
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 
-          {/* Account Verification */}
-
-          <div className="flex h-full flex-col rounded-2xl border border-amber-200 bg-white p-6 shadow-sm">
-            <div>
-              <p className="text-sm font-semibold text-amber-600">
-                Account Security
-              </p>
-
-              <h2 className="mt-1 text-lg font-semibold text-slate-900">
-                Verify Account
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-600">
-                Verify your identity so students can trust that you are a
-                legitimate landlord.
-              </p>
-            </div>
-
-            <Link
-              href="/dashboard/landlord/verification"
-              className="mt-auto inline-block w-fit rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
-            >
-              Start Verification
-            </Link>
-          </div>
-
-          {/* Listings */}
+          {/* ================================================== */}
+          {/* MY LISTINGS */}
+          {/* ================================================== */}
 
           <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
@@ -85,26 +84,58 @@ export default async function LandlordDashboard() {
             </Link>
           </div>
 
-          {/* Add Property */}
+          {/* ================================================== */}
+          {/* ADD PROPERTY */}
+          {/* ================================================== */}
 
-          <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Add Property
-            </h2>
+          <div
+            className={`flex h-full flex-col rounded-2xl border bg-white p-6 shadow-sm ${
+              isVerified
+                ? "border-emerald-200"
+                : "border-slate-200"
+            }`}
+          >
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Add Property
+              </h2>
 
-            <p className="mt-2 text-sm text-slate-600">
-              List a new property and make it available to students.
-            </p>
+              <p className="mt-2 text-sm text-slate-600">
+                List a new property and make it available to students.
+              </p>
 
-            <Link
-              href="/dashboard/landlord/listings/new"
-              className="mt-auto inline-block w-fit rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-              Add Listing
-            </Link>
+              {isVerified ? (
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  Verified
+                </div>
+              ) : (
+                <div className="mt-3 text-xs font-medium text-orange-600">
+                  Verification required before listing
+                </div>
+              )}
+            </div>
+
+            {isVerified ? (
+              <Link
+                href="/dashboard/landlord/listings/new"
+                className="mt-auto inline-block w-fit rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
+              >
+                Add Listing
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard/landlord/verification"
+                className="mt-auto inline-block w-fit rounded-xl border border-orange-300 bg-orange-50 px-3 py-3 font-semibold text-orange-700 transition hover:bg-orange-100"
+              >
+                Complete Verification
+              </Link>
+            )}
           </div>
 
-          {/* Viewing Requests */}
+          {/* ================================================== */}
+          {/* VIEWING REQUESTS */}
+          {/* ================================================== */}
 
           <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
@@ -125,35 +156,74 @@ export default async function LandlordDashboard() {
 
         </div>
 
-        {/* Account */}
+        {/* ================================================== */}
+        {/* ACCOUNT INFORMATION */}
+        {/* ================================================== */}
 
         <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Account
-          </h2>
 
-          <div className="mt-4 space-y-2 text-sm text-slate-600">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-            <p>
-              <span className="font-medium text-slate-900">
-                Name:
-              </span>{" "}
-              {user.name || "Not provided"}
-            </p>
+            <div>
+              <p className="text-sm font-semibold text-brand-blue">
+                Account
+              </p>
 
-            <p>
-              <span className="font-medium text-slate-900">
-                Email:
-              </span>{" "}
-              {user.email}
-            </p>
+              <h2 className="mt-1 text-lg font-semibold text-slate-900">
+                Account Information
+              </h2>
 
-            <p>
-              <span className="font-medium text-slate-900">
-                Account type:
-              </span>{" "}
-              Landlord
-            </p>
+              <p className="mt-1 text-sm text-slate-500">
+                Basic information associated with your MushaLink account.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/landlord/profile"
+              className="text-sm font-semibold text-brand-blue hover:underline"
+            >
+              Manage Profile →
+            </Link>
+
+          </div>
+
+          <div className="mt-6 grid gap-5 sm:grid-cols-3">
+
+            {/* Name */}
+
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Name
+              </p>
+
+              <p className="mt-1 font-medium text-slate-900">
+                {user.name || "Not provided"}
+              </p>
+            </div>
+
+            {/* Email */}
+
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Email
+              </p>
+
+              <p className="mt-1 font-medium text-slate-900">
+                {user.email}
+              </p>
+            </div>
+
+            {/* Account Type */}
+
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Account Type
+              </p>
+
+              <p className="mt-1 font-medium text-slate-900">
+                Landlord
+              </p>
+            </div>
 
           </div>
         </div>

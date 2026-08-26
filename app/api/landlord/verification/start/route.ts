@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { createDiditVerificationSession } from "@/lib/didit";
 
 export async function POST() {
@@ -22,9 +23,11 @@ export async function POST() {
       );
     }
 
-    const session = await createDiditVerificationSession(
-      user.id
-    );
+    // ------------------------------------------------------------
+    // CREATE DIDIT VERIFICATION SESSION
+    // ------------------------------------------------------------
+
+    const session = await createDiditVerificationSession(user.id);
 
     if (!session.url) {
       console.error("Unexpected Didit response:", session);
@@ -37,6 +40,31 @@ export async function POST() {
         { status: 502 }
       );
     }
+
+    // ------------------------------------------------------------
+    // CREATE / RESET LANDLORD VERIFICATION
+    // ------------------------------------------------------------
+
+    await prisma.landlordVerification.upsert({
+      where: {
+        landlordId: user.id,
+      },
+      update: {
+        status: "PENDING",
+        rejectionReason: null,
+        reviewedAt: null,
+        submittedAt: new Date(),
+      },
+      create: {
+        landlordId: user.id,
+        status: "PENDING",
+        submittedAt: new Date(),
+      },
+    });
+
+    // ------------------------------------------------------------
+    // RETURN DIDIT SESSION
+    // ------------------------------------------------------------
 
     return NextResponse.json({
       url: session.url,

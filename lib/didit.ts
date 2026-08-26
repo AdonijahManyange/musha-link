@@ -5,6 +5,7 @@ export async function createDiditVerificationSession(
 ) {
   const apiKey = process.env.DIDIT_API_KEY;
   const workflowId = process.env.DIDIT_WORKFLOW_ID;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   if (!apiKey) {
     throw new Error("DIDIT_API_KEY is not configured");
@@ -12,6 +13,10 @@ export async function createDiditVerificationSession(
 
   if (!workflowId) {
     throw new Error("DIDIT_WORKFLOW_ID is not configured");
+  }
+
+  if (!appUrl) {
+    throw new Error("NEXT_PUBLIC_APP_URL is not configured");
   }
 
   const response = await fetch(`${DIDIT_API_URL}/session/`, {
@@ -23,10 +28,15 @@ export async function createDiditVerificationSession(
     body: JSON.stringify({
       workflow_id: workflowId,
       vendor_data: userId,
+
+      callback: `${appUrl}/dashboard/landlord/verification/callback`,
+      callback_method: "both",
+
       metadata: {
         platform: "musha",
         user_id: userId,
       },
+
       language: "en",
     }),
   });

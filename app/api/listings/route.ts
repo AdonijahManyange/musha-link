@@ -65,20 +65,7 @@ export async function GET(request: Request) {
       );
     }
 
-    // ==========================================================
-    // LANDLORD CHECK
-    // ==========================================================
-
-    if (user.role !== "LANDLORD") {
-      return NextResponse.json(
-        {
-          error: "Only landlords can access their listings.",
-        },
-        {
-          status: 403,
-        }
-      );
-    }
+    
 
     // ==========================================================
     // LANDLORD ARCHIVED LISTINGS
@@ -189,6 +176,32 @@ export async function POST(request: Request) {
         }
       );
     }
+
+    // ----------------------------------------------------------
+// Landlord verification check
+// ----------------------------------------------------------
+
+const verification =
+  await prisma.landlordVerification.findUnique({
+    where: {
+      landlordId: user.id,
+    },
+  });
+
+if (!verification || verification.status !== "APPROVED") {
+  return NextResponse.json(
+    {
+      error:
+        "Your landlord account must be verified before you can create a listing.",
+      code: "VERIFICATION_REQUIRED",
+      verificationStatus:
+        verification?.status ?? "NOT_STARTED",
+    },
+    {
+      status: 403,
+    }
+  );
+}
 
     // ----------------------------------------------------------
     // Read request body
