@@ -27,25 +27,59 @@ export default async function PublicListingPage({
   const { from } = await searchParams;
 
   const backHref =
-  from === "dashboard"
-    ? "/dashboard/landlord/listings"
-    : from === "saved"
-      ? "/saved"
-      : "/browse";
+    from === "dashboard"
+      ? "/dashboard/landlord/listings"
+      : from === "saved"
+        ? "/saved"
+        : "/browse";
 
-const backLabel =
-  from === "dashboard"
-    ? "Back to My Listings"
-    : from === "saved"
-      ? "Back to Saved"
-      : "Back to Listings";
+  const backLabel =
+    from === "dashboard"
+      ? "Back to My Listings"
+      : from === "saved"
+        ? "Back to Saved"
+        : "Back to Listings";
+
+  // ============================================================
+  // LOAD LISTING
+  // ============================================================
 
   const listing = await prisma.listing.findUnique({
     where: {
       id,
     },
+
     include: {
       university: true,
+
+      landlord: {
+        select: {
+          id: true,
+          name: true,
+          verified: true,
+
+          landlordProfile: {
+            select: {
+              profilePhotoUrl: true,
+              city: true,
+              province: true,
+              country: true,
+            },
+          },
+
+          _count: {
+            select: {
+              listings: {
+                where: {
+                  status: "PUBLISHED",
+                  isActive: true,
+                },
+              },
+            },
+          },
+        },
+      },
+
       photos: {
         orderBy: {
           sortOrder: "asc",
@@ -53,6 +87,10 @@ const backLabel =
       },
     },
   });
+
+  // ============================================================
+  // VALIDATE LISTING
+  // ============================================================
 
   if (!listing) {
     notFound();
@@ -66,35 +104,35 @@ const backLabel =
     notFound();
   }
 
+  // ============================================================
+  // PHOTOS
+  // ============================================================
+
   const coverPhoto =
     listing.photos.find(
       (photo) => photo.isCover
     ) || listing.photos[0];
 
-  const galleryPhotos = listing.photos.filter(
-    (photo) => photo.id !== coverPhoto?.id
-  );
-
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
 
-        {/* =====================================================
+        {/* ====================================================
             BACK LINK
-        ===================================================== */}
+        ==================================================== */}
 
         <div className="mb-6">
           <Link
             href={backHref}
             className="text-sm font-medium text-slate-600 transition hover:text-brand-blue"
-            >
+          >
             ← {backLabel}
           </Link>
         </div>
 
-        {/* =====================================================
+        {/* ====================================================
             PHOTO GALLERY
-        ===================================================== */}
+        ==================================================== */}
 
         <section>
           {coverPhoto ? (
@@ -150,19 +188,19 @@ const backLabel =
           )}
         </section>
 
-        {/* =====================================================
+        {/* ====================================================
             MAIN LISTING AREA
-        ===================================================== */}
+        ==================================================== */}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_300px]">
 
-          {/* ===================================================
+          {/* ==================================================
               LEFT CONTENT
-          =================================================== */}
+          ================================================== */}
 
           <div>
 
-            {/* Verified */}
+            {/* Verified Listing */}
 
             <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
               <ShieldCheck
@@ -205,9 +243,9 @@ const backLabel =
               </span>
             </div>
 
-            {/* =================================================
+            {/* ==================================================
                 ABOUT
-            ================================================= */}
+            ================================================== */}
 
             <section className="mt-8">
               <h2 className="text-xl font-bold text-slate-900">
@@ -219,9 +257,9 @@ const backLabel =
               </p>
             </section>
 
-            {/* =================================================
+            {/* ==================================================
                 PROPERTY DETAILS
-            ================================================= */}
+            ================================================== */}
 
             <section className="mt-8">
               <h2 className="text-xl font-bold text-slate-900">
@@ -276,7 +314,7 @@ const backLabel =
                   </div>
                 </div>
 
-                {/* Gender */}
+                {/* Gender Preference */}
 
                 <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
@@ -323,9 +361,9 @@ const backLabel =
               </div>
             </section>
 
-            {/* =================================================
+            {/* ==================================================
                 LOCATION
-            ================================================= */}
+            ================================================== */}
 
             <section className="mt-8">
               <h2 className="text-xl font-bold text-slate-900">
@@ -364,16 +402,19 @@ const backLabel =
                 </div>
               </div>
             </section>
+
           </div>
 
-          {/* ===================================================
-              RIGHT PRICE CARD
-          =================================================== */}
+          {/* ==================================================
+              RIGHT SIDEBAR
+          ================================================== */}
 
           <aside>
             <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
-              {/* Price */}
+              {/* =================================================
+                  PRICE
+              ================================================= */}
 
               <p className="text-3xl font-bold text-brand-blue sm:text-4xl">
                 US${listing.monthlyRent}
@@ -383,7 +424,9 @@ const backLabel =
                 per month
               </p>
 
-              {/* Buttons */}
+              {/* =================================================
+                  ACTION BUTTONS
+              ================================================= */}
 
               <div className="mt-6 space-y-3">
 
@@ -409,7 +452,9 @@ const backLabel =
 
               <div className="my-5 border-t border-slate-200" />
 
-              {/* University */}
+              {/* =================================================
+                  QUICK DETAILS
+              ================================================= */}
 
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
@@ -421,8 +466,6 @@ const backLabel =
                 </p>
               </div>
 
-              {/* Location */}
-
               <div className="mt-5">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                   Location
@@ -433,8 +476,6 @@ const backLabel =
                   {listing.province}
                 </p>
               </div>
-
-              {/* Room */}
 
               <div className="mt-5">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
@@ -448,8 +489,6 @@ const backLabel =
                 </p>
               </div>
 
-              {/* Property */}
-
               <div className="mt-5">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
                   Property Type
@@ -462,7 +501,9 @@ const backLabel =
                 </p>
               </div>
 
-              {/* Status */}
+              {/* =================================================
+                  STATUS
+              ================================================= */}
 
               <div className="mt-5">
                 <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
@@ -478,8 +519,91 @@ const backLabel =
                 </div>
               </div>
 
+              {/* =================================================
+                  LANDLORD
+              ================================================= */}
+
+              <div className="mt-6 border-t border-slate-200 pt-6">
+
+                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                  Listed by
+                </p>
+
+                <div className="mt-3 flex items-center gap-3">
+
+                  {/* Profile Photo */}
+
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-2 ring-white shadow-sm">
+
+                    {listing.landlord.landlordProfile?.profilePhotoUrl ? (
+                      <img
+                        src={
+                          listing.landlord.landlordProfile
+                            .profilePhotoUrl
+                        }
+                        alt={
+                          listing.landlord.name ||
+                          "Landlord"
+                        }
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-lg font-bold text-brand-blue">
+                        {(listing.landlord.name || "L")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* Landlord Name */}
+
+                  <div className="min-w-0">
+
+                    <div className="flex items-center gap-1.5">
+
+                      <p className="truncate font-semibold text-slate-900">
+                        {listing.landlord.name ||
+                          "Landlord"}
+                      </p>
+
+                      {listing.landlord.verified && (
+                        <span
+                          title="Verified landlord"
+                          className="shrink-0 text-emerald-600"
+                        >
+                          ✓
+                        </span>
+                      )}
+
+                    </div>
+
+                    <p className="text-xs text-slate-500">
+                      {listing.landlord._count.listings}{" "}
+                      {listing.landlord._count.listings === 1
+                        ? "active listing"
+                        : "active listings"}
+                    </p>
+
+                  </div>
+
+                </div>
+
+                {/* View Landlord Profile */}
+
+                <Link
+                  href={`/landlords/${listing.landlord.id}`}
+                  className="mt-4 flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-brand-blue hover:bg-slate-50 hover:text-brand-blue"
+                >
+                  View Landlord Profile
+                </Link>
+
+              </div>
+
             </div>
           </aside>
+
         </div>
       </div>
     </main>

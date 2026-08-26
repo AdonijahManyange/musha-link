@@ -209,12 +209,12 @@ export default async function LandlordProfilePage() {
               </p>
             </div>
 
-            <button
-              type="button"
+            <Link
+              href="/dashboard/landlord/profile/edit"
               className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Edit Profile
-            </button>
+            </Link>
 
           </div>
 
@@ -279,34 +279,7 @@ export default async function LandlordProfilePage() {
           </div>
         </section>
 
-        {/* ================================================== */}
-        {/* ADDRESS */}
-        {/* ================================================== */}
-
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-          <h2 className="text-xl font-semibold text-slate-900">
-            Address
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-600">
-            Your residential or registered address.
-          </p>
-
-          <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5">
-            <p className="text-sm text-slate-500">
-              Address information has not been provided yet.
-            </p>
-
-            <button
-              type="button"
-              className="mt-4 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              Add Address
-            </button>
-          </div>
-
-        </section>
+        
 
         {/* ================================================== */}
         {/* VERIFICATION DOCUMENTS */}

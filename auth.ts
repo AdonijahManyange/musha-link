@@ -9,15 +9,24 @@ export const { handlers, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,
 
   providers: [
+    // ==========================================================
+    // GOOGLE
+    // ==========================================================
+
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+
       authorization: {
         params: {
           prompt: "select_account",
         },
       },
     }),
+
+    // ==========================================================
+    // EMAIL + PASSWORD
+    // ==========================================================
 
     Credentials({
       name: "Email and Password",
@@ -27,6 +36,7 @@ export const { handlers, auth } = NextAuth({
           label: "Email",
           type: "email",
         },
+
         password: {
           label: "Password",
           type: "password",
@@ -75,8 +85,23 @@ export const { handlers, auth } = NextAuth({
     }),
   ],
 
+  // ============================================================
+  // CALLBACKS
+  // ============================================================
+
   callbacks: {
+    // ==========================================================
+    // SIGN IN
+    // ==========================================================
+
     async signIn({ user, account }) {
+      /*
+       * Only apply the special account-creation logic
+       * to Google authentication.
+       *
+       * Credentials users are handled by authorize().
+       */
+
       if (
         account?.provider !== "google" ||
         !user.email
@@ -84,16 +109,29 @@ export const { handlers, auth } = NextAuth({
         return true;
       }
 
+      const email = user.email
+        .trim()
+        .toLowerCase();
+
+      // --------------------------------------------------------
+      // Check whether this Google account already exists
+      // --------------------------------------------------------
+
       const existingUser =
         await prisma.user.findUnique({
           where: {
-            email: user.email,
+            email,
           },
         });
 
+      // Existing account → allow normal login.
       if (existingUser) {
         return true;
       }
+
+      // --------------------------------------------------------
+      // New Google account
+      // --------------------------------------------------------
 
       const cookieStore = await cookies();
 
@@ -102,23 +140,57 @@ export const { handlers, auth } = NextAuth({
           "musha_signup_role"
         )?.value;
 
-      const role =
-        signupRole === "LANDLORD"
-          ? "LANDLORD"
-          : "STUDENT";
+      /*
+       * IMPORTANT:
+       *
+       * If there is no signup role, this Google login came
+       * from the LOGIN page rather than the SIGNUP page.
+       *
+       * We must NOT automatically create the account as
+       * STUDENT.
+       *
+       * Send the user to signup so they can choose:
+       *
+       *   Student
+       *   Landlord
+       */
+
+      if (
+        signupRole !== "STUDENT" &&
+        signupRole !== "LANDLORD"
+      ) {
+        return "/auth/signup";
+      }
+
+      // --------------------------------------------------------
+      // Create the new account using the selected role
+      // --------------------------------------------------------
 
       await prisma.user.create({
         data: {
           name: user.name,
-          email: user.email,
+          email,
           password: null,
-          role,
+
+          role:
+            signupRole === "LANDLORD"
+              ? "LANDLORD"
+              : "STUDENT",
+
           verified: true,
         },
       });
 
+      // --------------------------------------------------------
+      // Account created successfully
+      // --------------------------------------------------------
+
       return true;
     },
+
+    // ==========================================================
+    // JWT
+    // ==========================================================
 
     async jwt({ token, user }) {
       if (user) {
@@ -128,6 +200,10 @@ export const { handlers, auth } = NextAuth({
 
       return token;
     },
+
+    // ==========================================================
+    // SESSION
+    // ==========================================================
 
     async session({ session, token }) {
       if (session.user) {
