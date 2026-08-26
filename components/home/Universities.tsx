@@ -46,7 +46,7 @@ export default function Universities() {
             name="NUST"
             city="Bulawayo"
             description="Find accommodation close to NUST."
-            logo="/images/universities/nust.png"
+            logo="/images/universities/nust1.png"
             href="/browse?university=NUST"
           />
 

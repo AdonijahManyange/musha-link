@@ -86,9 +86,30 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
+          {/* ==================================================
+              MOBILE: HORIZONTAL SLIDER
+              DESKTOP: ORIGINAL 3-COLUMN GRID
+          ================================================== */}
+
+          <div
+            className="
+              mt-12
+              flex gap-5 overflow-x-auto pb-4
+              snap-x snap-mandatory
+              scrollbar-hide
+              md:grid md:grid-cols-3 md:gap-8
+              md:overflow-visible
+              md:pb-0
+            "
+          >
             {/* Step 1 */}
-            <div className="rounded-2xl bg-slate-50 p-7">
+            <div
+              className="
+                min-w-[85%] snap-center
+                rounded-2xl bg-slate-50 p-7
+                md:min-w-0
+              "
+            >
               <div className="text-3xl">🎓</div>
 
               <h3 className="mt-6 text-lg font-bold text-slate-900">
@@ -102,7 +123,13 @@ export default function AboutPage() {
             </div>
 
             {/* Step 2 */}
-            <div className="rounded-2xl bg-slate-50 p-7">
+            <div
+              className="
+                min-w-[85%] snap-center
+                rounded-2xl bg-slate-50 p-7
+                md:min-w-0
+              "
+            >
               <div className="text-3xl">🔎</div>
 
               <h3 className="mt-6 text-lg font-bold text-slate-900">
@@ -116,7 +143,13 @@ export default function AboutPage() {
             </div>
 
             {/* Step 3 */}
-            <div className="rounded-2xl bg-slate-50 p-7">
+            <div
+              className="
+                min-w-[85%] snap-center
+                rounded-2xl bg-slate-50 p-7
+                md:min-w-0
+              "
+            >
               <div className="text-3xl">🏡</div>
 
               <h3 className="mt-6 text-lg font-bold text-slate-900">
