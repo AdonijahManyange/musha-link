@@ -130,8 +130,7 @@ export async function POST(
 
       return NextResponse.json(
         {
-          error:
-            "Failed to upload profile photo.",
+          error: uploadError.message,
         },
         { status: 500 }
       );
@@ -193,7 +192,9 @@ export async function POST(
     return NextResponse.json(
       {
         error:
-          "Failed to upload profile photo.",
+          error instanceof Error
+            ? error.message
+            : "Failed to upload profile photo.",
       },
       { status: 500 }
     );

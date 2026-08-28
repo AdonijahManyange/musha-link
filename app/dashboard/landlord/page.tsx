@@ -32,7 +32,7 @@ export default async function LandlordDashboard() {
     verification?.status ?? "NOT_STARTED";
 
   const isVerified =
-    user.verified || verificationStatus === "APPROVED";
+  verificationStatus === "APPROVED";
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12">
@@ -92,7 +92,7 @@ export default async function LandlordDashboard() {
             className={`flex h-full flex-col rounded-2xl border bg-white p-6 shadow-sm ${
               isVerified
                 ? "border-emerald-200"
-                : "border-slate-200"
+                : "border-orange-200"
             }`}
           >
             <div>
@@ -110,8 +110,14 @@ export default async function LandlordDashboard() {
                   Verified
                 </div>
               ) : (
-                <div className="mt-3 text-xs font-medium text-orange-600">
-                  Verification required before listing
+                <div className="mt-4 rounded-xl bg-orange-50 p-3">
+                  <p className="text-sm font-semibold text-orange-800">
+                    Verification required
+                  </p>
+
+                  <p className="mt-1 text-xs text-orange-700">
+                    Complete landlord verification before you can create a listing.
+                  </p>
                 </div>
               )}
             </div>
@@ -126,7 +132,7 @@ export default async function LandlordDashboard() {
             ) : (
               <Link
                 href="/dashboard/landlord/verification"
-                className="mt-auto inline-block w-fit rounded-xl border border-orange-300 bg-orange-50 px-3 py-3 font-semibold text-orange-700 transition hover:bg-orange-100"
+                className="mt-auto inline-block w-fit rounded-xl border border-orange-300 bg-orange-50 px-5 py-3 font-semibold text-orange-700 transition hover:bg-orange-100"
               >
                 Complete Verification
               </Link>

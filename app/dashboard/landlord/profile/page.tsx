@@ -21,16 +21,6 @@ export default async function LandlordProfilePage() {
       },
     });
 
-  const documents =
-    await prisma.verificationDocument.findMany({
-      where: {
-        userId: user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
   const verificationStatus =
     verification?.status ?? "NOT_STARTED";
 
@@ -277,80 +267,6 @@ export default async function LandlordProfilePage() {
             </div>
 
           </div>
-        </section>
-
-        
-
-        {/* ================================================== */}
-        {/* VERIFICATION DOCUMENTS */}
-        {/* ================================================== */}
-
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
-          <h2 className="text-xl font-semibold text-slate-900">
-            Verification Documents
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-600">
-            Documents submitted for landlord verification are kept private.
-          </p>
-
-          <div className="mt-6 space-y-3">
-
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
-
-              <div>
-                <p className="font-medium text-slate-900">
-                  Government-issued ID
-                </p>
-
-                <p className="text-sm text-slate-500">
-                  Identity document
-                </p>
-              </div>
-
-              <DocumentStatus
-                exists={documents.some(
-                  (doc) => doc.type === "ID"
-                )}
-                status={
-                  documents.find(
-                    (doc) => doc.type === "ID"
-                  )?.status
-                }
-              />
-
-            </div>
-
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 p-4">
-
-              <div>
-                <p className="font-medium text-slate-900">
-                  Proof of Address
-                </p>
-
-                <p className="text-sm text-slate-500">
-                  Utility bill or accepted document
-                </p>
-              </div>
-
-              <DocumentStatus
-                exists={documents.some(
-                  (doc) =>
-                    doc.type === "UTILITY_BILL"
-                )}
-                status={
-                  documents.find(
-                    (doc) =>
-                      doc.type === "UTILITY_BILL"
-                  )?.status
-                }
-              />
-
-            </div>
-
-          </div>
-
         </section>
 
         {/* ================================================== */}

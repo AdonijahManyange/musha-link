@@ -9,6 +9,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import ListingGallery from "@/components/ListingGallery";
 
 type ListingPageProps = {
   params: Promise<{
@@ -104,15 +105,6 @@ export default async function PublicListingPage({
     notFound();
   }
 
-  // ============================================================
-  // PHOTOS
-  // ============================================================
-
-  const coverPhoto =
-    listing.photos.find(
-      (photo) => photo.isCover
-    ) || listing.photos[0];
-
   return (
     <main className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
@@ -134,59 +126,10 @@ export default async function PublicListingPage({
             PHOTO GALLERY
         ==================================================== */}
 
-        <section>
-          {coverPhoto ? (
-            <>
-              {/* Main Photo */}
-
-              <div className="relative overflow-hidden rounded-2xl bg-slate-200 shadow-sm">
-                <div className="h-[280px] sm:h-[400px] lg:h-[500px]">
-                  <img
-                    src={coverPhoto.url}
-                    alt={listing.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
-
-              {/* Thumbnail Strip */}
-
-              {listing.photos.length > 1 && (
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-                  {listing.photos.map((photo) => (
-                    <div
-                      key={photo.id}
-                      className={`h-16 w-20 shrink-0 overflow-hidden rounded-lg border-2 sm:h-20 sm:w-24 ${
-                        photo.id === coverPhoto.id
-                          ? "border-brand-blue"
-                          : "border-transparent"
-                      }`}
-                    >
-                      <img
-                        src={photo.url}
-                        alt={`${listing.title} photo`}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex h-[280px] items-center justify-center rounded-2xl bg-slate-200 sm:h-[400px] lg:h-[500px]">
-              <div className="text-center text-slate-500">
-                <Home
-                  size={48}
-                  className="mx-auto"
-                />
-
-                <p className="mt-3 font-medium">
-                  No photos available
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
+        <ListingGallery
+          photos={listing.photos}
+          title={listing.title}
+        />
 
         {/* ====================================================
             MAIN LISTING AREA
@@ -379,22 +322,16 @@ export default async function PublicListingPage({
 
                   <div>
                     <p className="font-medium text-slate-900">
-                      {listing.address}
+                      {listing.city}, {listing.province}
                     </p>
 
                     <p className="mt-1 text-sm text-slate-500">
-                      {listing.city},{" "}
-                      {listing.province},{" "}
                       {listing.country}
                     </p>
 
-                    {listing.distanceToUniversityKm !==
-                      null && (
+                    {listing.distanceToUniversityKm !== null && (
                       <p className="mt-3 text-sm text-slate-500">
-                        {listing.distanceToUniversityKm.toFixed(
-                          1
-                        )}{" "}
-                        km from{" "}
+                        {listing.distanceToUniversityKm.toFixed(1)} km from{" "}
                         {listing.university.name}
                       </p>
                     )}
