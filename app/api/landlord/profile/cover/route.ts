@@ -10,8 +10,7 @@ const supabase = createClient(
 
 const BUCKET_NAME = "landlord-profiles";
 
-const MAX_FILE_SIZE =
-  5 * 1024 * 1024;
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -20,7 +19,7 @@ const ALLOWED_TYPES = [
 ];
 
 /* ============================================================
-   POST — Upload landlord profile photo
+   POST — Upload landlord profile cover photo
 ============================================================ */
 
 export async function POST(
@@ -36,19 +35,15 @@ export async function POST(
       );
     }
 
-    const email = session?.user?.email;
-
-if (!email) {
-  return NextResponse.json(
-    { error: "Unauthorized" },
-    { status: 401 }
-  );
-}
+    /* --------------------------------------------------------
+       Find the actual Prisma user
+    -------------------------------------------------------- */
 
     const user = await prisma.user.findUnique({
       where: {
-        email,
+        id: session.user.id,
       },
+
       select: {
         id: true,
         role: true,
@@ -64,10 +59,17 @@ if (!email) {
 
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
-        { error: "Landlord access required." },
+        {
+          error:
+            "Landlord access required.",
+        },
         { status: 403 }
       );
     }
+
+    /* --------------------------------------------------------
+       Read file
+    -------------------------------------------------------- */
 
     const formData =
       await request.formData();
@@ -78,7 +80,8 @@ if (!email) {
     if (!(file instanceof File)) {
       return NextResponse.json(
         {
-          error: "No image was provided.",
+          error:
+            "No cover image was provided.",
         },
         { status: 400 }
       );
@@ -112,14 +115,14 @@ if (!email) {
       return NextResponse.json(
         {
           error:
-            "Profile photo must be 5MB or smaller.",
+            "Cover photo must be 10MB or smaller.",
         },
         { status: 400 }
       );
     }
 
     /* --------------------------------------------------------
-       Convert file
+       Convert file to buffer
     -------------------------------------------------------- */
 
     const arrayBuffer =
@@ -129,14 +132,14 @@ if (!email) {
       Buffer.from(arrayBuffer);
 
     /* --------------------------------------------------------
-       Fixed storage path
+       Storage path
        
-       Using a predictable path means uploading a new
-       profile photo replaces the old one.
+       Fixed path means a new cover replaces
+       the previous cover image.
     -------------------------------------------------------- */
 
     const storagePath =
-      `${user.id}/profile`;
+      `${user.id}/cover`;
 
     /* --------------------------------------------------------
        Upload to Supabase
@@ -157,13 +160,14 @@ if (!email) {
 
     if (uploadError) {
       console.error(
-        "Supabase profile upload error:",
+        "Supabase cover upload error:",
         uploadError
       );
 
       return NextResponse.json(
         {
-          error: uploadError.message,
+          error:
+            "Failed to upload cover photo.",
         },
         { status: 500 }
       );
@@ -196,12 +200,12 @@ if (!email) {
 
         create: {
           userId: user.id,
-          profilePhotoUrl:
+          coverPhotoUrl:
             publicUrl,
         },
 
         update: {
-          profilePhotoUrl:
+          coverPhotoUrl:
             publicUrl,
         },
       });
@@ -209,25 +213,23 @@ if (!email) {
     return NextResponse.json(
       {
         message:
-          "Profile photo uploaded successfully.",
+          "Cover photo uploaded successfully.",
 
-        profilePhotoUrl:
-          profile.profilePhotoUrl,
+        coverPhotoUrl:
+          profile.coverPhotoUrl,
       },
       { status: 200 }
     );
   } catch (error) {
     console.error(
-      "POST landlord profile photo error:",
+      "POST landlord cover photo error:",
       error
     );
 
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Failed to upload profile photo.",
+          "Failed to upload cover photo.",
       },
       { status: 500 }
     );

@@ -48,7 +48,13 @@ model LandlordProfile {
   province String?
   country  String?
 
+  // ==========================================================
+  // PUBLIC PROFILE
+  // ==========================================================
+
   profilePhotoUrl String?
+  coverPhotoUrl   String?
+  bio             String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

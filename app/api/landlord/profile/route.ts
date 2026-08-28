@@ -168,6 +168,11 @@ export async function PATCH(
         ? body.country.trim()
         : "";
 
+    const bio =
+      typeof body.bio === "string"
+        ? body.bio.trim()
+        : "";
+
     if (!name) {
       return NextResponse.json(
         {
@@ -199,6 +204,7 @@ export async function PATCH(
               city: city || null,
               province: province || null,
               country: country || null,
+              bio: bio || null,
             },
 
             update: {
@@ -207,6 +213,7 @@ export async function PATCH(
               city: city || null,
               province: province || null,
               country: country || null,
+              bio: bio || null,
             },
           },
         },
@@ -227,6 +234,8 @@ export async function PATCH(
             province: true,
             country: true,
             profilePhotoUrl: true,
+            coverPhotoUrl: true,
+            bio: true,
           },
         },
       },
