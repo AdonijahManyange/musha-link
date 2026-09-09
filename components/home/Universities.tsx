@@ -1,6 +1,40 @@
 import UniversityCard from "@/components/ui/UniversityCard";
+import { prisma } from "@/lib/prisma";
 
-export default function Universities() {
+export default async function Universities() {
+  const universities = await prisma.university.findMany({
+    where: {
+      name: {
+        in: [
+          "Africa University",
+          "University of Zimbabwe",
+          "National University of Science and Technology",
+          "National University of Science and Technology (NUST)",
+          "Midlands State University",
+        ],
+      },
+    },
+  });
+
+  const findUniversity = (...names: string[]) =>
+    universities.find((university) =>
+      names.includes(university.name)
+    );
+
+  const africaUniversity =
+    findUniversity("Africa University");
+
+  const universityOfZimbabwe =
+    findUniversity("University of Zimbabwe");
+
+  const nust = findUniversity(
+    "National University of Science and Technology (NUST)",
+    "National University of Science and Technology"
+  );
+
+  const msuas =
+    findUniversity("Midlands State University");
+
   return (
     <section
       id="universities"
@@ -26,37 +60,53 @@ export default function Universities() {
         {/* University Cards */}
         <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 
-          <UniversityCard
-            name="Africa University"
-            city="Mutare"
-            description="Find student accommodation near Africa University."
-            logo="/images/universities/africa-university.jpeg"
-            href="/browse?university=Africa%20University"
-          />
+          {africaUniversity && (
+            <UniversityCard
+              name="Africa University"
+              city="Mutare"
+              description="Find student accommodation near Africa University."
+              logo="/images/universities/africa-university.jpeg"
+              href={`/browse?university=${encodeURIComponent(
+                africaUniversity.id
+              )}`}
+            />
+          )}
 
-          <UniversityCard
-            name="University of Zimbabwe"
-            city="Harare"
-            description="Explore accommodation options around UZ."
-            logo="/images/universities/uz.png"
-            href="/browse?university=University%20of%20Zimbabwe"
-          />
+          {universityOfZimbabwe && (
+            <UniversityCard
+              name="University of Zimbabwe"
+              city="Harare"
+              description="Explore accommodation options around UZ."
+              logo="/images/universities/uz.png"
+              href={`/browse?university=${encodeURIComponent(
+                universityOfZimbabwe.id
+              )}`}
+            />
+          )}
 
-          <UniversityCard
-            name="NUST"
-            city="Bulawayo"
-            description="Find accommodation close to NUST."
-            logo="/images/universities/nust1.png"
-            href="/browse?university=NUST"
-          />
+          {nust && (
+            <UniversityCard
+              name="NUST"
+              city="Bulawayo"
+              description="Find accommodation close to NUST."
+              logo="/images/universities/nust1.png"
+              href={`/browse?university=${encodeURIComponent(
+                nust.id
+              )}`}
+            />
+          )}
 
-          <UniversityCard
-            name="MSUAS"
-            city="Mutare"
-            description="Browse student accommodation around MSUAS."
-            logo="/images/universities/msuas.png"
-            href="/browse?university=MSUAS"
-          />
+          {msuas && (
+            <UniversityCard
+              name="MSUAS"
+              city="Mutare"
+              description="Browse student accommodation around MSUAS."
+              logo="/images/universities/msuas.png"
+              href={`/browse?university=${encodeURIComponent(
+                msuas.id
+              )}`}
+            />
+          )}
 
         </div>
 

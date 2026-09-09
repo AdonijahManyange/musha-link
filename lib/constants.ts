@@ -38,6 +38,20 @@ export const BUDGET_OPTIONS = [
   },
 ];
 
+export const ROOM_TYPE_OPTIONS = [
+  {
+    label: "Private Room",
+    value: "PRIVATE",
+  },
+  {
+    label: "Shared Room",
+    value: "SHARED",
+  },
+  {
+    label: "Entire Property",
+    value: "ENTIRE_PROPERTY",
+  },
+];
 
 
 // ======================================================

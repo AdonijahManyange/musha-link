@@ -1,15 +1,61 @@
 import ListingCard from "@/components/listing/ListingCard";
-import { listings } from "@/lib/listings";
+import { prisma } from "@/lib/prisma";
 
-export default function FeaturedListings() {
-  const spotlightListings = listings
-    .filter((listing) => listing.featured)
-    .slice(0, 3);
+export default async function FeaturedListings() {
+  const listings = await prisma.listing.findMany({
+    where: {
+      status: "PUBLISHED",
+      isActive: true,
+    },
+    include: {
+      university: true,
+      photos: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 3,
+  });
 
-  // Don't render the section if there are no paid Spotlight listings.
+  const spotlightListings = listings.map((listing) => {
+    const coverPhoto =
+      listing.photos.find((photo) => photo.isCover) ||
+      listing.photos[0];
+
+    return {
+      id: listing.id,
+      slug: listing.id,
+      title: listing.title,
+      university: listing.university.name,
+      suburb: listing.suburb ?? "",
+      city: listing.city,
+      roomType: listing.roomType,
+      price: listing.monthlyRent,
+      images: coverPhoto
+        ? [coverPhoto.url]
+        : ["/images/listings/room2.png"],
+      description: listing.description,
+      amenities: listing.amenities,
+      featured: true,
+      verified: true,
+      landlord: {
+        name: "",
+        phone: "",
+        email: "",
+      },
+    };
+  });
+
   if (spotlightListings.length === 0) {
     return null;
   }
+
+  // ... existing JSX stays the same
+
 
   return (
     <section

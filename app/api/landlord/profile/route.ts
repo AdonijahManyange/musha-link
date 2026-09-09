@@ -36,15 +36,17 @@ export async function GET() {
         verified: true,
 
         landlordProfile: {
-          select: {
-            phone: true,
-            address: true,
-            city: true,
-            province: true,
-            country: true,
-            profilePhotoUrl: true,
-          },
+        select: {
+          phone: true,
+          address: true,
+          city: true,
+          province: true,
+          country: true,
+          profilePhotoUrl: true,
+          coverPhotoUrl: true,
+          bio: true,
         },
+      },
       },
     });
 

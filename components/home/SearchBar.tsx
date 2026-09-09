@@ -5,10 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import Button from "@/components/ui/Button";
 import {
-  getUniversities,
-  getRoomTypes,
-  getBudgetRanges,
-} from "@/lib/filters";
+  BUDGET_OPTIONS,
+  ROOM_TYPE_OPTIONS,
+} from "@/lib/constants";
+
+type University = {
+  id: string;
+  name: string;
+  city: string;
+};
 
 export default function SearchBar() {
   const router = useRouter();
@@ -18,13 +23,46 @@ export default function SearchBar() {
   const [budget, setBudget] = useState("");
   const [roomType, setRoomType] = useState("");
 
+  const [universities, setUniversities] = useState<
+    University[]
+  >([]);
+
+  /*
+   * Load universities from the database.
+   */
+  useEffect(() => {
+    async function loadUniversities() {
+      try {
+        const response = await fetch(
+          "/api/universities",
+          {
+            cache: "no-store",
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error ||
+              "Failed to load universities."
+          );
+        }
+
+        setUniversities(data);
+      } catch (error) {
+        console.error(
+          "Failed to load universities:",
+          error
+        );
+      }
+    }
+
+    loadUniversities();
+  }, []);
+
   /*
    * Read filters from the URL.
-   *
-   * Example:
-   * /browse?university=MSUAS
-   *
-   * This will automatically select MSUAS.
    */
   useEffect(() => {
     setUniversity(
@@ -39,16 +77,6 @@ export default function SearchBar() {
       searchParams.get("roomType") || ""
     );
   }, [searchParams]);
-
-  const universities = getUniversities();
-
-  const roomTypes = getRoomTypes(
-    university || undefined
-  );
-
-  const budgetRanges = getBudgetRanges(
-    university || undefined
-  );
 
   /*
    * When the user changes university,
@@ -114,10 +142,10 @@ export default function SearchBar() {
 
             {universities.map((uni) => (
               <option
-                key={uni}
-                value={uni}
+                key={uni.id}
+                value={uni.id}
               >
-                {uni}
+                {uni.name}
               </option>
             ))}
           </select>
@@ -136,7 +164,7 @@ export default function SearchBar() {
             }
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 focus:border-[#1C3769] focus:outline-none"
           >
-            {budgetRanges.map((range) => (
+            {BUDGET_OPTIONS.map((range) => (
               <option
                 key={range.value}
                 value={range.value}
@@ -164,12 +192,12 @@ export default function SearchBar() {
               Any
             </option>
 
-            {roomTypes.map((type) => (
+            {ROOM_TYPE_OPTIONS.map((type) => (
               <option
-                key={type}
-                value={type}
+                key={type.value}
+                value={type.value}
               >
-                {type}
+                {type.label}
               </option>
             ))}
           </select>

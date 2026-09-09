@@ -246,22 +246,30 @@ export default async function LandlordProfilePage() {
               </p>
             </div>
 
-            {/* Account Status */}
+            {/* Landlord Verification Status */}
 
             <div>
               <p className="text-sm font-medium text-slate-500">
-                Account Status
+                Landlord Verification
               </p>
 
               <p
                 className={`mt-1 font-semibold ${
-                  user.verified
+                  isVerified
                     ? "text-green-600"
+                    : isRejected
+                    ? "text-red-600"
+                    : isPending
+                    ? "text-blue-600"
                     : "text-amber-600"
                 }`}
               >
-                {user.verified
+                {isVerified
                   ? "Verified"
+                  : isPending
+                  ? "Under Review"
+                  : isRejected
+                  ? "Action Required"
                   : "Verification Required"}
               </p>
             </div>

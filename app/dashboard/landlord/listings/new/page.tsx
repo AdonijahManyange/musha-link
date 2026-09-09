@@ -80,10 +80,13 @@ export default function NewListingPage() {
     useState("");
 
   const [address, setAddress] =
-    useState("");
+  useState("");
 
-  const [city, setCity] =
-    useState("");
+const [suburb, setSuburb] =
+  useState("");
+
+const [city, setCity] =
+  useState("");
 
   const [province, setProvince] =
     useState("");
@@ -234,6 +237,7 @@ useEffect(() => {
           body: JSON.stringify({
             title: propertyTitle,
             address,
+            suburb,
             city,
             province,
             country,
@@ -375,6 +379,23 @@ useEffect(() => {
                         )
                       }
                       placeholder="e.g. 123 Gukurahundi Avenue"
+                      required
+                      className="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-600">
+                      Suburb
+                    </label>
+
+                    <input
+                      type="text"
+                      value={suburb}
+                      onChange={(e) =>
+                        setSuburb(e.target.value)
+                      }
+                      placeholder="e.g. Murambi"
                       required
                       className="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
                     />

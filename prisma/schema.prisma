@@ -152,6 +152,7 @@ model Listing {
 
   title       String
   address     String
+  suburb      String?
   city        String
   province    String
   country     String
