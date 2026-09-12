@@ -28,6 +28,7 @@ model User {
   verification          LandlordVerification?
   verificationDocuments VerificationDocument[]
   landlordProfile       LandlordProfile?
+  studentProfile        StudentProfile?
 }
 
 // ============================================================
@@ -58,6 +59,29 @@ model LandlordProfile {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model StudentProfile {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  universityId String?
+  university   University? @relation(fields: [universityId], references: [id])
+
+  phone    String?
+  city     String?
+  province String?
+  country  String?
+
+  profilePhotoUrl String?
+  bio             String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([universityId])
 }
 
 // ============================================================
@@ -139,7 +163,8 @@ model University {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  listings Listing[]
+  listings        Listing[]
+  studentProfiles StudentProfile[]
 }
 
 model Listing {

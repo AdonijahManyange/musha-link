@@ -102,34 +102,44 @@ export default async function StudentDashboard() {
         {/* Account */}
 
         <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Account
-          </h2>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Account
+              </h2>
 
-          <div className="mt-4 space-y-2 text-sm text-slate-600">
-            <p>
-              <span className="font-medium text-slate-900">
-                Name:
-              </span>{" "}
-              {user.name || "Not provided"}
-            </p>
+              <div className="mt-4 space-y-2 text-sm text-slate-600">
+                <p>
+                  <span className="font-medium text-slate-900">
+                    Name:
+                  </span>{" "}
+                  {user.name || "Not provided"}
+                </p>
 
-            <p>
-              <span className="font-medium text-slate-900">
-                Email:
-              </span>{" "}
-              {user.email}
-            </p>
+                <p>
+                  <span className="font-medium text-slate-900">
+                    Email:
+                  </span>{" "}
+                  {user.email}
+                </p>
 
-            <p>
-              <span className="font-medium text-slate-900">
-                Account type:
-              </span>{" "}
-              Student
-            </p>
+                <p>
+                  <span className="font-medium text-slate-900">
+                    Account type:
+                  </span>{" "}
+                  Student
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/dashboard/student/profile/edit"
+              className="inline-flex w-fit rounded-xl bg-brand-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark"
+            >
+              Edit Profile
+            </Link>
           </div>
         </div>
-
       </div>
     </main>
   );

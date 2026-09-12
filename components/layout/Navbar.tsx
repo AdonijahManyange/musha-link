@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getCurrentUser } from "@/lib/auth";
 import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
-import LogoutButton from "@/components/auth/LogoutButton";
+import ProfileMenu from "./ProfileMenu";
 
 export default async function Navbar() {
   const user = await getCurrentUser();
@@ -59,7 +59,22 @@ export default async function Navbar() {
                 Dashboard
               </Link>
 
-              <LogoutButton />
+              {/* Profile Menu */}
+              <div className="hidden md:block">
+                <ProfileMenu
+                  name={user.name}
+                  profilePhotoUrl={
+                    user.role === "STUDENT"
+                      ? user.studentProfile?.profilePhotoUrl || null
+                      : user.landlordProfile?.profilePhotoUrl || null
+                  }
+                  profileHref={
+                    user.role === "STUDENT"
+                      ? "/dashboard/student/profile"
+                      : "/dashboard/landlord/profile"
+                  }
+                />
+              </div>
             </>
           )}
 

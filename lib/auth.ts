@@ -12,12 +12,25 @@ export async function getCurrentUser() {
     where: {
       email: session.user.email,
     },
+
     select: {
       id: true,
       name: true,
       email: true,
       role: true,
       verified: true,
+
+      studentProfile: {
+        select: {
+          profilePhotoUrl: true,
+        },
+      },
+
+      landlordProfile: {
+        select: {
+          profilePhotoUrl: true,
+        },
+      },
     },
   });
 
