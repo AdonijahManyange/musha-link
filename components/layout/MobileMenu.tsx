@@ -1,18 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 import { Menu, X } from "lucide-react";
 import NavLinks from "./NavLinks";
 import Image from "next/image";
 import Link from "next/link";
-import LogoutButton from "@/components/auth/LogoutButton";
 
 interface MobileMenuProps {
   isLoggedIn: boolean;
+  name: string | null;
+  profilePhotoUrl: string | null;
+  profileHref: string;
 }
 
 export default function MobileMenu({
   isLoggedIn,
+  name,
+  profilePhotoUrl,
+  profileHref,
 }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
 
@@ -118,10 +124,70 @@ export default function MobileMenu({
                     Dashboard
                   </Link>
 
-                  {/* Logout */}
+                  {/* Profile */}
 
-                  <div className="w-full">
-                    <LogoutButton />
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+
+                    <div className="flex items-center gap-3">
+
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-blue text-sm font-bold text-white">
+                        {profilePhotoUrl ? (
+                          <img
+                            src={profilePhotoUrl}
+                            alt={name || "Profile"}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          (name || "User")
+                            .split(" ")
+                            .filter(Boolean)
+                            .map((part) => part[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()
+                        )}
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-slate-900">
+                          {name || "User"}
+                        </p>
+
+                        <p className="text-sm text-slate-500">
+                          My Account
+                        </p>
+                      </div>
+
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+
+                      <Link
+                        href={profileHref}
+                        onClick={() => setOpen(false)}
+                        className="block w-full rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-white"
+                      >
+                        My Profile
+                      </Link>
+
+                      <Link
+                        href="/dashboard/settings"
+                        onClick={() => setOpen(false)}
+                        className="block w-full rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-white"
+                      >
+                        Account Settings
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="block w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-white"
+                      >
+                        Log Out
+                      </button>
+
+                    </div>
+
                   </div>
                 </>
               )}

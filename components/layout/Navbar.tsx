@@ -79,7 +79,20 @@ export default async function Navbar() {
           )}
 
           {/* Mobile Navigation */}
-          <MobileMenu isLoggedIn={isLoggedIn} />
+          <MobileMenu
+            isLoggedIn={isLoggedIn}
+            name={user?.name ?? null}
+            profilePhotoUrl={
+              user?.role === "STUDENT"
+                ? user.studentProfile?.profilePhotoUrl ?? null
+                : user?.landlordProfile?.profilePhotoUrl ?? null
+            }
+            profileHref={
+              user?.role === "STUDENT"
+                ? "/dashboard/student/profile"
+                : "/dashboard/landlord/profile"
+            }
+          />
         </div>
       </nav>
     </header>
