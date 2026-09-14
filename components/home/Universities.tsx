@@ -58,56 +58,79 @@ export default async function Universities() {
         </div>
 
         {/* University Cards */}
-        <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-14">
 
-          {africaUniversity && (
-            <UniversityCard
-              name="Africa University"
-              city="Mutare"
-              description="Find student accommodation near Africa University."
-              logo="/images/universities/africa-university.jpeg"
-              href={`/browse?university=${encodeURIComponent(
-                africaUniversity.id
-              )}`}
-            />
-          )}
+          {/* Mobile Swipe Hint */}
+          <div className="mb-4 flex items-center justify-between md:hidden">
+            <p className="text-sm font-medium text-slate-500">
+              Swipe to explore universities
+            </p>
 
-          {universityOfZimbabwe && (
-            <UniversityCard
-              name="University of Zimbabwe"
-              city="Harare"
-              description="Explore accommodation options around UZ."
-              logo="/images/universities/uz.png"
-              href={`/browse?university=${encodeURIComponent(
-                universityOfZimbabwe.id
-              )}`}
-            />
-          )}
+            <span className="text-sm text-slate-400">
+              ← →
+            </span>
+          </div>
 
-          {nust && (
-            <UniversityCard
-              name="NUST"
-              city="Bulawayo"
-              description="Find accommodation close to NUST."
-              logo="/images/universities/nust1.png"
-              href={`/browse?university=${encodeURIComponent(
-                nust.id
-              )}`}
-            />
-          )}
+          {/* Mobile Carousel / Desktop Grid */}
+          <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-4">
 
-          {msuas && (
-            <UniversityCard
-              name="MSUAS"
-              city="Mutare"
-              description="Browse student accommodation around MSUAS."
-              logo="/images/universities/msuas.png"
-              href={`/browse?university=${encodeURIComponent(
-                msuas.id
-              )}`}
-            />
-          )}
+            {africaUniversity && (
+              <div className="min-w-[85%] snap-start md:min-w-0">
+                <UniversityCard
+                  name="Africa University"
+                  city="Mutare"
+                  description="Find student accommodation near Africa University."
+                  logo="/images/universities/africa-university.jpeg"
+                  href={`/browse?university=${encodeURIComponent(
+                    africaUniversity.id
+                  )}`}
+                />
+              </div>
+            )}
 
+            {universityOfZimbabwe && (
+              <div className="min-w-[85%] snap-start md:min-w-0">
+                <UniversityCard
+                  name="University of Zimbabwe"
+                  city="Harare"
+                  description="Explore accommodation options around UZ."
+                  logo="/images/universities/uz.png"
+                  href={`/browse?university=${encodeURIComponent(
+                    universityOfZimbabwe.id
+                  )}`}
+                />
+              </div>
+            )}
+
+            {nust && (
+              <div className="min-w-[85%] snap-start md:min-w-0">
+                <UniversityCard
+                  name="NUST"
+                  city="Bulawayo"
+                  description="Find accommodation close to NUST."
+                  logo="/images/universities/nust1.png"
+                  href={`/browse?university=${encodeURIComponent(
+                    nust.id
+                  )}`}
+                />
+              </div>
+            )}
+
+            {msuas && (
+              <div className="min-w-[85%] snap-start md:min-w-0">
+                <UniversityCard
+                  name="MSUAS"
+                  city="Mutare"
+                  description="Browse student accommodation around MSUAS."
+                  logo="/images/universities/msuas.png"
+                  href={`/browse?university=${encodeURIComponent(
+                    msuas.id
+                  )}`}
+                />
+              </div>
+            )}
+
+          </div>
         </div>
 
         {/* Browse Everything */}
