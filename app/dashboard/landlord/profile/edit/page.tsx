@@ -29,7 +29,6 @@ type ProfileData = {
 
   landlordProfile: {
     phone: string | null;
-    address: string | null;
     city: string | null;
     province: string | null;
     country: string | null;
@@ -41,8 +40,6 @@ type ProfileData = {
 
 type FormState = {
   name: string;
-  phone: string;
-  address: string;
   city: string;
   province: string;
   country: string;
@@ -59,7 +56,6 @@ export default function EditLandlordProfilePage() {
     useState<FormState>({
       name: "",
       phone: "",
-      address: "",
       city: "",
       province: "",
       country: "",
@@ -142,10 +138,6 @@ export default function EditLandlordProfilePage() {
 
           phone:
             user.landlordProfile?.phone ||
-            "",
-
-          address:
-            user.landlordProfile?.address ||
             "",
 
           city:
@@ -1165,35 +1157,12 @@ export default function EditLandlordProfilePage() {
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              This information helps students understand
-              where you are based.
+              Only your city, province, and country are shown on your profile.
+              Your street address is kept separate from your landlord profile.
             </p>
 
             <div className="mt-6 space-y-5">
 
-              {/* ADDRESS */}
-
-              <div>
-
-                <label
-                  htmlFor="address"
-                  className="block text-sm font-medium text-slate-700"
-                >
-                  Address
-                </label>
-
-                <input
-                  id="address"
-                  name="address"
-                  value={form.address}
-                  onChange={
-                    handleChange
-                  }
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10"
-                  placeholder="Street address"
-                />
-
-              </div>
 
               {/* CITY / PROVINCE */}
 

@@ -38,7 +38,6 @@ export async function GET() {
         landlordProfile: {
         select: {
           phone: true,
-          address: true,
           city: true,
           province: true,
           country: true,
@@ -150,11 +149,6 @@ export async function PATCH(
         ? body.phone.trim()
         : "";
 
-    const address =
-      typeof body.address === "string"
-        ? body.address.trim()
-        : "";
-
     const city =
       typeof body.city === "string"
         ? body.city.trim()
@@ -202,7 +196,6 @@ export async function PATCH(
           upsert: {
             create: {
               phone: phone || null,
-              address: address || null,
               city: city || null,
               province: province || null,
               country: country || null,
@@ -211,7 +204,6 @@ export async function PATCH(
 
             update: {
               phone: phone || null,
-              address: address || null,
               city: city || null,
               province: province || null,
               country: country || null,
@@ -231,7 +223,6 @@ export async function PATCH(
         landlordProfile: {
           select: {
             phone: true,
-            address: true,
             city: true,
             province: true,
             country: true,

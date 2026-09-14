@@ -134,6 +134,7 @@ export async function GET(request: Request) {
 
     const status = searchParams.get("status");
     const universityId = searchParams.get("university");
+    const ids = searchParams.get("ids");
 
     // ==========================================================
     // PUBLIC PUBLISHED LISTINGS
@@ -187,7 +188,54 @@ export async function GET(request: Request) {
       );
     }
 
-    
+    // ==========================================================
+    // SAVED LISTINGS
+    // ==========================================================
+
+    if (ids) {
+      const listingIds = ids
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
+
+      const listings = await prisma.listing.findMany({
+        where: {
+          id: {
+            in: listingIds,
+          },
+          status: "PUBLISHED",
+          isActive: true,
+        },
+
+        include: {
+          university: true,
+
+          landlord: {
+            select: {
+              name: true,
+              email: true,
+              landlordProfile: {
+                select: {
+                  phone: true,
+                },
+              },
+            },
+          },
+
+          photos: {
+            orderBy: {
+              sortOrder: "asc",
+            },
+          },
+        },
+
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+
+      return NextResponse.json(listings);
+    }
 
     // ==========================================================
     // LANDLORD ARCHIVED LISTINGS
