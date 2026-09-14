@@ -54,7 +54,7 @@ export default function ListingCard({
               ${
                 isSpotlight
                   ? "h-64"
-                  : "h-56"
+                  : "h-40 md:h-56"
               }
             `}
           />
@@ -82,7 +82,7 @@ export default function ListingCard({
               ${
                 isSpotlight
                   ? "left-4 top-14"
-                  : "left-4 top-4"
+                  : "left-3 top-3 md:left-4 md:top-4"
               }
               rounded-full
               bg-green-600
@@ -103,7 +103,7 @@ export default function ListingCard({
             FAVORITE
         ================================================= */}
 
-        <div className="absolute right-4 top-4">
+        <div className="absolute right-3 top-3 md:right-4 md:top-4">
           <FavoriteButton listingId={listing.id} />
         </div>
 
@@ -119,7 +119,7 @@ export default function ListingCard({
           ${
             isSpotlight
               ? "p-7"
-              : "p-6"
+              : "p-4 md:p-6"
           }
         `}
       >
@@ -137,7 +137,7 @@ export default function ListingCard({
               ${
                 isSpotlight
                   ? "text-[23px] tracking-tight"
-                  : "text-2xl"
+                  : "text-lg md:text-2xl"
               }
             `}
           >
@@ -149,7 +149,16 @@ export default function ListingCard({
             UNIVERSITY
         ================================================= */}
 
-        <p className="mt-2 font-medium text-brand-blue">
+        <p
+          className={`
+            font-medium text-brand-blue
+            ${
+              isSpotlight
+                ? "mt-2"
+                : "mt-1 text-sm md:mt-2 md:text-base"
+            }
+          `}
+        >
           {listing.university}
         </p>
 
@@ -157,7 +166,13 @@ export default function ListingCard({
             LOCATION
         ================================================= */}
 
-        <p className="text-slate-500">
+        <p
+          className={
+            isSpotlight
+              ? "text-slate-500"
+              : "text-sm text-slate-500 md:text-base"
+          }
+        >
           {listing.suburb}, {listing.city}
         </p>
 
@@ -166,7 +181,16 @@ export default function ListingCard({
         ================================================= */}
 
         {listing.amenities?.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div
+            className={`
+              flex flex-wrap gap-2
+              ${
+                isSpotlight
+                  ? "mt-5"
+                  : "mt-3 md:mt-5"
+              }
+            `}
+          >
             {listing.amenities
               .slice(0, 3)
               .map((amenity) => (
@@ -199,11 +223,11 @@ export default function ListingCard({
         <div
           className={`
             mt-auto
-            flex items-end justify-between
+            flex items-end justify-between gap-3
             ${
               isSpotlight
                 ? "pt-8"
-                : "pt-6"
+                : "pt-4 md:pt-6"
             }
           `}
         >
@@ -215,14 +239,14 @@ export default function ListingCard({
                 ${
                   isSpotlight
                     ? "text-[34px] tracking-tight"
-                    : "text-4xl"
+                    : "text-2xl md:text-4xl"
                 }
               `}
             >
               US${listing.price}
             </p>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-xs text-slate-500 md:text-sm">
               per month
             </p>
           </div>
@@ -237,7 +261,7 @@ export default function ListingCard({
               ${
                 isSpotlight
                   ? "bg-brand-blue px-6 py-3.5 text-sm shadow-md hover:-translate-y-0.5 hover:bg-brand-blue-dark hover:shadow-lg"
-                  : "bg-brand-blue px-6 py-3 text-sm hover:bg-brand-blue-dark"
+                  : "bg-brand-blue px-4 py-2.5 text-xs hover:bg-brand-blue-dark md:px-6 md:py-3 md:text-sm"
               }
             `}
           >
