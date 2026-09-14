@@ -40,6 +40,7 @@ type ProfileData = {
 
 type FormState = {
   name: string;
+  phone: string;
   city: string;
   province: string;
   country: string;
