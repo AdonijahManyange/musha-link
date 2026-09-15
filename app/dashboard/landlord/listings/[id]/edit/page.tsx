@@ -26,8 +26,91 @@ type Listing = {
   description: string;
   latitude: number | null;
   longitude: number | null;
+  amenities: string[];
   university: University;
 };
+
+// ============================================================
+// AMENITIES
+// ============================================================
+
+const AMENITIES = [
+  {
+    value: "WIFI",
+    label: "Wi-Fi",
+    emoji: "📶",
+  },
+  {
+    value: "SOLAR_POWER",
+    label: "Solar Power",
+    emoji: "☀️",
+  },
+  {
+    value: "BOREHOLE",
+    label: "Borehole",
+    emoji: "🚰",
+  },
+  {
+    value: "ELECTRICITY",
+    label: "Electricity",
+    emoji: "⚡",
+  },
+  {
+    value: "BACKUP_GENERATOR",
+    label: "Backup Generator",
+    emoji: "🔋",
+  },
+  {
+    value: "WATER",
+    label: "Water",
+    emoji: "💧",
+  },
+  {
+    value: "SECURITY",
+    label: "Security",
+    emoji: "🛡️",
+  },
+  {
+    value: "PARKING",
+    label: "Parking",
+    emoji: "🚗",
+  },
+  {
+    value: "FURNISHED",
+    label: "Furnished",
+    emoji: "🛏️",
+  },
+  {
+    value: "LAUNDRY",
+    label: "Laundry",
+    emoji: "🧺",
+  },
+  {
+    value: "KITCHEN",
+    label: "Kitchen",
+    emoji: "🍳",
+  },
+  {
+    value: "STUDY_AREA",
+    label: "Study Area",
+    emoji: "📚",
+  },
+  {
+    value: "GARDEN",
+    label: "Garden",
+    emoji: "🌳",
+  },
+  {
+    value: "SWIMMING_POOL",
+    label: "Swimming Pool",
+    emoji: "🏊",
+  },
+  {
+    value: "DSTV",
+    label: "DSTV",
+    emoji: "📺",
+  },
+];
 
 export default function EditListingPage() {
   const params = useParams();
@@ -65,6 +148,7 @@ export default function EditListingPage() {
     description: "",
     latitude: "",
     longitude: "",
+    amenities: [] as string[],
   });
 
   // ============================================================
@@ -87,41 +171,68 @@ export default function EditListingPage() {
           );
         }
 
-        const loadedListing = data.listing;
+        const loadedListing =
+          data.listing;
 
         setListing(loadedListing);
 
         setFormData({
-          title: loadedListing.title || "",
+          title:
+            loadedListing.title || "",
+
           propertyType:
             loadedListing.propertyType || "",
-          address: loadedListing.address || "",
-          city: loadedListing.city || "",
+
+          address:
+            loadedListing.address || "",
+
+          city:
+            loadedListing.city || "",
+
           province:
             loadedListing.province || "",
+
           country:
             loadedListing.country || "",
+
           monthlyRent:
             loadedListing.monthlyRent?.toString() ||
             "",
+
           roomType:
             loadedListing.roomType || "",
+
           genderPreference:
             loadedListing.genderPreference ||
             "",
+
           universityId:
             loadedListing.universityId || "",
+
           distanceToUniversityKm:
             loadedListing.distanceToUniversityKm?.toString() ||
             "",
+
           description:
             loadedListing.description || "",
+
           latitude:
             loadedListing.latitude?.toString() ||
             "",
+
           longitude:
             loadedListing.longitude?.toString() ||
             "",
+
+          // Load existing amenities.
+          // These will automatically appear checked
+          // when the landlord opens Edit Listing.
+          amenities:
+            Array.isArray(
+              loadedListing.amenities
+            )
+              ? loadedListing.amenities
+              : [],
         });
       } catch (error) {
         console.error(error);
@@ -177,6 +288,29 @@ export default function EditListingPage() {
   }
 
   // ============================================================
+  // TOGGLE AMENITY
+  // ============================================================
+
+  function toggleAmenity(
+    amenity: string
+  ) {
+    setFormData((current) => ({
+      ...current,
+
+      amenities: current.amenities.includes(
+        amenity
+      )
+        ? current.amenities.filter(
+            (item) => item !== amenity
+          )
+        : [
+            ...current.amenities,
+            amenity,
+          ],
+    }));
+  }
+
+  // ============================================================
   // SAVE CHANGES
   // ============================================================
 
@@ -193,32 +327,58 @@ export default function EditListingPage() {
         `/api/listings/${listingId}`,
         {
           method: "PUT",
+
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
+
           body: JSON.stringify({
-            title: formData.title,
+            title:
+              formData.title,
+
             propertyType:
               formData.propertyType,
-            address: formData.address,
-            city: formData.city,
-            province: formData.province,
-            country: formData.country,
-            monthlyRent: Number(
-              formData.monthlyRent
-            ),
-            roomType: formData.roomType,
+
+            address:
+              formData.address,
+
+            city:
+              formData.city,
+
+            province:
+              formData.province,
+
+            country:
+              formData.country,
+
+            monthlyRent:
+              Number(
+                formData.monthlyRent
+              ),
+
+            roomType:
+              formData.roomType,
+
             genderPreference:
               formData.genderPreference,
+
             universityId:
               formData.universityId,
+
             description:
               formData.description,
+
+            // Send selected amenities
+            // to the API.
+            amenities:
+              formData.amenities,
           }),
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -295,7 +455,9 @@ export default function EditListingPage() {
     <main className="min-h-screen bg-slate-50 px-6 py-12">
       <div className="mx-auto max-w-4xl">
 
-        {/* Back */}
+        {/* ==================================================
+            BACK
+        ================================================== */}
 
         <Link
           href="/dashboard/landlord/listings"
@@ -304,7 +466,9 @@ export default function EditListingPage() {
           ← Back to My Listings
         </Link>
 
-        {/* Header */}
+        {/* ==================================================
+            HEADER
+        ================================================== */}
 
         <div className="mt-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-blue">
@@ -324,7 +488,9 @@ export default function EditListingPage() {
           </p>
         </div>
 
-        {/* Error */}
+        {/* ==================================================
+            ERROR
+        ================================================== */}
 
         {error && (
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -358,7 +524,9 @@ export default function EditListingPage() {
 
                 <input
                   type="text"
-                  value={formData.title}
+                  value={
+                    formData.title
+                  }
                   onChange={(e) =>
                     handleChange(
                       "title",
@@ -429,7 +597,9 @@ export default function EditListingPage() {
 
                 <input
                   type="text"
-                  value={formData.address}
+                  value={
+                    formData.address
+                  }
                   onChange={(e) =>
                     handleChange(
                       "address",
@@ -452,7 +622,9 @@ export default function EditListingPage() {
 
                   <input
                     type="text"
-                    value={formData.city}
+                    value={
+                      formData.city
+                    }
                     onChange={(e) =>
                       handleChange(
                         "city",
@@ -496,7 +668,9 @@ export default function EditListingPage() {
 
                 <input
                   type="text"
-                  value={formData.country}
+                  value={
+                    formData.country
+                  }
                   onChange={(e) =>
                     handleChange(
                       "country",
@@ -620,6 +794,85 @@ export default function EditListingPage() {
           </section>
 
           {/* ==================================================
+              AMENITIES
+          ================================================== */}
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Amenities & Facilities
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-600">
+                Select everything available at
+                the property.
+              </p>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+
+              {AMENITIES.map(
+                (amenity) => {
+                  const selected =
+                    formData.amenities.includes(
+                      amenity.value
+                    );
+
+                  return (
+                    <label
+                      key={amenity.value}
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition ${
+                        selected
+                          ? "border-brand-blue bg-blue-50"
+                          : "border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() =>
+                          toggleAmenity(
+                            amenity.value
+                          )
+                        }
+                        className="h-4 w-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                      />
+
+                      <span className="text-lg leading-none">
+                        {amenity.emoji}
+                      </span>
+
+                      <span className="text-sm font-medium text-slate-700">
+                        {amenity.label}
+                      </span>
+
+                    </label>
+                  );
+                }
+              )}
+
+            </div>
+
+            {/* Selected Count */}
+
+            <div className="mt-5 rounded-xl bg-slate-50 px-4 py-3">
+              <p className="text-sm text-slate-600">
+                <span className="font-semibold text-slate-900">
+                  {formData.amenities.length}
+                </span>{" "}
+                {formData.amenities.length ===
+                1
+                  ? "amenity"
+                  : "amenities"}{" "}
+                selected.
+              </p>
+            </div>
+
+          </section>
+
+          {/* ==================================================
               UNIVERSITY
           ================================================== */}
 
@@ -688,7 +941,7 @@ export default function EditListingPage() {
                 </select>
               </div>
 
-              {/* Distance — DISABLED */}
+              {/* Distance */}
 
               <div>
                 <label className="text-sm font-medium text-slate-500">
@@ -726,7 +979,9 @@ export default function EditListingPage() {
             </h2>
 
             <textarea
-              value={formData.description}
+              value={
+                formData.description
+              }
               onChange={(e) =>
                 handleChange(
                   "description",
@@ -757,7 +1012,7 @@ export default function EditListingPage() {
 
             <div className="mt-6 grid gap-5 sm:grid-cols-2">
 
-              {/* Latitude — DISABLED */}
+              {/* Latitude */}
 
               <div>
                 <label className="text-sm font-medium text-slate-500">
@@ -776,7 +1031,7 @@ export default function EditListingPage() {
                 />
               </div>
 
-              {/* Longitude — DISABLED */}
+              {/* Longitude */}
 
               <div>
                 <label className="text-sm font-medium text-slate-500">

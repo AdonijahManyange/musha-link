@@ -1,6 +1,13 @@
 import Image from "next/image";
+import { getCurrentUser } from "@/lib/auth";
+import LandlordCTAButton from "./LandlordCTAButton";
 
-export default function LandlordCTA() {
+export default async function LandlordCTA() {
+  const user = await getCurrentUser();
+
+  const isSignedIn = !!user;
+  const isLandlord = user?.role === "LANDLORD";
+
   return (
     <section className="bg-gradient-to-r from-[#1C3769] via-[#23427D] to-[#2A4D8F] py-24">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row">
@@ -34,9 +41,10 @@ export default function LandlordCTA() {
 
           </div>
 
-          <button className="mt-10 rounded-xl bg-white px-8 py-4 text-lg font-bold text-blue-900 transition hover:scale-105">
-            List Your Property
-          </button>
+          <LandlordCTAButton
+            isLandlord={isLandlord}
+            isSignedIn={isSignedIn}
+          />
 
         </div>
 

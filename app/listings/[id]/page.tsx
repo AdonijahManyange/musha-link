@@ -305,6 +305,44 @@ export default async function PublicListingPage({
             </section>
 
             {/* ==================================================
+                AMENITIES
+            ================================================== */}
+
+            {listing.amenities.length > 0 && (
+              <section className="mt-8">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Amenities & Facilities
+                </h2>
+
+                <p className="mt-2 text-sm text-slate-500">
+                  Everything available at this property.
+                </p>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {listing.amenities.map((amenity) => {
+                    const details =
+                      getAmenityDetails(amenity);
+
+                    return (
+                      <div
+                        key={amenity}
+                        className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4"
+                      >
+                        <span className="text-xl leading-none">
+                          {details.emoji}
+                        </span>
+
+                        <span className="text-sm font-medium text-slate-700">
+                          {details.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* ==================================================
                 LOCATION
             ================================================== */}
 
@@ -598,5 +636,99 @@ function formatGenderPreference(
   return (
     labels[preference] ||
     preference
+  );
+}
+
+function getAmenityDetails(
+  amenity: string
+) {
+  const amenities: Record<
+    string,
+    {
+      label: string;
+      emoji: string;
+    }
+  > = {
+    WIFI: {
+      label: "Wi-Fi",
+      emoji: "📶",
+    },
+
+    SOLAR_POWER: {
+      label: "Solar Power",
+      emoji: "☀️",
+    },
+
+    BOREHOLE: {
+      label: "Borehole",
+      emoji: "🚰",
+    },
+
+    ELECTRICITY: {
+      label: "Electricity",
+      emoji: "⚡",
+    },
+
+    BACKUP_GENERATOR: {
+      label: "Backup Generator",
+      emoji: "🔋",
+    },
+
+    WATER: {
+      label: "Water",
+      emoji: "💧",
+    },
+
+    SECURITY: {
+      label: "Security",
+      emoji: "🛡️",
+    },
+
+    PARKING: {
+      label: "Parking",
+      emoji: "🚗",
+    },
+
+    FURNISHED: {
+      label: "Furnished",
+      emoji: "🛏️",
+    },
+
+    LAUNDRY: {
+      label: "Laundry",
+      emoji: "🧺",
+    },
+
+    KITCHEN: {
+      label: "Kitchen",
+      emoji: "🍳",
+    },
+
+    STUDY_AREA: {
+      label: "Study Area",
+      emoji: "📚",
+    },
+
+    GARDEN: {
+      label: "Garden",
+      emoji: "🌳",
+    },
+
+    SWIMMING_POOL: {
+      label: "Swimming Pool",
+      emoji: "🏊",
+    },
+
+    DSTV: {
+      label: "DSTV",
+      emoji: "📺",
+    },
+  };
+
+  return (
+    amenities[amenity] || {
+      label: amenity,
+      emoji: "✓",
+    }
   );
 }

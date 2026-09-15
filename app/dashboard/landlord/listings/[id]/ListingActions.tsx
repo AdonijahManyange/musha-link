@@ -156,19 +156,51 @@ export default function ListingActions({
 
       {/* Publish Requirement */}
 
-      {status === "DRAFT" &&
-        !canPublish && (
-          <div className="col-span-full rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-semibold text-amber-800">
-              More photos required
-            </p>
+      {status === "DRAFT" && (
+        <div
+          className={`col-span-full rounded-xl border p-4 ${
+            canPublish
+              ? "border-green-200 bg-green-50"
+              : "border-amber-200 bg-amber-50"
+          }`}
+        >
+          {canPublish ? (
+            <>
+              <p className="text-sm font-semibold text-green-800">
+                ✅ Your listing is ready to publish
+              </p>
 
-            <p className="mt-1 text-sm text-amber-700">
-              Add at least 5 photos before
-              publishing this listing.
-            </p>
-          </div>
-        )}
+              <p className="mt-1 text-sm text-green-700">
+                You have met the minimum requirement of 5
+                photos. Your listing is still a Draft and
+                remains private until you publish it.
+              </p>
+
+              <p className="mt-2 text-xs text-green-600">
+                ⭐ We recommend 10 photos for the best
+                presentation.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-amber-800">
+                📸 Your listing is still a Draft
+              </p>
+
+              <p className="mt-1 text-sm text-amber-700">
+                Draft listings are private and are not visible
+                to students. Add at least 5 photos to enable
+                publishing.
+              </p>
+
+              <p className="mt-2 text-xs text-amber-600">
+                ⭐ We recommend 10 photos so students can get a
+                better look at your property.
+              </p>
+            </>
+          )}
+        </div>
+      )}
 
     </div>
   );

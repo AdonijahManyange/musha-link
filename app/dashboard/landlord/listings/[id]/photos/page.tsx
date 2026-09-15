@@ -710,6 +710,55 @@ export default function ManagePhotosPage() {
           </p>
         </div>
 
+        {/* Publishing Explanation */}
+
+        <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+          <div className="flex gap-3">
+            <div className="mt-0.5 text-xl">
+              💡
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-slate-900">
+                How publishing works
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                When you create a property, it is automatically
+                saved as a <strong className="text-slate-900">Draft</strong>.
+                Draft listings are private and are not visible to
+                students or other visitors.
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Add at least{" "}
+                <strong className="text-slate-900">
+                  5 photos
+                </strong>{" "}
+                to publish your listing. We recommend{" "}
+                <strong className="text-slate-900">
+                  10 photos
+                </strong>{" "}
+                so students can get a good look at the property.
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                <span className="rounded-full bg-white px-3 py-1 text-slate-600">
+                  🔒 Draft = Private
+                </span>
+
+                <span className="rounded-full bg-white px-3 py-1 text-slate-600">
+                  📸 5 photos = Ready to publish
+                </span>
+
+                <span className="rounded-full bg-white px-3 py-1 text-slate-600">
+                  ⭐ 10 photos = Recommended
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Alerts */}
 
         {error && (
@@ -743,11 +792,15 @@ export default function ManagePhotosPage() {
 
             <div className="text-left md:text-right">
               <p className="text-2xl font-bold text-slate-900">
-                {photos.length}/{MAX_PHOTOS}
+                {photos.length}/{MIN_PHOTOS_TO_PUBLISH}
               </p>
 
               <p className="text-sm text-slate-500">
-                Photos uploaded
+                Photos required to publish
+              </p>
+
+              <p className="mt-1 text-xs text-slate-400">
+                Up to {MAX_PHOTOS} photos · 10 recommended
               </p>
             </div>
 
@@ -760,18 +813,22 @@ export default function ManagePhotosPage() {
             <div className="flex items-center justify-between gap-4">
 
               <div>
-                <p className="font-semibold text-slate-900">
-                  {photos.length >=
-                  MIN_PHOTOS_TO_PUBLISH
-                    ? "Ready to publish"
-                    : "Add more photos to publish"}
+               <p className="font-semibold text-slate-900">
+                  {photos.length >= MIN_PHOTOS_TO_PUBLISH
+                    ? "✅ Your listing is ready to publish"
+                    : `📸 Add ${
+                        MIN_PHOTOS_TO_PUBLISH - photos.length
+                      } more ${
+                        MIN_PHOTOS_TO_PUBLISH - photos.length === 1
+                          ? "photo"
+                          : "photos"
+                      } to publish`}
                 </p>
 
                 <p className="mt-1 text-sm text-slate-600">
-                  {photos.length >=
-                  MIN_PHOTOS_TO_PUBLISH
-                    ? "You have enough photos to publish this listing."
-                    : `You need at least ${MIN_PHOTOS_TO_PUBLISH} photos to publish this listing.`}
+                  {photos.length >= MIN_PHOTOS_TO_PUBLISH
+                    ? "You have met the minimum photo requirement. Your listing is still private until you publish it."
+                    : `You need at least ${MIN_PHOTOS_TO_PUBLISH} photos. We recommend ${MAX_PHOTOS} photos for the best listing.`}
                 </p>
               </div>
 
@@ -791,20 +848,33 @@ export default function ManagePhotosPage() {
 
             </div>
 
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+            <div className="mt-4">
+              <div className="mb-2 flex items-center justify-between text-xs font-medium text-slate-500">
+                <span>
+                  Publishing requirement
+                </span>
 
-              <div
-                className="h-full rounded-full bg-brand-blue transition-all"
-                style={{
-                  width: `${Math.min(
-                    (photos.length /
-                      MIN_PHOTOS_TO_PUBLISH) *
-                      100,
-                    100
-                  )}%`,
-                }}
-              />
+                <span>
+                  {Math.min(
+                    photos.length,
+                    MIN_PHOTOS_TO_PUBLISH
+                  )}/{MIN_PHOTOS_TO_PUBLISH}
+                </span>
+              </div>
 
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-brand-blue transition-all"
+                  style={{
+                    width: `${Math.min(
+                      (photos.length /
+                        MIN_PHOTOS_TO_PUBLISH) *
+                        100,
+                      100
+                    )}%`,
+                  }}
+                />
+              </div>
             </div>
 
           </div>
@@ -874,10 +944,10 @@ export default function ManagePhotosPage() {
                 No photos yet
               </h2>
 
-              <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-                Add at least one photo to your listing.
-                We recommend adding around 10 photos so
-                students can properly view the property.
+              <p className="mt-1 text-sm text-slate-600">
+                We recommend 10 photos: exterior, living areas,
+                bedrooms, kitchen, bathroom, outdoor spaces,
+                and other important areas.
               </p>
 
               <button
