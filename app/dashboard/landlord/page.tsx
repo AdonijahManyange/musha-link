@@ -48,7 +48,7 @@ export default async function LandlordDashboard() {
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-slate-900">
-            Welcome back
+            Welcome
             {user.name ? `, ${user.name}` : ""}! 👋
           </h1>
 
