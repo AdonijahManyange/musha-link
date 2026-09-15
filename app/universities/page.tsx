@@ -110,21 +110,21 @@ export default function UniversitiesPage() {
         {!loading &&
           !error &&
           universities.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
+           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {universities.map((university) => (
                 <article
                   key={university.id}
                   className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg"
                 >
                   {/* University Logo */}
-                  <div className="flex h-48 items-center justify-center bg-slate-50 p-8">
+                  <div className="flex h-40 items-center justify-center bg-slate-50 p-6 sm:h-48 sm:p-8">
                     {university.logo ? (
                       <Image
                         src={university.logo}
                         alt={`${university.name} logo`}
                         width={140}
                         height={140}
-                        className="h-32 w-32 object-contain"
+                        className="h-28 w-28 object-contain sm:h-32 sm:w-32"
                       />
                     ) : (
                       <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 text-5xl">
@@ -134,12 +134,12 @@ export default function UniversitiesPage() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-6">
+                  <div className="p-5 sm:p-6">
                     <p className="text-sm font-medium text-blue-900">
                       {university.city}
                     </p>
 
-                    <h2 className="mt-2 min-h-[56px] text-xl font-semibold leading-7 text-slate-900">
+                    <h2 className="mt-2 min-h-[56px] text-lg font-semibold leading-6 text-slate-900 sm:text-xl sm:leading-7">
                       {university.name}
                     </h2>
 
@@ -147,7 +147,7 @@ export default function UniversitiesPage() {
                       href={`/browse?university=${encodeURIComponent(
                         university.id
                       )}`}
-                      className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-blue-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                      className="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 sm:mt-6 sm:py-3"
                     >
                       View Accommodation
                     </Link>
