@@ -26,7 +26,7 @@ export default async function StudentDashboard() {
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-slate-900">
-            Welcome back{user.name ? `, ${user.name}` : ""}! 👋
+            Welcome {user.name ? `, ${user.name}` : ""}! 👋
           </h1>
 
           <p className="mt-2 text-slate-600">

@@ -8,7 +8,65 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const MAX_PHOTOS = 10;
+// ============================================================
+// PHOTO CONFIGURATION
+// ============================================================
+
+// Maximum number of photos allowed per listing.
+// 10 photos are required for publishing, but landlords can
+// upload up to 20 photos for additional property coverage.
+const MAX_PHOTOS = 20;
+const MIN_PHOTOS_TO_PUBLISH = 10;
+
+// All supported photo categories.
+const PHOTO_CATEGORIES = [
+  "LIVING_ROOM",
+  "BEDROOM",
+  "BATHROOM",
+  "FRONT_YARD",
+  "PARKING",
+  "MAIN_ENTRANCE",
+  "VERANDA",
+  "BED",
+  "CORRIDOR",
+  "BACK_YARD",
+] as const;
+
+type PhotoCategory =
+  (typeof PHOTO_CATEGORIES)[number];
+
+// Minimum number of photos required in each category
+// before a listing can be published.
+//
+// Required:
+// Living Room     = 2
+// Bedrooms        = 2
+// Bathrooms       = 2
+// Front Yard      = 1
+// Parking         = 1
+// Main Entrance   = 1
+// Veranda         = 1
+//
+// Total required = 10 photos.
+//
+// Optional categories have a requirement of 0.
+const REQUIRED_PHOTO_CATEGORIES: Record<
+  PhotoCategory,
+  number
+> = {
+  LIVING_ROOM: 2,
+  BEDROOM: 2,
+  BATHROOM: 2,
+  FRONT_YARD: 1,
+  PARKING: 1,
+  MAIN_ENTRANCE: 1,
+  VERANDA: 1,
+
+  // Optional categories
+  BED: 0,
+  CORRIDOR: 0,
+  BACK_YARD: 0,
+};
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -23,14 +81,24 @@ export async function GET(
   context: RouteContext
 ) {
   try {
+    // ----------------------------------------------------------
+    // Authentication
+    // ----------------------------------------------------------
+
     const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
-        { error: "You must be logged in." },
+        {
+          error: "You must be logged in.",
+        },
         { status: 401 }
       );
     }
+
+    // ----------------------------------------------------------
+    // Landlord check
+    // ----------------------------------------------------------
 
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
@@ -42,21 +110,31 @@ export async function GET(
       );
     }
 
-    const { id: listingId } = await context.params;
+    // ----------------------------------------------------------
+    // Listing ID
+    // ----------------------------------------------------------
 
-    const listing = await prisma.listing.findFirst({
-      where: {
-        id: listingId,
-        landlordId: user.id,
-      },
-      include: {
-        photos: {
-          orderBy: {
-            sortOrder: "asc",
+    const { id: listingId } =
+      await context.params;
+
+    // ----------------------------------------------------------
+    // Find listing and verify ownership
+    // ----------------------------------------------------------
+
+    const listing =
+      await prisma.listing.findFirst({
+        where: {
+          id: listingId,
+          landlordId: user.id,
+        },
+        include: {
+          photos: {
+            orderBy: {
+              sortOrder: "asc",
+            },
           },
         },
-      },
-    });
+      });
 
     if (!listing) {
       return NextResponse.json(
@@ -68,12 +146,65 @@ export async function GET(
       );
     }
 
+    // ----------------------------------------------------------
+    // Calculate category counts
+    // ----------------------------------------------------------
+
+    const categoryCounts =
+      Object.fromEntries(
+        PHOTO_CATEGORIES.map(
+          (category) => [
+            category,
+            listing.photos.filter(
+              (photo) =>
+                photo.category === category
+            ).length,
+          ]
+        )
+      ) as Record<PhotoCategory, number>;
+
+    // ----------------------------------------------------------
+    // Determine missing required categories
+    // ----------------------------------------------------------
+
+    const missingCategories =
+      PHOTO_CATEGORIES.filter(
+        (category) =>
+          categoryCounts[category] <
+          REQUIRED_PHOTO_CATEGORIES[
+            category
+          ]
+      );
+
+    const totalRequiredPhotos =
+      Object.values(
+        REQUIRED_PHOTO_CATEGORIES
+      ).reduce(
+        (total, required) =>
+          total + required,
+        0
+      );
+
+    // ----------------------------------------------------------
+    // Return photo information
+    // ----------------------------------------------------------
+
     return NextResponse.json({
       listingId: listing.id,
       photos: listing.photos,
       photoCount: listing.photos.length,
+
       maxPhotos: MAX_PHOTOS,
-      canPublish: listing.photos.length >= 5,
+      minPhotosToPublish:
+        MIN_PHOTOS_TO_PUBLISH,
+
+      totalRequiredPhotos,
+
+      categoryCounts,
+      missingCategories,
+
+      canPublish:
+        missingCategories.length === 0,
     });
   } catch (error) {
     console.error(
@@ -108,7 +239,9 @@ export async function POST(
 
     if (!user) {
       return NextResponse.json(
-        { error: "You must be logged in." },
+        {
+          error: "You must be logged in.",
+        },
         { status: 401 }
       );
     }
@@ -131,7 +264,8 @@ export async function POST(
     // Listing ID
     // ----------------------------------------------------------
 
-    const { id: listingId } = await context.params;
+    const { id: listingId } =
+      await context.params;
 
     // ----------------------------------------------------------
     // Verify listing ownership
@@ -173,14 +307,14 @@ export async function POST(
       return NextResponse.json(
         {
           error:
-            "You can upload a maximum of 10 photos per listing.",
+            "You can upload a maximum of 20 photos per listing.",
         },
         { status: 400 }
       );
     }
 
     // ----------------------------------------------------------
-    // Read uploaded file
+    // Read form data
     // ----------------------------------------------------------
 
     const formData =
@@ -188,6 +322,13 @@ export async function POST(
 
     const file =
       formData.get("file");
+
+    const category =
+      formData.get("category");
+
+    // ----------------------------------------------------------
+    // Validate file
+    // ----------------------------------------------------------
 
     if (!(file instanceof File)) {
       return NextResponse.json(
@@ -198,6 +339,28 @@ export async function POST(
         { status: 400 }
       );
     }
+
+    // ----------------------------------------------------------
+    // Validate category
+    // ----------------------------------------------------------
+
+    if (
+      typeof category !== "string" ||
+      !PHOTO_CATEGORIES.includes(
+        category as PhotoCategory
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "A valid photo category is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const photoCategory =
+      category as PhotoCategory;
 
     // ----------------------------------------------------------
     // Validate file type
@@ -243,6 +406,8 @@ export async function POST(
     const sortOrder =
       currentPhotoCount;
 
+    // The very first uploaded photo becomes
+    // the cover photo automatically.
     const isCover =
       currentPhotoCount === 0;
 
@@ -333,6 +498,7 @@ export async function POST(
           fileName: file.name,
           sortOrder,
           isCover,
+          category: photoCategory,
         },
       });
 
@@ -375,43 +541,73 @@ export async function DELETE(
   }
 ) {
   try {
+    // ----------------------------------------------------------
+    // Authentication
+    // ----------------------------------------------------------
+
     const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
-        { error: "You must be logged in." },
+        {
+          error: "You must be logged in.",
+        },
         { status: 401 }
       );
     }
 
+    // ----------------------------------------------------------
+    // Landlord check
+    // ----------------------------------------------------------
+
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error: "Only landlords can manage listing photos.",
+          error:
+            "Only landlords can manage listing photos.",
         },
         { status: 403 }
       );
     }
 
-    const { id: listingId } = await context.params;
+    // ----------------------------------------------------------
+    // Listing ID
+    // ----------------------------------------------------------
 
-    const body = await request.json();
-    const photoId = body.photoId;
+    const { id: listingId } =
+      await context.params;
+
+    // ----------------------------------------------------------
+    // Read request body
+    // ----------------------------------------------------------
+
+    const body =
+      await request.json();
+
+    const photoId =
+      body.photoId;
 
     if (!photoId) {
       return NextResponse.json(
-        { error: "Photo ID is required." },
+        {
+          error:
+            "Photo ID is required.",
+        },
         { status: 400 }
       );
     }
 
+    // ----------------------------------------------------------
     // Verify listing ownership
-    const listing = await prisma.listing.findFirst({
-      where: {
-        id: listingId,
-        landlordId: user.id,
-      },
-    });
+    // ----------------------------------------------------------
+
+    const listing =
+      await prisma.listing.findFirst({
+        where: {
+          id: listingId,
+          landlordId: user.id,
+        },
+      });
 
     if (!listing) {
       return NextResponse.json(
@@ -423,34 +619,49 @@ export async function DELETE(
       );
     }
 
+    // ----------------------------------------------------------
     // Find photo
-    const photo = await prisma.listingPhoto.findFirst({
-      where: {
-        id: photoId,
-        listingId,
-      },
-    });
+    // ----------------------------------------------------------
+
+    const photo =
+      await prisma.listingPhoto.findFirst({
+        where: {
+          id: photoId,
+          listingId,
+        },
+      });
 
     if (!photo) {
       return NextResponse.json(
-        { error: "Photo not found." },
+        {
+          error:
+            "Photo not found.",
+        },
         { status: 404 }
       );
     }
 
+    // ----------------------------------------------------------
     // Delete from Supabase Storage
-    const marker = "/listing-photos/";
+    // ----------------------------------------------------------
 
-    const markerIndex = photo.url.indexOf(marker);
+    const marker =
+      "/listing-photos/";
+
+    const markerIndex =
+      photo.url.indexOf(marker);
 
     if (markerIndex !== -1) {
-      const storagePath = decodeURIComponent(
-        photo.url.substring(
-          markerIndex + marker.length
-        )
-      );
+      const storagePath =
+        decodeURIComponent(
+          photo.url.substring(
+            markerIndex + marker.length
+          )
+        );
 
-      const { error: storageError } =
+      const {
+        error: storageError,
+      } =
         await supabase.storage
           .from("listing-photos")
           .remove([storagePath]);
@@ -463,14 +674,20 @@ export async function DELETE(
       }
     }
 
+    // ----------------------------------------------------------
     // Delete database record
+    // ----------------------------------------------------------
+
     await prisma.listingPhoto.delete({
       where: {
         id: photo.id,
       },
     });
 
+    // ----------------------------------------------------------
     // Re-number remaining photos
+    // ----------------------------------------------------------
+
     const remainingPhotos =
       await prisma.listingPhoto.findMany({
         where: {
@@ -481,7 +698,11 @@ export async function DELETE(
         },
       });
 
-    for (let index = 0; index < remainingPhotos.length; index++) {
+    for (
+      let index = 0;
+      index < remainingPhotos.length;
+      index++
+    ) {
       await prisma.listingPhoto.update({
         where: {
           id: remainingPhotos[index].id,
@@ -494,7 +715,8 @@ export async function DELETE(
     }
 
     return NextResponse.json({
-      message: "Photo deleted successfully.",
+      message:
+        "Photo deleted successfully.",
     });
   } catch (error) {
     console.error(
@@ -512,7 +734,6 @@ export async function DELETE(
   }
 }
 
-
 // ============================================================
 // REORDER / CHANGE COVER PHOTO
 // ============================================================
@@ -524,29 +745,51 @@ export async function PATCH(
   }
 ) {
   try {
+    // ----------------------------------------------------------
+    // Authentication
+    // ----------------------------------------------------------
+
     const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
-        { error: "You must be logged in." },
+        {
+          error: "You must be logged in.",
+        },
         { status: 401 }
       );
     }
 
+    // ----------------------------------------------------------
+    // Landlord check
+    // ----------------------------------------------------------
+
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error: "Only landlords can manage listing photos.",
+          error:
+            "Only landlords can manage listing photos.",
         },
         { status: 403 }
       );
     }
 
-    const { id: listingId } = await context.params;
+    // ----------------------------------------------------------
+    // Listing ID
+    // ----------------------------------------------------------
 
-    const body = await request.json();
+    const { id: listingId } =
+      await context.params;
 
-    const photoIds = body.photoIds;
+    // ----------------------------------------------------------
+    // Read request body
+    // ----------------------------------------------------------
+
+    const body =
+      await request.json();
+
+    const photoIds =
+      body.photoIds;
 
     if (
       !Array.isArray(photoIds) ||
@@ -561,13 +804,17 @@ export async function PATCH(
       );
     }
 
+    // ----------------------------------------------------------
     // Verify listing ownership
-    const listing = await prisma.listing.findFirst({
-      where: {
-        id: listingId,
-        landlordId: user.id,
-      },
-    });
+    // ----------------------------------------------------------
+
+    const listing =
+      await prisma.listing.findFirst({
+        where: {
+          id: listingId,
+          landlordId: user.id,
+        },
+      });
 
     if (!listing) {
       return NextResponse.json(
@@ -579,7 +826,10 @@ export async function PATCH(
       );
     }
 
+    // ----------------------------------------------------------
     // Get all listing photos
+    // ----------------------------------------------------------
+
     const photos =
       await prisma.listingPhoto.findMany({
         where: {
@@ -587,15 +837,24 @@ export async function PATCH(
         },
       });
 
-    // Make sure every supplied ID belongs to this listing
-    const photoIdSet = new Set(
-      photos.map((photo) => photo.id)
-    );
+    // ----------------------------------------------------------
+    // Make sure every supplied ID belongs
+    // to this listing
+    // ----------------------------------------------------------
+
+    const photoIdSet =
+      new Set(
+        photos.map(
+          (photo) => photo.id
+        )
+      );
 
     const validIds =
-      photoIds.length === photos.length &&
-      photoIds.every((id) =>
-        photoIdSet.has(id)
+      photoIds.length ===
+        photos.length &&
+      photoIds.every(
+        (id) =>
+          photoIdSet.has(id)
       );
 
     if (!validIds) {
@@ -608,24 +867,32 @@ export async function PATCH(
       );
     }
 
-    // Update ordering
+    // ----------------------------------------------------------
+    // Update ordering and cover photo
+    // ----------------------------------------------------------
+
     await prisma.$transaction(
       photoIds.map(
-        (photoId: string, index: number) =>
+        (
+          photoId: string,
+          index: number
+        ) =>
           prisma.listingPhoto.update({
             where: {
               id: photoId,
             },
             data: {
               sortOrder: index,
-              isCover: index === 0,
+              isCover:
+                index === 0,
             },
           })
       )
     );
 
     return NextResponse.json({
-      message: "Photo order updated successfully.",
+      message:
+        "Photo order updated successfully.",
     });
   } catch (error) {
     console.error(

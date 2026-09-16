@@ -171,6 +171,7 @@ export async function GET(request: Request) {
       return NextResponse.json(listings);
     }
 
+
     // ==========================================================
     // AUTHENTICATION
     // ==========================================================
@@ -294,7 +295,61 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(listings);
+    const requiredPhotoCategories = {
+      LIVING_ROOM: 2,
+      BEDROOM: 2,
+      BATHROOM: 2,
+      FRONT_YARD: 1,
+      PARKING: 1,
+      MAIN_ENTRANCE: 1,
+      VERANDA: 1,
+    } as const;
+
+    const listingsWithPublishStatus =
+      listings.map((listing) => {
+        const missingPhotoCategories =
+          Object.entries(
+            requiredPhotoCategories
+          )
+            .filter(
+              ([category, requiredCount]) => {
+                const uploadedCount =
+                  listing.photos.filter(
+                    (photo) =>
+                      photo.category === category
+                  ).length;
+
+                return (
+                  uploadedCount <
+                  requiredCount
+                );
+              }
+            )
+            .map(
+              ([category, requiredCount]) => ({
+                category,
+                required: requiredCount,
+                uploaded:
+                  listing.photos.filter(
+                    (photo) =>
+                      photo.category ===
+                      category
+                  ).length,
+              })
+            );
+
+        return {
+          ...listing,
+          canPublish:
+            missingPhotoCategories.length === 0,
+          missingPhotoCategories,
+        };
+      });
+
+    return NextResponse.json(
+      listingsWithPublishStatus
+    );
+
   } catch (error) {
     console.error("Failed to load listings:", error);
 
@@ -385,17 +440,26 @@ export async function POST(request: Request) {
 
     const {
       title,
+      propertyType,
       address,
       suburb,
       city,
       province,
       country,
-      description,
-      propertyType,
-      universityId,
       monthlyRent,
+      depositRequired,
+      depositAmount,
+      additionalFees,
+      utilitiesIncluded,
+      internetCharges,
+      internetProvider,
+      waterSource,
+      waterDrinkable,
+      solarBackupCapacity,
       roomType,
       genderPreference,
+      universityId,
+      description,
     } = body;
 
     // ----------------------------------------------------------
@@ -508,6 +572,31 @@ export async function POST(request: Request) {
         propertyType,
         universityId,
         monthlyRent: Number(monthlyRent),
+        depositRequired: Boolean(depositRequired),
+        depositAmount:
+          depositRequired && depositAmount
+            ? Number(depositAmount)
+            : null,
+        additionalFees:
+          additionalFees?.trim() || null,
+        utilitiesIncluded:
+          utilitiesIncluded?.trim() || null,
+        internetCharges:
+          internetCharges?.trim() || null,
+        solarBackupCapacity:
+          solarBackupCapacity || null,
+        internetProvider:
+          internetProvider || null,
+
+        waterSource:
+          waterSource || null,
+
+        waterDrinkable:
+          waterDrinkable === true
+            ? true
+            : waterDrinkable === false
+              ? false
+              : null,
         roomType,
         genderPreference,
         status: "DRAFT",

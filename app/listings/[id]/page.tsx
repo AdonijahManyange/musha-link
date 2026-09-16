@@ -175,6 +175,103 @@ export default async function PublicListingPage({
               </span>
             </div>
 
+            {/* ==================================================
+                UTILITIES & SERVICES
+            ================================================== */}
+
+            {(
+              listing.internetProvider ||
+              listing.waterSource ||
+              listing.waterDrinkable !== null ||
+              listing.solarBackupCapacity
+            ) && (
+              <section className="mt-8">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Utilities & Services
+                </h2>
+
+                <p className="mt-2 text-sm text-slate-500">
+                  Utilities, internet, and backup power available at this property.
+                </p>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+
+                  {/* Internet Provider */}
+
+                  {listing.internetProvider && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-4">
+                      <p className="text-xs text-slate-400">
+                        Internet Provider
+                      </p>
+
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {getInternetProviderLabel(
+                          listing.internetProvider
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Water Source */}
+
+                  {listing.waterSource && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-4">
+                      <p className="text-xs text-slate-400">
+                        Water Source
+                      </p>
+
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {getWaterSourceLabel(
+                          listing.waterSource
+                        )}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Drinkable Water */}
+
+                  {listing.waterDrinkable !== null && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-4">
+                      <p className="text-xs text-slate-400">
+                        Drinkable Water
+                      </p>
+
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {listing.waterDrinkable
+                          ? "Yes"
+                          : "No"}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Solar Backup */}
+
+                  {listing.solarBackupCapacity && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-4">
+                      <p className="text-xs text-slate-400">
+                        ☀️ Solar Backup
+                      </p>
+
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {getSolarBackupLabel(
+                          listing.solarBackupCapacity
+                        )}
+                      </p>
+
+                      {listing.solarBackupCapacity !== "NONE" && (
+                        <p className="mt-2 text-sm leading-5 text-slate-500">
+                          {getSolarBackupDescription(
+                            listing.solarBackupCapacity
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                </div>
+              </section>
+            )}
+
             {/* Location */}
 
             <div className="mt-1 flex items-center gap-2 text-sm text-slate-500">
@@ -391,13 +488,79 @@ export default async function PublicListingPage({
                   PRICE
               ================================================= */}
 
-              <p className="text-3xl font-bold text-brand-blue sm:text-4xl">
-                US${listing.monthlyRent}
-              </p>
+              <div>
+                <p className="text-3xl font-bold text-brand-blue sm:text-4xl">
+                  US${listing.monthlyRent}
+                </p>
 
-              <p className="mt-1 text-xs text-slate-500">
-                per month
-              </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  per month
+                </p>
+
+                {/* Cost Breakdown */}
+
+                <div className="mt-5 space-y-3 border-t border-slate-200 pt-5">
+
+                  {/* Security Deposit */}
+
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-sm text-slate-600">
+                      Security Deposit
+                    </span>
+
+                    <span className="text-right text-sm font-medium text-slate-900">
+                      {listing.depositRequired
+                        ? listing.depositAmount
+                          ? `US$${listing.depositAmount}`
+                          : "Required"
+                        : "None"}
+                    </span>
+                  </div>
+
+                  {/* Additional Fees */}
+
+                  {listing.additionalFees && (
+                    <div>
+                      <p className="text-sm text-slate-600">
+                        Additional Fees
+                      </p>
+
+                      <p className="mt-1 text-sm leading-5 text-slate-900">
+                        {listing.additionalFees}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Utilities */}
+
+                  {listing.utilitiesIncluded && (
+                    <div>
+                      <p className="text-sm text-slate-600">
+                        Utilities
+                      </p>
+
+                      <p className="mt-1 text-sm leading-5 text-slate-900">
+                        {listing.utilitiesIncluded}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Internet Charges */}
+
+                  {listing.internetCharges && (
+                    <div>
+                      <p className="text-sm text-slate-600">
+                        Internet
+                      </p>
+
+                      <p className="mt-1 text-sm leading-5 text-slate-900">
+                        {listing.internetCharges}
+                      </p>
+                    </div>
+                  )}
+
+                </div>
+              </div>
 
               {/* =================================================
                   ACTION BUTTONS
@@ -637,6 +800,84 @@ function formatGenderPreference(
     labels[preference] ||
     preference
   );
+}
+
+function getInternetProviderLabel(
+  provider: string
+) {
+  const providers: Record<string, string> = {
+    LIQUID_HOME: "Liquid Home",
+    TELONE: "TelOne",
+    STARLINK: "Starlink",
+    UTANDE: "Utande",
+    AFRICOM: "Africom",
+    POWERTEL: "Powertel",
+    DANDEMUTANDE: "Dandemutande",
+    ZARNET: "Zarnet",
+    ECONET: "Econet",
+    NETONE: "NetOne",
+    TELECEL: "Telecel",
+    OTHER: "Other",
+    NONE: "No Internet",
+  };
+
+  return providers[provider] || provider;
+}
+
+function getWaterSourceLabel(
+  source: string
+) {
+  const sources: Record<string, string> = {
+    BOREHOLE_FRESH_WATER:
+      "Borehole Fresh Water",
+    TAP_FRESH_WATER:
+      "Tap Fresh Water",
+    BOREHOLE_AND_TAP:
+      "Borehole + Tap",
+    NO_RELIABLE_SUPPLY:
+      "No Reliable Water Supply",
+    OTHER: "Other",
+  };
+
+  return sources[source] || source;
+}
+
+function getSolarBackupLabel(
+  capacity: string
+) {
+  const capacities: Record<string, string> = {
+    NONE: "No Solar Backup",
+    BASIC_500VA_2KVA:
+      "Basic Backup — 500VA–2kVA",
+    STANDARD_3_4KVA:
+      "Standard Backup — 3–4kVA",
+    HIGH_CAPACITY_5_6KVA:
+      "High-Capacity Backup — 5–6kVA",
+    PREMIUM_7KVA_PLUS:
+      "Premium Backup — 7+ kVA",
+  };
+
+  return capacities[capacity] || capacity;
+}
+
+function getSolarBackupDescription(
+  capacity: string
+) {
+  const descriptions: Record<string, string> = {
+    BASIC_500VA_2KVA:
+      "Typically supports lights, Wi-Fi / router, laptops, phones & chargers, and TV.",
+
+    STANDARD_3_4KVA:
+      "Includes Basic Backup, plus fridge / freezer, multiple devices, multiple laptops, and small household appliances.",
+
+    HIGH_CAPACITY_5_6KVA:
+      "Includes Standard Backup, plus electric jugs / kettles, irons, washing machines, and multiple household appliances.",
+
+    PREMIUM_7KVA_PLUS:
+      "Includes High-Capacity Backup, plus higher-power appliances and multiple appliances running together.",
+  };
+
+  return descriptions[capacity] || "";
 }
 
 function getAmenityDetails(

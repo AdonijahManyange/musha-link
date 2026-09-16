@@ -18,15 +18,32 @@ export default function ListingActions({
     "publish" | "archive" | null
   >(null);
 
+  // Mandatory confirmation required before publishing.
+  const [listingConfirmation, setListingConfirmation] =
+    useState(false);
+
   async function updateStatus(
     newStatus: "PUBLISHED" | "ARCHIVED"
   ) {
     const isPublishing =
       newStatus === "PUBLISHED";
 
+    // Publishing requires the landlord to explicitly
+    // confirm that the listing information and photos
+    // accurately represent the property.
+    if (
+      isPublishing &&
+      !listingConfirmation
+    ) {
+      alert(
+        "Please confirm that the information and photos in this listing are accurate before submitting."
+      );
+      return;
+    }
+
     const confirmed = window.confirm(
       isPublishing
-        ? "Publish this listing? Students will be able to see it."
+        ? "Submit this listing for publication? Students will be able to see it once published."
         : "Are you sure you want to archive this listing? It will no longer be visible to students."
     );
 
@@ -117,6 +134,41 @@ export default function ListingActions({
         </Link>
       )}
 
+      {/* Publish Confirmation */}
+
+      {status === "DRAFT" && (
+        <div className="col-span-full rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={listingConfirmation}
+              onChange={(event) =>
+                setListingConfirmation(
+                  event.target.checked
+                )
+              }
+              className="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+            />
+
+            <span className="text-sm leading-6 text-slate-700">
+              <span className="font-semibold text-slate-900">
+                I confirm that the information and photos
+                in this listing are accurate and represent
+                the property as it currently exists.
+              </span>
+            </span>
+          </label>
+
+          <div className="mt-4 border-l-4 border-slate-300 pl-4 text-sm leading-6 text-slate-600">
+            By submitting this listing, you acknowledge
+            that verification does not automatically
+            guarantee approval. Listings may be rejected,
+            restricted, suspended or removed if they do not
+            meet MushaLink standards.
+          </div>
+        </div>
+      )}
+
       {/* Publish */}
 
       {status === "DRAFT" && (
@@ -124,6 +176,7 @@ export default function ListingActions({
           type="button"
           disabled={
             !canPublish ||
+            !listingConfirmation ||
             loading !== null
           }
           onClick={() =>
@@ -171,14 +224,9 @@ export default function ListingActions({
               </p>
 
               <p className="mt-1 text-sm text-green-700">
-                You have met the minimum requirement of 5
-                photos. Your listing is still a Draft and
-                remains private until you publish it.
-              </p>
-
-              <p className="mt-2 text-xs text-green-600">
-                ⭐ We recommend 10 photos for the best
-                presentation.
+                You have completed the required photo
+                categories. Your listing is still a Draft
+                and remains private until you publish it.
               </p>
             </>
           ) : (
@@ -188,14 +236,14 @@ export default function ListingActions({
               </p>
 
               <p className="mt-1 text-sm text-amber-700">
-                Draft listings are private and are not visible
-                to students. Add at least 5 photos to enable
-                publishing.
+                Complete all required photo categories
+                before publishing your listing.
               </p>
 
               <p className="mt-2 text-xs text-amber-600">
-                ⭐ We recommend 10 photos so students can get a
-                better look at your property.
+                Required coverage includes the living room,
+                bedrooms, bathrooms, front yard/exterior,
+                parking, main entrance and veranda.
               </p>
             </>
           )}

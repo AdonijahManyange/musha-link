@@ -195,10 +195,24 @@ model Listing {
 
   monthlyRent Int
 
+  depositRequired Boolean @default(false)
+  depositAmount   Int?
+
+  additionalFees String?
+
+  utilitiesIncluded String?
+
+  internetCharges String?
+
   roomType         RoomType
   genderPreference GenderPreference
 
   amenities Amenity[]
+
+  internetProvider InternetProvider?
+  waterSource      WaterSource?
+  waterDrinkable   Boolean?
+  solarBackupCapacity SolarBackupCapacity?
 
   status   ListingStatus @default(DRAFT)
   isActive Boolean       @default(true)
@@ -241,8 +255,9 @@ model ListingPhoto {
   url      String
   fileName String
 
-  sortOrder Int     @default(0)
-  isCover   Boolean @default(false)
+  sortOrder Int            @default(0)
+  isCover   Boolean        @default(false)
+  category  PhotoCategory?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -319,4 +334,49 @@ enum Amenity {
   GARDEN
   SWIMMING_POOL
   DSTV
+}
+
+enum PhotoCategory {
+  LIVING_ROOM
+  BEDROOM
+  BATHROOM
+  FRONT_YARD
+  PARKING
+  MAIN_ENTRANCE
+  VERANDA
+  BED
+  CORRIDOR
+  BACK_YARD
+}
+
+enum InternetProvider {
+  LIQUID_HOME
+  TELONE
+  STARLINK
+  UTANDE
+  AFRICOM
+  POWERTEL
+  DANDEMUTANDE
+  ZARNET
+  ECONET
+  NETONE
+  TELECEL
+  OTHER
+  NONE
+}
+
+enum WaterSource {
+  BOREHOLE_FRESH_WATER
+  TAP_FRESH_WATER
+  BOREHOLE_AND_TAP
+  NO_RELIABLE_SUPPLY
+  OTHER
+}
+
+enum SolarBackupCapacity {
+  NONE
+  BASIC_500VA_2KVA
+  STANDARD_3_4KVA
+  HIGH_CAPACITY_5_6KVA
+  PREMIUM_7KVA_PLUS
 }

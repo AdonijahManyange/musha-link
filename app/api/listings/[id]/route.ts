@@ -414,14 +414,72 @@ export async function PATCH(
     // ==========================================================
 
     if (status === "PUBLISHED") {
-      const photoCount =
-        listing.photos.length;
+      // ==========================================================
+      // REQUIRED PHOTO CATEGORIES
+      // ==========================================================
+      // A listing must have all required photo categories before
+      // it can be published. Extra optional photos are allowed.
+      const requiredPhotoCategories = {
+        LIVING_ROOM: 2,
+        BEDROOM: 2,
+        BATHROOM: 2,
+        FRONT_YARD: 1,
+        PARKING: 1,
+        MAIN_ENTRANCE: 1,
+        VERANDA: 1,
+      } as const;
 
-      if (photoCount < 5) {
+      // Check how many photos exist in each required category.
+      const missingCategories = Object.entries(
+        requiredPhotoCategories
+      ).filter(([category, requiredCount]) => {
+        const actualCount = listing.photos.filter(
+          (photo) => photo.category === category
+        ).length;
+
+        return actualCount < requiredCount;
+      });
+
+      // Block publishing if any required category is incomplete.
+      if (missingCategories.length > 0) {
+        const categoryLabels: Record<
+          keyof typeof requiredPhotoCategories,
+          string
+        > = {
+          LIVING_ROOM: "Living Room",
+          BEDROOM: "Bedrooms",
+          BATHROOM: "Bathrooms",
+          FRONT_YARD: "Front Yard / Exterior",
+          PARKING: "Parking",
+          MAIN_ENTRANCE: "Main Entrance",
+          VERANDA: "Veranda",
+        };
+
+        const missingDescription = missingCategories
+          .map(([category, requiredCount]) => {
+            const label =
+              categoryLabels[
+                category as keyof typeof requiredPhotoCategories
+              ];
+
+            return `${label} (${requiredCount} required)`;
+          })
+          .join(", ");
+
         return NextResponse.json(
           {
             error:
-              "You need at least 5 photos before publishing this listing.",
+              "You must complete all required photo categories before publishing.",
+            missingCategories: missingCategories.map(
+              ([category, requiredCount]) => ({
+                category,
+                required: requiredCount,
+                uploaded: listing.photos.filter(
+                  (photo) => photo.category === category
+                ).length,
+              })
+            ),
+            details: `Missing or incomplete categories: ${missingDescription}`,
           },
           { status: 400 }
         );

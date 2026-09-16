@@ -29,6 +29,13 @@ type Listing = {
     city: string;
   };
   photos: ListingPhoto[];
+  canPublish: boolean;
+
+  missingPhotoCategories: {
+    category: string;
+    required: number;
+    uploaded: number;
+  }[];
 };
 
 export default function LandlordListingsPage() {
@@ -40,6 +47,9 @@ export default function LandlordListingsPage() {
 
   const [publishingId, setPublishingId] =
     useState<string | null>(null);
+
+  const [confirmedListings, setConfirmedListings] =
+    useState<Record<string, boolean>>({});
 
   const [error, setError] = useState("");
 
@@ -96,19 +106,24 @@ export default function LandlordListingsPage() {
       return;
     }
 
-    const photoCount =
-      listing.photos.length;
-
-    if (photoCount < 5) {
+    if (!listing.canPublish) {
       setError(
-        `You need at least 5 photos before publishing this listing. You currently have ${photoCount}.`
+        "Complete all required photo categories before publishing this listing."
+      );
+
+      return;
+    }
+
+    if (!confirmedListings[listingId]) {
+      setError(
+        "Please confirm that the information and photos in this listing are accurate before publishing."
       );
 
       return;
     }
 
     const confirmed = window.confirm(
-      "Are you sure you want to publish this listing? Students will be able to see it."
+      "Submit this listing for publication? Students will be able to see it once published."
     );
 
     if (!confirmed) {
@@ -404,7 +419,7 @@ export default function LandlordListingsPage() {
                   listing.photos.length;
 
                 const canPublish =
-                  photoCount >= 5;
+                  listing.canPublish;
 
                 const isPublishing =
                   publishingId ===
@@ -544,8 +559,7 @@ export default function LandlordListingsPage() {
 
                         {/* Photo Requirement */}
 
-                        {listing.status ===
-                          "DRAFT" && (
+                        {listing.status === "DRAFT" && (
                           <div className="mt-5 rounded-xl bg-slate-50 p-4">
 
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -556,28 +570,19 @@ export default function LandlordListingsPage() {
                                 </p>
 
                                 <p className="mt-1 text-xs text-slate-600">
-                                  {photoCount < 1
-                                    ? "Add at least 1 photo to save your listing."
-                                    : photoCount < 5
-                                      ? `Add ${
-                                          5 -
-                                          photoCount
-                                        } more ${
-                                          5 -
-                                            photoCount ===
-                                          1
-                                            ? "photo"
-                                            : "photos"
-                                        } before publishing.`
-                                      : "You have enough photos to publish your listing."}
+                                  {canPublish
+                                    ? "All required photo categories are complete. Your listing is ready to publish."
+                                    : "Complete all required photo categories before publishing."}
                                 </p>
                               </div>
 
                               <span className="text-sm font-semibold text-slate-700">
-                                {photoCount}/10
+                                {photoCount}/10 required photos
                               </span>
 
                             </div>
+
+                            {/* Progress */}
 
                             <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
 
@@ -585,9 +590,7 @@ export default function LandlordListingsPage() {
                                 className="h-full rounded-full bg-brand-blue transition-all"
                                 style={{
                                   width: `${Math.min(
-                                    (photoCount /
-                                      10) *
-                                      100,
+                                    (Math.min(photoCount, 10) / 10) * 100,
                                     100
                                   )}%`,
                                 }}
@@ -595,10 +598,96 @@ export default function LandlordListingsPage() {
 
                             </div>
 
-                            <p className="mt-2 text-xs text-slate-500">
-                              We recommend 10 photos
-                              for the best listing.
+                            {/* Missing Categories */}
+
+                            {!canPublish &&
+                              listing.missingPhotoCategories.length > 0 && (
+                                <div className="mt-4">
+
+                                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                    Still needed
+                                  </p>
+
+                                  <div className="mt-2 flex flex-wrap gap-2">
+
+                                    {listing.missingPhotoCategories.map(
+                                      (item) => (
+                                        <span
+                                          key={item.category}
+                                          className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700"
+                                        >
+                                          {item.category
+                                            .replaceAll("_", " ")
+                                            .toLowerCase()
+                                            .replace(
+                                              /\b\w/g,
+                                              (letter) =>
+                                                letter.toUpperCase()
+                                            )}
+                                          : {item.uploaded}/
+                                          {item.required}
+                                        </span>
+                                      )
+                                    )}
+
+                                  </div>
+
+                                </div>
+                              )}
+
+                            {canPublish && (
+                              <p className="mt-3 text-xs font-medium text-emerald-600">
+                                ✅ Required photo coverage complete
+                              </p>
+                            )}
+
+                            <p className="mt-3 text-xs text-slate-500">
+                              You can upload up to 20 photos total, including
+                              optional photos such as beds, corridors and back yard.
                             </p>
+
+                          </div>
+                        )}
+
+                        {/* Publishing Confirmation */}
+
+                        {listing.status === "DRAFT" && (
+                          <div className="mb-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+                            <label className="flex cursor-pointer items-start gap-3">
+
+                              <input
+                                type="checkbox"
+                                checked={
+                                  confirmedListings[listing.id] ?? false
+                                }
+                                onChange={(event) =>
+                                  setConfirmedListings((current) => ({
+                                    ...current,
+                                    [listing.id]:
+                                      event.target.checked,
+                                  }))
+                                }
+                                className="mt-1 h-5 w-5 shrink-0 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                              />
+
+                              <span className="text-sm leading-6 text-slate-700">
+                                <span className="font-semibold text-slate-900">
+                                  I confirm that the information and photos
+                                  in this listing are accurate and represent
+                                  the property as it currently exists.
+                                </span>
+
+                                <span className="mt-1 block text-xs leading-5 text-slate-500">
+                                  By submitting this listing, you acknowledge
+                                  that verification does not automatically
+                                  guarantee approval. Listings may be rejected,
+                                  restricted, suspended or removed if they do
+                                  not meet MushaLink standards.
+                                </span>
+                              </span>
+
+                            </label>
 
                           </div>
                         )}
@@ -650,6 +739,7 @@ export default function LandlordListingsPage() {
                               }
                               disabled={
                                 !canPublish ||
+                                !confirmedListings[listing.id] ||
                                 isPublishing
                               }
                               className="rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-50"

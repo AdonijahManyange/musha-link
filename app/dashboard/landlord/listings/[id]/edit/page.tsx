@@ -15,10 +15,23 @@ type Listing = {
   title: string;
   propertyType: string;
   address: string;
+  suburb: string;
   city: string;
   province: string;
   country: string;
   monthlyRent: number;
+
+  depositRequired: boolean;
+  depositAmount: number | null;
+  additionalFees: string | null;
+  utilitiesIncluded: string | null;
+  internetCharges: string | null;
+
+  internetProvider: string | null;
+  waterSource: string | null;
+  waterDrinkable: boolean | null;
+  solarBackupCapacity: string | null;
+
   roomType: string;
   genderPreference: string;
   universityId: string;
@@ -137,10 +150,23 @@ export default function EditListingPage() {
     title: "",
     propertyType: "",
     address: "",
+    suburb: "",
     city: "",
     province: "",
     country: "",
     monthlyRent: "",
+
+    depositRequired: "",
+    depositAmount: "",
+    additionalFees: "",
+    utilitiesIncluded: "",
+    internetCharges: "",
+
+    internetProvider: "",
+    waterSource: "",
+    waterDrinkable: "",
+    solarBackupCapacity: "",
+
     roomType: "",
     genderPreference: "",
     universityId: "",
@@ -186,6 +212,9 @@ export default function EditListingPage() {
           address:
             loadedListing.address || "",
 
+          suburb:
+            loadedListing.suburb || "",
+
           city:
             loadedListing.city || "",
 
@@ -198,6 +227,40 @@ export default function EditListingPage() {
           monthlyRent:
             loadedListing.monthlyRent?.toString() ||
             "",
+
+          depositRequired:
+            loadedListing.depositRequired
+              ? "yes"
+              : "no",
+
+          depositAmount:
+            loadedListing.depositAmount?.toString() ||
+            "",
+
+          additionalFees:
+            loadedListing.additionalFees || "",
+
+          utilitiesIncluded:
+            loadedListing.utilitiesIncluded || "",
+
+          internetCharges:
+            loadedListing.internetCharges || "",
+
+          internetProvider:
+            loadedListing.internetProvider || "",
+
+          waterSource:
+            loadedListing.waterSource || "",
+
+          waterDrinkable:
+            loadedListing.waterDrinkable === true
+              ? "yes"
+              : loadedListing.waterDrinkable === false
+                ? "no"
+                : "unknown",
+
+          solarBackupCapacity:
+            loadedListing.solarBackupCapacity || "",
 
           roomType:
             loadedListing.roomType || "",
@@ -343,6 +406,9 @@ export default function EditListingPage() {
             address:
               formData.address,
 
+            suburb:
+              formData.suburb,
+
             city:
               formData.city,
 
@@ -356,6 +422,39 @@ export default function EditListingPage() {
               Number(
                 formData.monthlyRent
               ),
+
+            depositRequired:
+              formData.depositRequired === "yes",
+
+            depositAmount:
+              formData.depositRequired === "yes"
+                ? formData.depositAmount
+                : null,
+
+            additionalFees:
+              formData.additionalFees,
+
+            utilitiesIncluded:
+              formData.utilitiesIncluded,
+
+            internetCharges:
+              formData.internetCharges,
+
+            internetProvider:
+              formData.internetProvider || null,
+
+            waterSource:
+              formData.waterSource || null,
+
+            waterDrinkable:
+              formData.waterDrinkable === "yes"
+                ? true
+                : formData.waterDrinkable === "no"
+                  ? false
+                  : null,
+
+            solarBackupCapacity:
+              formData.solarBackupCapacity || null,
 
             roomType:
               formData.roomType,
@@ -611,6 +710,27 @@ export default function EditListingPage() {
                 />
               </div>
 
+              {/* Suburb */}
+
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  Suburb
+                </label>
+
+                <input
+                  type="text"
+                  value={formData.suburb}
+                  onChange={(e) =>
+                    handleChange(
+                      "suburb",
+                      e.target.value
+                    )
+                  }
+                  required
+                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                />
+              </div>
+
               {/* City / Province */}
 
               <div className="grid gap-5 sm:grid-cols-2">
@@ -757,6 +877,141 @@ export default function EditListingPage() {
 
             </div>
 
+            {/* ==================================================
+                PRICING & COSTS
+            ================================================== */}
+
+            <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5">
+
+              <h3 className="text-base font-semibold text-slate-900">
+                Pricing & Costs
+              </h3>
+
+              <div className="mt-5 space-y-5">
+
+                {/* Deposit Required */}
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    Security Deposit Required?
+                  </label>
+
+                  <select
+                    value={formData.depositRequired}
+                    onChange={(e) =>
+                      handleChange(
+                        "depositRequired",
+                        e.target.value
+                      )
+                    }
+                    required
+                    className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                  >
+                    <option value="">
+                      Select an option
+                    </option>
+
+                    <option value="yes">
+                      Yes
+                    </option>
+
+                    <option value="no">
+                      No
+                    </option>
+                  </select>
+                </div>
+
+                {/* Deposit Amount */}
+
+                {formData.depositRequired === "yes" && (
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">
+                      Security Deposit Amount
+                    </label>
+
+                    <input
+                      type="number"
+                      min="0"
+                      value={formData.depositAmount}
+                      onChange={(e) =>
+                        handleChange(
+                          "depositAmount",
+                          e.target.value
+                        )
+                      }
+                      required
+                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                    />
+                  </div>
+                )}
+
+                {/* Additional Fees */}
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    Additional Fees
+                  </label>
+
+                  <textarea
+                    value={formData.additionalFees}
+                    onChange={(e) =>
+                      handleChange(
+                        "additionalFees",
+                        e.target.value
+                      )
+                    }
+                    rows={3}
+                    placeholder="List any additional mandatory fees."
+                    className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                  />
+                </div>
+
+                {/* Utilities */}
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    Utilities
+                  </label>
+
+                  <textarea
+                    value={formData.utilitiesIncluded}
+                    onChange={(e) =>
+                      handleChange(
+                        "utilitiesIncluded",
+                        e.target.value
+                      )
+                    }
+                    rows={3}
+                    required
+                    placeholder="State which utilities are included or excluded."
+                    className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                  />
+                </div>
+
+                {/* Internet Charges */}
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">
+                    Internet Charges
+                  </label>
+
+                  <textarea
+                    value={formData.internetCharges}
+                    onChange={(e) =>
+                      handleChange(
+                        "internetCharges",
+                        e.target.value
+                      )
+                    }
+                    rows={3}
+                    placeholder="State any internet charges or included service."
+                    className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                  />
+                </div>
+
+              </div>
+            </div>
+
             {/* Gender */}
 
             <div className="mt-5">
@@ -868,6 +1123,256 @@ export default function EditListingPage() {
                   : "amenities"}{" "}
                 selected.
               </p>
+            </div>
+
+          </section>
+
+          {/* ==================================================
+              UTILITIES & SERVICES
+          ================================================== */}
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+            <h2 className="text-lg font-semibold text-slate-900">
+              Utilities & Services
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-600">
+              Provide accurate information about internet,
+              water, and backup power available at the property.
+            </p>
+
+            <div className="mt-6 space-y-5">
+
+              {/* Internet Provider */}
+
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  Internet Service Provider
+                </label>
+
+                <select
+                  value={formData.internetProvider}
+                  onChange={(e) =>
+                    handleChange(
+                      "internetProvider",
+                      e.target.value
+                    )
+                  }
+                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                >
+                  <option value="">
+                    Select a provider
+                  </option>
+
+                  <option value="LIQUID_HOME">
+                    Liquid Home
+                  </option>
+
+                  <option value="TELONE">
+                    TelOne
+                  </option>
+
+                  <option value="STARLINK">
+                    Starlink
+                  </option>
+
+                  <option value="UTANDE">
+                    Utande
+                  </option>
+
+                  <option value="AFRICOM">
+                    Africom
+                  </option>
+
+                  <option value="POWERTEL">
+                    Powertel
+                  </option>
+
+                  <option value="DANDEMUTANDE">
+                    Dandemutande
+                  </option>
+
+                  <option value="ZARNET">
+                    Zarnet
+                  </option>
+
+                  <option value="ECONET">
+                    Econet
+                  </option>
+
+                  <option value="NETONE">
+                    NetOne
+                  </option>
+
+                  <option value="TELECEL">
+                    Telecel
+                  </option>
+
+                  <option value="OTHER">
+                    Other
+                  </option>
+
+                  <option value="NONE">
+                    No Internet
+                  </option>
+                </select>
+              </div>
+
+              {/* Water Source */}
+
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  Water Source
+                </label>
+
+                <select
+                  value={formData.waterSource}
+                  onChange={(e) =>
+                    handleChange(
+                      "waterSource",
+                      e.target.value
+                    )
+                  }
+                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                >
+                  <option value="">
+                    Select a water source
+                  </option>
+
+                  <option value="BOREHOLE_FRESH_WATER">
+                    Borehole Fresh Water
+                  </option>
+
+                  <option value="TAP_FRESH_WATER">
+                    Tap Fresh Water
+                  </option>
+
+                  <option value="BOREHOLE_AND_TAP">
+                    Borehole + Tap
+                  </option>
+
+                  <option value="NO_RELIABLE_SUPPLY">
+                    No Reliable Water Supply
+                  </option>
+
+                  <option value="OTHER">
+                    Other
+                  </option>
+                </select>
+              </div>
+
+              {/* Drinkable Water */}
+
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  Drinkable Water
+                </label>
+
+                <select
+                  value={formData.waterDrinkable}
+                  onChange={(e) =>
+                    handleChange(
+                      "waterDrinkable",
+                      e.target.value
+                    )
+                  }
+                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                >
+                  <option value="">
+                    Select an option
+                  </option>
+
+                  <option value="yes">
+                    Yes
+                  </option>
+
+                  <option value="no">
+                    No
+                  </option>
+
+                  <option value="unknown">
+                    Unknown
+                  </option>
+                </select>
+              </div>
+
+              {/* Solar Backup */}
+
+              <div>
+                <label className="text-sm font-medium text-slate-700">
+                  Solar Backup Capacity
+                </label>
+
+                <select
+                  value={formData.solarBackupCapacity}
+                  onChange={(e) =>
+                    handleChange(
+                      "solarBackupCapacity",
+                      e.target.value
+                    )
+                  }
+                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                >
+                  <option value="">
+                    Select backup capacity
+                  </option>
+
+                  <option value="NONE">
+                    No Solar Backup
+                  </option>
+
+                  <option value="BASIC_500VA_2KVA">
+                    Basic Backup — 500VA–2kVA
+                  </option>
+
+                  <option value="STANDARD_3_4KVA">
+                    Standard Backup — 3–4kVA
+                  </option>
+
+                  <option value="HIGH_CAPACITY_5_6KVA">
+                    High-Capacity Backup — 5–6kVA
+                  </option>
+
+                  <option value="PREMIUM_7KVA_PLUS">
+                    Premium Backup — 7+ kVA
+                  </option>
+                </select>
+
+                {formData.solarBackupCapacity !== "" &&
+                  formData.solarBackupCapacity !== "NONE" && (
+                    <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+                      <p className="text-sm font-semibold text-yellow-900">
+                        ☀️ Solar Backup Guide
+                      </p>
+
+                      <p className="mt-2 text-sm leading-6 text-yellow-800">
+                        {formData.solarBackupCapacity ===
+                          "BASIC_500VA_2KVA" &&
+                          "Typically supports lights, Wi-Fi / router, laptops, phones & chargers, and TV."}
+
+                        {formData.solarBackupCapacity ===
+                          "STANDARD_3_4KVA" &&
+                          "Includes Basic Backup, plus fridge / freezer, multiple devices, multiple laptops, and small household appliances."}
+
+                        {formData.solarBackupCapacity ===
+                          "HIGH_CAPACITY_5_6KVA" &&
+                          "Includes Standard Backup, plus electric jugs / kettles, irons, washing machines, and multiple household appliances."}
+
+                        {formData.solarBackupCapacity ===
+                          "PREMIUM_7KVA_PLUS" &&
+                          "Includes High-Capacity Backup, plus higher-power appliances and multiple appliances running together."}
+                      </p>
+
+                      <p className="mt-2 text-xs leading-5 text-yellow-700">
+                        Actual appliance support may vary depending on the
+                        battery, inverter, system configuration, and
+                        simultaneous usage.
+                      </p>
+                    </div>
+                  )}
+              </div>
+
             </div>
 
           </section>
