@@ -581,7 +581,7 @@ export default async function PublicListingPage({
                 >
                   <CalendarDays size={17} />
 
-                  Schedule Viewing
+                  Request Viewing
                 </button>
 
               </div>
@@ -590,54 +590,6 @@ export default async function PublicListingPage({
 
               <div className="my-5 border-t border-slate-200" />
 
-              {/* =================================================
-                  QUICK DETAILS
-              ================================================= */}
-
-              <div>
-                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-                  University
-                </p>
-
-                <p className="mt-1 text-sm font-semibold text-slate-900">
-                  {listing.university.name}
-                </p>
-              </div>
-
-              <div className="mt-5">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-                  Location
-                </p>
-
-                <p className="mt-1 text-sm font-semibold text-slate-900">
-                  {listing.city},{" "}
-                  {listing.province}
-                </p>
-              </div>
-
-              <div className="mt-5">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-                  Room Type
-                </p>
-
-                <p className="mt-1 text-sm font-semibold text-slate-900">
-                  {formatRoomType(
-                    listing.roomType
-                  )}
-                </p>
-              </div>
-
-              <div className="mt-5">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-                  Property Type
-                </p>
-
-                <p className="mt-1 text-sm font-semibold text-slate-900">
-                  {formatPropertyType(
-                    listing.propertyType
-                  )}
-                </p>
-              </div>
 
               {/* =================================================
                   STATUS

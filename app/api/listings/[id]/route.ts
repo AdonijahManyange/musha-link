@@ -140,10 +140,23 @@ export async function PUT(
       title,
       propertyType,
       address,
+      suburb,
       city,
       province,
       country,
       monthlyRent,
+
+      depositRequired,
+      depositAmount,
+      additionalFees,
+      utilitiesIncluded,
+      internetCharges,
+
+      internetProvider,
+      waterSource,
+      waterDrinkable,
+      solarBackupCapacity,
+
       roomType,
       genderPreference,
       universityId,
@@ -159,6 +172,7 @@ export async function PUT(
       !title ||
       !propertyType ||
       !address ||
+      !suburb ||
       !city ||
       !province ||
       !country ||
@@ -247,6 +261,8 @@ export async function PUT(
 
           address: address.trim(),
 
+          suburb: suburb.trim(),
+
           city: city.trim(),
 
           province: province.trim(),
@@ -255,6 +271,57 @@ export async function PUT(
 
           monthlyRent:
             Number(monthlyRent),
+
+          // ----------------------------------------------------------
+          // Pricing & Costs
+          // ----------------------------------------------------------
+
+          depositRequired:
+            Boolean(depositRequired),
+
+          depositAmount:
+            depositRequired && depositAmount
+              ? Number(depositAmount)
+              : null,
+
+          additionalFees:
+            typeof additionalFees === "string"
+              ? additionalFees.trim()
+              : null,
+
+          utilitiesIncluded:
+            typeof utilitiesIncluded === "string"
+              ? utilitiesIncluded.trim()
+              : null,
+
+          internetCharges:
+            typeof internetCharges === "string"
+              ? internetCharges.trim()
+              : null,
+
+          // ----------------------------------------------------------
+          // Utilities & Services
+          // ----------------------------------------------------------
+
+          internetProvider:
+            internetProvider || null,
+
+          waterSource:
+            waterSource || null,
+
+          waterDrinkable:
+            waterDrinkable === true
+              ? true
+              : waterDrinkable === false
+                ? false
+                : null,
+
+          solarBackupCapacity:
+            solarBackupCapacity || null,
+
+          // ----------------------------------------------------------
+          // Other listing details
+          // ----------------------------------------------------------
 
           roomType,
 
@@ -267,9 +334,9 @@ export async function PUT(
               ? description.trim()
               : "",
 
-          // ----------------------------------------------------
+          // ----------------------------------------------------------
           // Replace amenities
-          // ----------------------------------------------------
+          // ----------------------------------------------------------
 
           amenities: selectedAmenities,
         },

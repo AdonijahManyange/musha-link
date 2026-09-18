@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import ListingCard from "@/components/listing/ListingCard";
-import SearchBar from "@/components/home/SearchBar";
+import BrowseFilters from "./BrowseFilters";
+
+
+const BrowseMap = dynamic(
+  () => import("./BrowseMap"),
+  {
+    ssr: false,
+  }
+);
 
 type ListingPhoto = {
   id: string;
@@ -17,13 +27,17 @@ type ListingPhoto = {
 type DatabaseListing = {
   id: string;
   title: string;
+  suburb: string;
   city: string;
   province: string;
+  latitude: number;
+  longitude: number;
   monthlyRent: number;
   propertyType: string;
   roomType: string;
   genderPreference: string;
   description: string;
+  amenities: string[];
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
   isActive: boolean;
   distanceToUniversityKm: number | null;
@@ -55,6 +69,15 @@ export default function BrowseContent() {
 
   const budget =
     searchParams.get("budget") || "";
+
+  const search =
+    searchParams.get("search") || "";
+
+  const gender =
+    searchParams.get("gender") || "";
+
+  const distance =
+    searchParams.get("distance") || "";
 
   useEffect(() => {
     async function loadListings() {
@@ -111,7 +134,38 @@ export default function BrowseContent() {
         !roomType ||
         listing.roomType === roomType;
 
+      const matchesGender =
+        !gender ||
+        listing.genderPreference === gender;
+
+      const matchesDistance =
+        !distance ||
+        (
+          listing.distanceToUniversityKm !== null &&
+          listing.distanceToUniversityKm <=
+            Number(distance)
+        );
+
+      const searchTerm = search.toLowerCase();
+
+      const matchesSearch =
+        !search ||
+        listing.title
+          ?.toLowerCase()
+          .includes(searchTerm) ||
+        listing.suburb
+          ?.toLowerCase()
+          .includes(searchTerm) ||
+        listing.city
+          ?.toLowerCase()
+          .includes(searchTerm) ||
+        listing.university?.name
+          ?.toLowerCase()
+          .includes(searchTerm);
+
       let matchesBudget = true;
+
+
 
       switch (budget) {
         case "under-100":
@@ -138,8 +192,11 @@ export default function BrowseContent() {
       }
 
       return (
+        matchesSearch &&
         matchesRoomType &&
-        matchesBudget
+        matchesBudget &&
+        matchesGender &&
+        matchesDistance
       );
     }
   );
@@ -165,7 +222,7 @@ export default function BrowseContent() {
         university:
           listing.university.name,
 
-        suburb: listing.city,
+        suburb: listing.suburb,
 
         city: listing.city,
 
@@ -205,27 +262,66 @@ export default function BrowseContent() {
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-7xl px-6 py-16">
+      <div className="mx-auto max-w-[1500px] px-8 py-16">
 
       {/* ======================================================
-          HEADER
+          BROWSE HERO
       ====================================================== */}
 
-      <h1 className="text-5xl font-bold tracking-tight text-slate-900">
-        Browse Accommodation
-      </h1>
+      <section className="relative overflow-hidden rounded-3xl">
+        {/* Background image */}
+        <Image
+          src="/images/house3.webp"
+          alt=""
+          fill
+          priority
+          className="scale-105 object-cover opacity-90 blur-[2px]"
+        />
 
-      <p className="mt-3 max-w-2xl text-lg text-slate-600">
-        Find verified student accommodation
-        near your university across Zimbabwe.
-      </p>
+        {/* Soft white overlay */}
+        <div className="absolute inset-0 bg-white/35" />
+
+        {/* Gentle fade toward the bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/35 to-white/65" />
+
+        <div className="relative px-6 pb-24 pt-10 sm:px-8 sm:pb-32 sm:pt-12 md:px-12 md:pt-16">
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900 drop-shadow-[0_2px_3px_rgba(0,0,0,0.35)] md:text-5xl">
+            Browse Accommodation
+          </h1>
+
+          <p className="mt-3 max-w-2xl text-base text-slate-700 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] md:text-lg">
+            Find verified student accommodation near your
+            university across Zimbabwe.
+          </p>
+
+          {/* Trust points */}
+          <div className="mt-7 flex flex-wrap gap-x-8 gap-y-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+              <span className="text-xl">🏠</span>
+              <span>Verified Listings</span>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+              <span className="text-xl">🛡️</span>
+              <span>Safe & Secure</span>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+              <span className="text-xl">👥</span>
+              <span>Built for Students</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ======================================================
-          SEARCH
+          SEARCH & FILTERS
       ====================================================== */}
 
-      <div className="mt-10 rounded-3xl bg-white p-6 shadow-lg">
-        <SearchBar />
+      <div className="relative z-10 -mt-10 px-3 sm:-mt-20 sm:px-5 md:px-8">
+        <div className="rounded-3xl bg-white p-5 shadow-xl ring-1 ring-slate-200 md:p-6">
+          <BrowseFilters />
+        </div>
       </div>
 
       {/* ======================================================
@@ -240,9 +336,15 @@ export default function BrowseContent() {
             : `${filteredListings.length} Listings Found`}
         </h2>
 
-        {(university ||
+        {(search ||
+          university ||
           budget ||
-          roomType) && (
+          roomType ||
+          gender ||
+          distance) && (
+          gender ||
+          distance ||
+          search) && (
           <button
             type="button"
             onClick={() => {
@@ -292,17 +394,29 @@ export default function BrowseContent() {
       {!loading &&
         !error &&
         listingCards.length > 0 && (
-          <div className="mt-8 grid gap-10 md:grid-cols-2 lg:grid-cols-3 animate-in fade-in duration-500">
-
-            {listingCards.map(
-              (listing) => (
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_1.2fr]">
+            {/* Listings */}
+            <div className="grid gap-8 md:grid-cols-2">
+              {listingCards.map((listing) => (
                 <ListingCard
                   key={listing.id}
                   listing={listing}
                 />
-              )
-            )}
+              ))}
+            </div>
 
+            {/* Map */}
+            <BrowseMap
+              listings={filteredListings.map((listing) => ({
+                id: listing.id,
+                title: listing.title,
+                latitude: listing.latitude,
+                longitude: listing.longitude,
+                monthlyRent: listing.monthlyRent,
+                suburb: listing.suburb,
+                city: listing.city,
+              }))}
+            />
           </div>
         )}
 
