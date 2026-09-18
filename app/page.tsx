@@ -4,6 +4,7 @@ import TrustSection from "@/components/home/TrustSection";
 import FeaturedListings from "@/components/home/FeaturedListings";
 import LandlordCTA from "@/components/home/LandlordCTA";
 import Universities from "@/components/home/Universities";
+import StudentAccommodation from "@/components/home/StudentAccommodation";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
       <FeaturedListings />
       <LandlordCTA />
       <Universities />
+      <StudentAccommodation />
     </>
   );
 }

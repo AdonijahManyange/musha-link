@@ -68,17 +68,17 @@ export default async function FeaturedListings() {
             SECTION HEADER
         ===================================================== */}
 
-        <div className="mb-14 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-blue/10 bg-white px-4 py-2 text-sm font-semibold text-brand-blue shadow-sm">
+        <div className="mb-8 text-center md:mb-14">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-blue/10 bg-white px-3 py-1.5 text-xs font-semibold text-brand-blue shadow-sm md:mb-4 md:px-4 md:py-2 md:text-sm">
             <span className="text-base">✦</span>
             Spotlight
           </div>
 
-          <h2 className="text-4xl font-bold tracking-tight text-slate-900">
+         <h2 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
             Spotlight Listings
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">
+          <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 md:mt-4 md:text-lg">
             Premium student accommodation, hand-picked
             for your next home.
           </p>
@@ -108,8 +108,8 @@ export default async function FeaturedListings() {
               <div
                 key={listing.id}
                 className="
-                  w-[88%]
-                  min-w-[88%]
+                  w-[82%]
+                  min-w-[82%]
                   shrink-0
                   snap-start
                 "

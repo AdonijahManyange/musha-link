@@ -9,27 +9,27 @@ export default async function LandlordCTA() {
   const isLandlord = user?.role === "LANDLORD";
 
   return (
-    <section className="bg-gradient-to-r from-[#1C3769] via-[#23427D] to-[#2A4D8F] py-24">
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-12 px-6 lg:flex-row">
+    <section className="bg-gradient-to-r from-[#1C3769] via-[#23427D] to-[#2A4D8F] py-16 md:py-24">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 px-6 md:gap-12 lg:flex-row">
 
         {/* Left Side */}
 
         <div className="flex-1 text-white">
 
-          <span className="rounded-full bg-white/20 px-4 py-2 text-sm font-semibold">
+          <span className="rounded-full bg-white/20 px-3 py-1.5 text-xs font-semibold md:px-4 md:py-2 md:text-sm">
             🏠 For Landlords
           </span>
 
-          <h2 className="mt-6 text-5xl font-bold leading-tight">
+          <h2 className="mt-5 text-4xl font-bold leading-tight md:mt-6 md:text-5xl">
             Fill Your Rooms Faster.
           </h2>
 
-          <p className="mt-6 max-w-xl text-lg text-blue-100">
+          <p className="mt-4 max-w-xl text-base text-blue-100 md:mt-6 md:text-lg">
             Reach thousands of university students across Zimbabwe
             looking for safe, verified accommodation.
           </p>
 
-          <div className="mt-10 space-y-4 text-lg">
+          <div className="mt-7 space-y-3 text-base md:mt-10 md:space-y-4 md:text-lg">
 
             <div>✅ Free landlord account</div>
 
