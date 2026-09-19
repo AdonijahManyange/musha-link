@@ -279,17 +279,12 @@ export default function BrowseContent() {
         />
 
         {/* Warm khaki glow behind the hero content */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to right, rgba(245, 239, 220, 0.95) 0%, rgba(245, 239, 220, 0.78) 28%, rgba(245, 239, 220, 0.45) 48%, rgba(245, 239, 220, 0.08) 72%, transparent 100%)",
-          }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#F5EFDC]/95 via-[#F5EFDC]/80 to-transparent" />
+        <div className="absolute inset-y-0 left-0 w-[65%] bg-[#F5EFDC]/25 blur-2xl" />
 
         
 
-        <div className="relative px-5 pb-20 pt-10 sm:px-8 sm:pb-32 sm:pt-14 md:px-12 md:pt-16">
+        <div className="relative px-5 pb-16 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:px-12 md:pt-16">
           <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight drop-shadow-[0_2px_3px_rgba(0,0,0,0.18)] sm:text-5xl md:text-6xl">
             <span className="text-[#183B73]">Browse</span>
             <br />
@@ -299,24 +294,23 @@ export default function BrowseContent() {
           </h1>
 
 
-          <p className="mt-3 max-w-xl text-sm font-semibold leading-6 text-[#183B73] sm:text-base md:text-lg">
-            Find verified student accommodation near your
-            university across Zimbabwe.
+          <p className="mt-3 max-w-xl text-sm font-bold leading-6 text-[#102A56] drop-shadow-[0_1px_1px_rgba(255,255,255,0.55)] sm:text-base md:text-lg">
+            Find your next student home in Zimbabwe.
           </p>
 
           {/* Trust points */}
-          <div className="mt-7 flex flex-wrap gap-2.5 sm:mt-8 sm:gap-3">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/55 px-3 py-1.5 text-xs font-semibold text-[#183B73] backdrop-blur-sm">
+          <div className="mt-8 hidden flex-wrap items-center gap-3 sm:flex">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/55 px-3 py-1.5 text-xs font-bold text-[#183B73] backdrop-blur-sm">
               <span>✓</span>
               <span>Verified Listings</span>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/55 px-3 py-1.5 text-xs font-semibold text-[#183B73] backdrop-blur-sm">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/55 px-3 py-1.5 text-xs font-bold text-[#183B73] backdrop-blur-sm">
               <span>🛡️</span>
               <span>Safe & Secure</span>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/55 px-3 py-1.5 text-xs font-semibold text-[#183B73] backdrop-blur-sm">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/55 px-3 py-1.5 text-xs font-bold text-[#183B73] backdrop-blur-sm">
               <span>👥</span>
               <span>Built for Students</span>
             </div>
