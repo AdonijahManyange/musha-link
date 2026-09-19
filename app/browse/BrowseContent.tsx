@@ -282,8 +282,8 @@ export default function BrowseContent() {
                 translate-x-[13%]
                 object-[78%_85%]
                 md:scale-100
-                md:translate-x-0
-                md:object-[65%_0%]
+                md:translate-x-20
+                md:object-[65%_25%]
               "
             />
           </div>
