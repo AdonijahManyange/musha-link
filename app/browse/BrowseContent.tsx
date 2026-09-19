@@ -275,38 +275,42 @@ export default function BrowseContent() {
           alt=""
           fill
           priority
-          className="scale-105 object-cover opacity-90 blur-[2px]"
+          className="object-cover"
         />
 
-        {/* Soft white overlay */}
-        <div className="absolute inset-0 bg-white/35" />
+        {/* Warm khaki glow behind the hero content */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_45%,rgba(245,239,220,0.96)_0%,rgba(245,239,220,0.82)_25%,rgba(245,239,220,0.48)_43%,rgba(245,239,220,0.08)_66%,transparent_78%)]" />
 
-        {/* Gentle fade toward the bottom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/35 to-white/65" />
+        
 
-        <div className="relative px-6 pb-24 pt-10 sm:px-8 sm:pb-32 sm:pt-12 md:px-12 md:pt-16">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 drop-shadow-[0_2px_3px_rgba(0,0,0,0.35)] md:text-5xl">
-            Browse Accommodation
+        <div className="relative px-6 pb-28 pt-12 sm:px-8 sm:pb-32 sm:pt-14 md:px-12 md:pt-16">
+          <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
+            <span className="text-[#183B73]">Browse</span>
+            <br />
+            <span className="text-[#2FA64A]">
+              Accommodation
+            </span>
           </h1>
 
-          <p className="mt-3 max-w-2xl text-base text-slate-700 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)] md:text-lg">
+
+          <p className="mt-3 max-w-2xl text-base font-semibold text-[#183B73] md:text-lg">
             Find verified student accommodation near your
             university across Zimbabwe.
           </p>
 
           {/* Trust points */}
-          <div className="mt-7 flex flex-wrap gap-x-8 gap-y-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+          <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-[#183B73]">
               <span className="text-xl">🏠</span>
               <span>Verified Listings</span>
             </div>
 
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+            <div className="flex items-center gap-2 text-sm font-semibold text-[#183B73]">
               <span className="text-xl">🛡️</span>
               <span>Safe & Secure</span>
             </div>
 
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+            <div className="flex items-center gap-2 text-sm font-semibold text-[#183B73]">
               <span className="text-xl">👥</span>
               <span>Built for Students</span>
             </div>
