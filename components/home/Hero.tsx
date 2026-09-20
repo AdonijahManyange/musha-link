@@ -1,5 +1,5 @@
 import Image from "next/image";
-import SearchBar from "./SearchBar";
+import BrowseFilters from "@/components/browse/BrowseFilters";
 import { Suspense } from "react";
 
 export default function Hero() {
@@ -39,11 +39,11 @@ export default function Hero() {
           Verified student accommodation near Zimbabwe's leading universities.
         </p>
 
-       <div className="mt-8 w-full">
-         <Suspense fallback={<div>Loading...</div>}>
-           <SearchBar />
-         </Suspense>
-       </div>
+       <div className="mt-8 w-full max-w-5xl">
+        <Suspense fallback={<div>Loading...</div>}>
+          <BrowseFilters variant="hero" />
+        </Suspense>
+      </div>
       </div>
     </section>
   );

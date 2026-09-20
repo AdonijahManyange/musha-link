@@ -38,7 +38,14 @@ const DISTANCE_OPTIONS = [
   { value: "10", label: "Within 10 km" },
 ];
 
-export default function BrowseFilters() {
+type BrowseFiltersProps = {
+  variant?: "browse" | "hero";
+};
+
+export default function BrowseFilters({
+  variant = "browse",
+}: BrowseFiltersProps) {
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -192,7 +199,13 @@ export default function BrowseFilters() {
     distance;
 
   return (
-    <section className="w-full rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section
+      className={
+        variant === "hero"
+          ? "w-full rounded-3xl border border-white/60 bg-white/95 p-3 shadow-2xl backdrop-blur-sm sm:p-4"
+          : "w-full rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+      }
+    >
 
       {/* Search */}
 
@@ -215,14 +228,22 @@ export default function BrowseFilters() {
               }
             }}
             placeholder="Search by city, suburb or university..."
-            className="w-full min-w-0 rounded-2xl border border-slate-300 bg-slate-50 px-5 py-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-blue focus:bg-white focus:ring-2 focus:ring-brand-blue/10"
+            className={`w-full min-w-0 rounded-2xl border border-slate-300 bg-slate-50 px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-blue focus:bg-white focus:ring-2 focus:ring-brand-blue/10 ${
+              variant === "hero"
+                ? "py-3"
+                : "py-3.5"
+            }`}
           />
         </div>
 
         <button
           type="button"
           onClick={applyFilters}
-          className="rounded-2xl bg-brand-blue px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-blue-dark"
+          className={`rounded-2xl bg-brand-blue px-7 text-sm font-semibold text-white transition hover:bg-brand-blue-dark ${
+            variant === "hero"
+              ? "py-3"
+              : "py-3.5"
+          }`}
         >
           Search
         </button>
@@ -231,7 +252,13 @@ export default function BrowseFilters() {
 
       {/* Filter Controls */}
 
-      <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div
+        className={`grid min-w-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 ${
+          variant === "hero"
+            ? "mt-3 gap-2.5"
+            : "mt-4 gap-3"
+        }`}
+      >
 
         {/* University */}
 
@@ -240,7 +267,7 @@ export default function BrowseFilters() {
           onChange={(e) =>
             setUniversity(e.target.value)
           }
-          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-brand-blue"
+          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-blue"
         >
           <option value="">
             University
@@ -263,7 +290,7 @@ export default function BrowseFilters() {
           onChange={(e) =>
             setBudget(e.target.value)
           }
-          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-brand-blue"
+          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-blue"
         >
           {BUDGET_OPTIONS.map(
             (option) => (
@@ -284,7 +311,7 @@ export default function BrowseFilters() {
           onChange={(e) =>
             setRoomType(e.target.value)
           }
-          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-brand-blue"
+          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-blue"
         >
           {ROOM_TYPES.map(
             (option) => (
@@ -305,7 +332,7 @@ export default function BrowseFilters() {
           onChange={(e) =>
             setGender(e.target.value)
           }
-          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-brand-blue"
+          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-blue"
         >
           {GENDER_OPTIONS.map(
             (option) => (
@@ -326,7 +353,7 @@ export default function BrowseFilters() {
           onChange={(e) =>
             setDistance(e.target.value)
           }
-          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-brand-blue"
+          className="w-full min-w-0 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-blue"
         >
           {DISTANCE_OPTIONS.map(
             (option) => (
@@ -344,6 +371,7 @@ export default function BrowseFilters() {
 
       {/* Bottom Row */}
 
+      {variant === "browse" && (
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
 
         <p className="text-sm text-slate-500">
@@ -361,6 +389,7 @@ export default function BrowseFilters() {
         )}
 
       </div>
+    )}
 
     </section>
   );
