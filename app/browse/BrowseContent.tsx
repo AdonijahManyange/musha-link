@@ -60,6 +60,8 @@ export default function BrowseContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [sort, setSort] = useState("recommended");
+
   const university =
     searchParams.get("university") || "";
 
@@ -200,11 +202,51 @@ export default function BrowseContent() {
     }
   );
 
+  const sortedListings = [...filteredListings].sort(
+  (a, b) => {
+    switch (sort) {
+      case "price-low":
+        return a.monthlyRent - b.monthlyRent;
+
+      case "price-high":
+        return b.monthlyRent - a.monthlyRent;
+
+      case "distance":
+        if (
+          a.distanceToUniversityKm === null
+        ) {
+          return 1;
+        }
+
+        if (
+          b.distanceToUniversityKm === null
+        ) {
+          return -1;
+        }
+
+        return (
+          a.distanceToUniversityKm -
+          b.distanceToUniversityKm
+        );
+
+      case "newest":
+        // The API currently returns newest first,
+        // so keep the existing order for now.
+        return 0;
+
+      case "recommended":
+      default:
+        // Keep the existing API order.
+        return 0;
+    }
+  }
+);
+
   // ============================================================
   // CONVERT DATABASE LISTINGS TO LISTING CARD FORMAT
   // ============================================================
 
-  const listingCards = filteredListings.map(
+  const listingCards = sortedListings.map(
     (listing) => {
       const coverPhoto =
         listing.photos.find(
@@ -279,7 +321,7 @@ export default function BrowseContent() {
               className="
                 object-cover
                 scale-[1.5]
-                translate-x-[13%]
+                translate-x-[25%]
                 object-[78%_85%]
                 md:scale-100
                 md:translate-x-20
@@ -352,30 +394,72 @@ export default function BrowseContent() {
             RESULTS HEADER
         ====================================================== */}
 
-        <div className="mt-14 flex items-center justify-between">
+        <div className="mt-14 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
           <h2 className="text-2xl font-bold text-slate-900">
             {loading
               ? "Loading listings..."
-              : `${filteredListings.length} Listings Found`}
+              : `${sortedListings.length} Listings Found`}
           </h2>
 
-          {(search ||
-            university ||
-            budget ||
-            roomType ||
-            gender ||
-            distance) && (
-            <button
-              type="button"
-              onClick={() => {
-                router.replace("/browse");
-              }}
-              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+          <div className="flex items-center gap-3">
+
+            {/* Sort */}
+            <label
+              htmlFor="sort"
+              className="text-sm font-medium text-slate-600"
             >
-              Reset Filters
-            </button>
-          )}
+              Sort:
+            </label>
+
+            <select
+              id="sort"
+              value={sort}
+              onChange={(event) =>
+                setSort(event.target.value)
+              }
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/10"
+            >
+              <option value="recommended">
+                Recommended
+              </option>
+
+              <option value="price-low">
+                Price: Low to High
+              </option>
+
+              <option value="price-high">
+                Price: High to Low
+              </option>
+
+              <option value="distance">
+                Distance: Nearest First
+              </option>
+
+              <option value="newest">
+                Newest Listings
+              </option>
+            </select>
+
+            {/* Reset Filters */}
+            {(search ||
+              university ||
+              budget ||
+              roomType ||
+              gender ||
+              distance) && (
+              <button
+                type="button"
+                onClick={() => {
+                  router.replace("/browse");
+                }}
+                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                Reset Filters
+              </button>
+            )}
+
+          </div>
 
         </div>
 
