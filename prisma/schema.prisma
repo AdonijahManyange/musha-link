@@ -113,7 +113,29 @@ model LandlordVerification {
 
   status VerificationStatus @default(PENDING)
 
+  // ==========================================================
+  // DIDIT IDENTITY VERIFICATION
+  // ==========================================================
+
+  diditSessionId    String?
+  identityVerified  Boolean @default(false)
+  livenessVerified  Boolean @default(false)
+  faceMatchVerified Boolean @default(false)
+
+  // ==========================================================
+  // PROPERTY OWNERSHIP
+  // ==========================================================
+
+  titleDeedUrl String?
+
+  titleDeedStatus VerificationStatus @default(PENDING)
+
+  // ==========================================================
+  // ADMIN REVIEW
+  // ==========================================================
+
   rejectionReason String?
+  reviewedById    String?
   reviewedAt      DateTime?
   submittedAt     DateTime?
 
@@ -121,6 +143,7 @@ model LandlordVerification {
   updatedAt DateTime @updatedAt
 
   @@index([status])
+  @@index([titleDeedStatus])
 }
 
 // ============================================================
@@ -209,9 +232,9 @@ model Listing {
 
   amenities Amenity[]
 
-  internetProvider InternetProvider?
-  waterSource      WaterSource?
-  waterDrinkable   Boolean?
+  internetProvider    InternetProvider?
+  waterSource         WaterSource?
+  waterDrinkable      Boolean?
   solarBackupCapacity SolarBackupCapacity?
 
   status   ListingStatus @default(DRAFT)

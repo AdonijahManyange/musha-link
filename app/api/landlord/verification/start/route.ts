@@ -24,43 +24,55 @@ export async function POST() {
     }
 
     // ------------------------------------------------------------
-    // CREATE DIDIT VERIFICATION SESSION
-    // ------------------------------------------------------------
+// CREATE / RESET LANDLORD VERIFICATION
+// ------------------------------------------------------------
 
-    const session = await createDiditVerificationSession(user.id);
+const verification = await prisma.landlordVerification.upsert({
+  where: {
+    landlordId: user.id,
+  },
+  update: {
+    status: "PENDING",
+    rejectionReason: null,
+    reviewedAt: null,
+    submittedAt: new Date(),
+  },
+  create: {
+    landlordId: user.id,
+    status: "PENDING",
+    submittedAt: new Date(),
+  },
+});
 
-    if (!session.url) {
-      console.error("Unexpected Didit response:", session);
+// ------------------------------------------------------------
+// CREATE DIDIT VERIFICATION SESSION
+// ------------------------------------------------------------
 
-      return NextResponse.json(
-        {
-          error:
-            "Didit did not return a hosted verification URL.",
-        },
-        { status: 502 }
-      );
-    }
+const session = await createDiditVerificationSession(user.id);
 
-    // ------------------------------------------------------------
-    // CREATE / RESET LANDLORD VERIFICATION
-    // ------------------------------------------------------------
+if (!session.url || !session.session_id) {
+  console.error("Unexpected Didit response:", session);
 
-    await prisma.landlordVerification.upsert({
-      where: {
-        landlordId: user.id,
-      },
-      update: {
-        status: "PENDING",
-        rejectionReason: null,
-        reviewedAt: null,
-        submittedAt: new Date(),
-      },
-      create: {
-        landlordId: user.id,
-        status: "PENDING",
-        submittedAt: new Date(),
-      },
-    });
+  return NextResponse.json(
+    {
+      error: "Didit did not return a valid verification session.",
+    },
+    { status: 502 }
+  );
+}
+
+// ------------------------------------------------------------
+// SAVE DIDIT SESSION ID
+// ------------------------------------------------------------
+
+await prisma.landlordVerification.update({
+  where: {
+    id: verification.id,
+  },
+  data: {
+    diditSessionId: session.session_id,
+  },
+});
 
     // ------------------------------------------------------------
     // RETURN DIDIT SESSION

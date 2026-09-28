@@ -1,3 +1,4 @@
+import TitleDeedUpload from "./TitleDeedUpload";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -24,9 +25,24 @@ export default async function LandlordVerificationPage() {
 
   const status = verification?.status ?? "NOT_STARTED";
 
-  const isVerified = status === "APPROVED";
+  const identityVerified =
+    verification?.identityVerified &&
+    verification?.livenessVerified &&
+    verification?.faceMatchVerified;
+
+  const titleDeedUploaded =
+    Boolean(verification?.titleDeedUrl);
+
+  const titleDeedApproved =
+    verification?.titleDeedStatus === "APPROVED";
+
+  const isVerified =
+    verification?.status === "APPROVED" &&
+    titleDeedApproved;
+
   const isPending =
-    status === "PENDING" || status === "ACTION_REQUIRED";
+    status === "PENDING" ||
+    status === "ACTION_REQUIRED";
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12">
@@ -69,12 +85,12 @@ export default async function LandlordVerificationPage() {
 
               <div>
                 <h2 className="font-semibold text-emerald-900">
-                  Your account is verified
+                  Your account is fully verified
                 </h2>
 
                 <p className="mt-1 text-sm text-emerald-800">
-                  Your identity has been successfully verified. You can now
-                  create and manage property listings on MushaLink.
+                  Your identity and property ownership have been verified by
+                  MushaLink.
                 </p>
               </div>
             </div>
@@ -89,92 +105,131 @@ export default async function LandlordVerificationPage() {
             </div>
           </div>
         ) : (
-          <>
+          <div className="mt-8 space-y-6">
+
             {/* ================================================== */}
-            {/* PENDING */}
+            {/* STEP 1 — IDENTITY */}
             {/* ================================================== */}
 
-            {isPending && (
-              <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 h-3 w-3 rounded-full bg-amber-500" />
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                    identityVerified
+                      ? "bg-emerald-500 text-white"
+                      : "bg-brand-blue text-white"
+                  }`}
+                >
+                  {identityVerified ? "✓" : "1"}
+                </div>
 
-                  <div>
-                    <h2 className="font-semibold text-slate-900">
-                      Verification in progress
-                    </h2>
+                <div className="flex-1">
+                  <h2 className="text-xl font-semibold text-slate-900">
+                    Identity verification
+                  </h2>
 
-                    <p className="mt-1 text-sm text-slate-600">
-                      Your verification is currently being processed.
-                      We'll update your account once the review is complete.
-                    </p>
-                  </div>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Verify your government-issued ID, liveness, and face match
+                    through our secure verification provider.
+                  </p>
+
+                  {identityVerified ? (
+                    <div className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                      Identity verification completed ✓
+                    </div>
+                  ) : (
+                    <div className="mt-5">
+                      <StartVerificationButton />
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+            </section>
 
             {/* ================================================== */}
-            {/* NOT VERIFIED */}
+            {/* STEP 2 — TITLE DEED */}
             {/* ================================================== */}
 
-            {!isPending && (
-              <>
-                <div className="mt-8 rounded-2xl border border-orange-200 bg-orange-50 p-5">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1 h-3 w-3 rounded-full bg-orange-500" />
+            {identityVerified && !titleDeedApproved && (
+              <section>
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-blue text-sm font-bold text-white">
+                      2
+                    </div>
 
                     <div>
-                      <h2 className="font-semibold text-slate-900">
-                        Verification required
+                      <h2 className="text-xl font-semibold text-slate-900">
+                        Property ownership
                       </h2>
 
                       <p className="mt-1 text-sm text-slate-600">
-                        Complete identity verification before creating
-                        property listings.
+                        Upload the title deed for the property you intend to list
+                        on MushaLink.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Requirements */}
-                <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <h2 className="text-xl font-semibold text-slate-900">
-                    What you'll need
-                  </h2>
+                {titleDeedUploaded ? (
+                  <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 h-3 w-3 rounded-full bg-amber-500" />
 
-                  <div className="mt-5 space-y-4">
+                      <div>
+                        <h3 className="font-semibold text-slate-900">
+                          Title deed submitted
+                        </h3>
 
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <h3 className="font-semibold text-slate-900">
-                        1. Government-issued ID
-                      </h3>
+                        <p className="mt-1 text-sm text-slate-600">
+                          Your title deed is waiting for MushaLink admin review.
+                        </p>
 
-                      <p className="mt-1 text-sm text-slate-600">
-                        Upload a clear copy of your national ID, passport,
-                        or driver's license.
-                      </p>
+                        {verification?.rejectionReason && (
+                          <p className="mt-3 text-sm text-red-600">
+                            Previous review:
+                            {" "}
+                            {verification.rejectionReason}
+                          </p>
+                        )}
+                      </div>
                     </div>
-
-                    <div className="rounded-xl bg-slate-50 p-4">
-                      <h3 className="font-semibold text-slate-900">
-                        2. Identity verification
-                      </h3>
-
-                      <p className="mt-1 text-sm text-slate-600">
-                        Complete the secure identity verification process.
-                      </p>
-                    </div>
-
                   </div>
-                </div>
-
-                {/* Start Verification */}
-                <div className="mt-8 flex justify-end">
-                  <StartVerificationButton />
-                </div>
-              </>
+                ) : (
+                  <TitleDeedUpload />
+                )}
+              </section>
             )}
-          </>
+
+            {/* ================================================== */}
+            {/* STEP 3 — ADMIN REVIEW */}
+            {/* ================================================== */}
+
+            {identityVerified && titleDeedUploaded && !titleDeedApproved && (
+              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-600">
+                    3
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-900">
+                      MushaLink review
+                    </h2>
+
+                    <p className="mt-1 text-sm text-slate-600">
+                      Our team will review your title deed before your account
+                      receives verified landlord status.
+                    </p>
+
+                    <div className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                      Verification is still in progress.
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+          </div>
         )}
 
         {/* Privacy Notice */}

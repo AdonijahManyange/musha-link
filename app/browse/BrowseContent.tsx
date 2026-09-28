@@ -386,7 +386,7 @@ export default function BrowseContent() {
 
         <div className="relative z-10 -mt-10 px-3 sm:-mt-20 sm:px-5 md:px-8">
           <div className="rounded-3xl bg-white p-5 shadow-xl ring-1 ring-slate-200 md:p-6">
-            <BrowseFilters variant="hero" />
+            <BrowseFilters />
           </div>
         </div>
 

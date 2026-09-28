@@ -177,7 +177,7 @@ export const { handlers, auth } = NextAuth({
               ? "LANDLORD"
               : "STUDENT",
 
-          verified: true,
+          verified: false,
         },
       });
 

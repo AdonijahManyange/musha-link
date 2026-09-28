@@ -5,18 +5,52 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    console.log("DIDit webhook received:", body);
+    console.log("========== DIDIT WEBHOOK ==========");
+    console.log("Full payload:", JSON.stringify(body, null, 2));
 
-    const {
-      session_id,
-      status,
-      vendor_data,
-    } = body;
+    const sessionId = body.session_id;
+    const status = body.status;
+    const vendorData = body.vendor_data;
 
-    if (!session_id || !status || !vendor_data) {
+    console.log("session_id:", sessionId);
+    console.log("status:", status);
+    console.log("vendor_data:", vendorData);
+
+    if (!sessionId || !status || !vendorData) {
+      console.error("Missing required Didit webhook fields.");
+
       return NextResponse.json(
         { error: "Invalid webhook payload" },
         { status: 400 }
+      );
+    }
+
+    const verification =
+      await prisma.landlordVerification.findUnique({
+        where: {
+          landlordId: vendorData,
+        },
+      });
+
+    console.log(
+      "Verification found:",
+      verification
+        ? {
+            id: verification.id,
+            landlordId: verification.landlordId,
+            diditSessionId: verification.diditSessionId,
+          }
+        : null
+    );
+
+    if (!verification) {
+      console.error(
+        `No verification record found for landlord ${vendorData}`
+      );
+
+      return NextResponse.json(
+        { error: "Verification record not found" },
+        { status: 404 }
       );
     }
 
@@ -25,30 +59,30 @@ export async function POST(request: Request) {
     // ------------------------------------------------------------
 
     if (status === "Approved") {
-      await prisma.$transaction([
-        prisma.landlordVerification.update({
+      const updated =
+        await prisma.landlordVerification.update({
           where: {
-            landlordId: vendor_data,
+            landlordId: vendorData,
           },
           data: {
-            status: "APPROVED",
-            reviewedAt: new Date(),
-          },
-        }),
+            diditSessionId: sessionId,
+            identityVerified: true,
+            livenessVerified: true,
+            faceMatchVerified: true,
 
-        prisma.user.update({
-          where: {
-            id: vendor_data,
+            // Still requires title deed approval.
+            status: "PENDING",
+            rejectionReason: null,
           },
-          data: {
-            verified: true,
-          },
-        }),
-      ]);
+        });
 
-      console.log(
-        `DIDit verification approved for landlord ${vendor_data}`
-      );
+      console.log("✅ DIDIT APPROVED");
+      console.log({
+        identityVerified: updated.identityVerified,
+        livenessVerified: updated.livenessVerified,
+        faceMatchVerified: updated.faceMatchVerified,
+        status: updated.status,
+      });
     }
 
     // ------------------------------------------------------------
@@ -58,9 +92,13 @@ export async function POST(request: Request) {
     else if (status === "Declined") {
       await prisma.landlordVerification.update({
         where: {
-          landlordId: vendor_data,
+          landlordId: vendorData,
         },
         data: {
+          diditSessionId: sessionId,
+          identityVerified: false,
+          livenessVerified: false,
+          faceMatchVerified: false,
           status: "REJECTED",
           reviewedAt: new Date(),
         },
@@ -68,16 +106,14 @@ export async function POST(request: Request) {
 
       await prisma.user.update({
         where: {
-          id: vendor_data,
+          id: vendorData,
         },
         data: {
           verified: false,
         },
       });
 
-      console.log(
-        `DIDit verification declined for landlord ${vendor_data}`
-      );
+      console.log("❌ DIDIT DECLINED");
     }
 
     // ------------------------------------------------------------
@@ -87,16 +123,15 @@ export async function POST(request: Request) {
     else if (status === "In Review") {
       await prisma.landlordVerification.update({
         where: {
-          landlordId: vendor_data,
+          landlordId: vendorData,
         },
         data: {
+          diditSessionId: sessionId,
           status: "ACTION_REQUIRED",
         },
       });
 
-      console.log(
-        `DIDit verification requires review for landlord ${vendor_data}`
-      );
+      console.log("⚠️ DIDIT IN REVIEW");
     }
 
     // ------------------------------------------------------------
@@ -106,33 +141,34 @@ export async function POST(request: Request) {
     else if (status === "Resubmitted") {
       await prisma.landlordVerification.update({
         where: {
-          landlordId: vendor_data,
+          landlordId: vendorData,
         },
         data: {
-          status: "ACTION_REQUIRED",
+          diditSessionId: sessionId,
+          status: "PENDING",
         },
       });
 
-      console.log(
-        `DIDit verification resubmitted for landlord ${vendor_data}`
-      );
+      console.log("🔄 DIDIT RESUBMITTED");
     }
 
     // ------------------------------------------------------------
-    // OTHER STATUS
+    // UNKNOWN STATUS
     // ------------------------------------------------------------
 
     else {
-      console.log(
-        `DIDit status received: ${status}`
+      console.warn(
+        `⚠️ Unknown Didit status received: "${status}"`
       );
     }
+
+    console.log("========== END DIDIT WEBHOOK ==========");
 
     return NextResponse.json({
       received: true,
     });
   } catch (error) {
-    console.error("DIDit webhook error:", error);
+    console.error("❌ DIDIT WEBHOOK ERROR:", error);
 
     return NextResponse.json(
       {
