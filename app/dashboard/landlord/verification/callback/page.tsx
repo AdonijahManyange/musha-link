@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function VerificationCallback() {
-  redirect("/dashboard/landlord");
+  redirect("/dashboard/landlord/verification");
 }
