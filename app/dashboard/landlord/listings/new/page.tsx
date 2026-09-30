@@ -537,7 +537,7 @@ export default function NewListingPage() {
                           e.target.value
                         )
                       }
-                      placeholder="e.g. 123 Gukurahundi Avenue"
+                      placeholder="e.g. Murambi Drive"
                       required
                       className="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
                     />
