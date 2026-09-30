@@ -272,14 +272,17 @@ export default async function PublicListingPage({
               </section>
             )}
 
-            {/* Location */}
+            {/* ==================================================
+                SHORT LOCATION
+            ================================================== */}
 
             <div className="mt-1 flex items-center gap-2 text-sm text-slate-500">
               <MapPin size={16} />
 
               <span>
-                {listing.city},{" "}
-                {listing.province}
+                {listing.suburb
+                  ? `${listing.suburb}, ${listing.city}, ${listing.province}`
+                  : `${listing.city}, ${listing.province}`}
               </span>
             </div>
 
@@ -456,13 +459,21 @@ export default async function PublicListingPage({
                   />
 
                   <div>
+                    {/* Suburb + City + Province */}
+
                     <p className="font-medium text-slate-900">
-                      {listing.city}, {listing.province}
+                      {listing.suburb
+                        ? `${listing.suburb}, ${listing.city}, ${listing.province}`
+                        : `${listing.city}, ${listing.province}`}
                     </p>
+
+                    {/* Country */}
 
                     <p className="mt-1 text-sm text-slate-500">
                       {listing.country}
                     </p>
+
+                    {/* Distance */}
 
                     {listing.distanceToUniversityKm !== null && (
                       <p className="mt-3 text-sm text-slate-500">
@@ -589,7 +600,6 @@ export default async function PublicListingPage({
               {/* Divider */}
 
               <div className="my-5 border-t border-slate-200" />
-
 
               {/* =================================================
                   STATUS
@@ -910,6 +920,21 @@ function getAmenityDetails(
     SWIMMING_POOL: {
       label: "Swimming Pool",
       emoji: "🏊",
+    },
+
+    SMART_TV: {
+      label: "Smart TV",
+      emoji: "📺",
+    },
+
+    NETFLIX: {
+      label: "Netflix",
+      emoji: "🎬",
+    },
+
+    PRIME_VIDEO: {
+      label: "Prime Video",
+      emoji: "▶️",
     },
 
     DSTV: {
