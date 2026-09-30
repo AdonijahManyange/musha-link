@@ -126,9 +126,7 @@ model LandlordVerification {
   // PROPERTY OWNERSHIP
   // ==========================================================
 
-  titleDeedUrl String?
-
-  titleDeedStatus VerificationStatus @default(PENDING)
+  
 
   // ==========================================================
   // ADMIN REVIEW
@@ -143,7 +141,6 @@ model LandlordVerification {
   updatedAt DateTime @updatedAt
 
   @@index([status])
-  @@index([titleDeedStatus])
 }
 
 // ============================================================
@@ -242,6 +239,7 @@ model Listing {
 
   photos           ListingPhoto[]
   listingAmenities ListingAmenity[]
+  bathrooms        ListingBathroom[]
 
   @@index([landlordId])
   @@index([universityId])
@@ -264,6 +262,33 @@ model ListingAmenity {
   @@unique([listingId, amenity])
   @@index([listingId])
   @@index([amenity])
+}
+
+// ============================================================
+// LISTING BATHROOM
+// ============================================================
+
+model ListingBathroom {
+  id String @id @default(cuid())
+
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // Bathroom number/order
+  sortOrder Int @default(0)
+
+  // Whether the bathroom is inside the main house/property
+  // or outside/separate from the main property.
+  location BathroomLocation @default(INSIDE)
+
+  // Fixtures/features available in this bathroom
+  features BathroomFeature[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([listingId])
+  @@index([listingId, sortOrder])
 }
 
 // ============================================================
@@ -303,7 +328,9 @@ enum Role {
 
 enum VerificationDocumentType {
   ID
-  UTILITY_BILL
+  TITLE_DEED
+  WATER_BILL
+  ELECTRICITY_BILL
 }
 
 enum VerificationStatus {
@@ -356,7 +383,28 @@ enum Amenity {
   STUDY_AREA
   GARDEN
   SWIMMING_POOL
+
+  // Entertainment
+  SMART_TV
+  NETFLIX
+  PRIME_VIDEO
   DSTV
+}
+
+// ============================================================
+// BATHROOM ENUMS
+// ============================================================
+
+enum BathroomLocation {
+  INSIDE
+  OUTSIDE
+}
+
+enum BathroomFeature {
+  SHOWER
+  BATHTUB
+  TOILET
+  SINK
 }
 
 enum PhotoCategory {

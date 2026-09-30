@@ -6,13 +6,28 @@ import Link from "next/link";
 type Verification = {
   id: string;
   status: "PENDING" | "ACTION_REQUIRED";
-  titleDeedStatus: string;
   createdAt: string;
+
   landlord: {
     id: string;
     name: string | null;
     email: string;
     verified: boolean;
+
+    verificationDocuments: {
+      type:
+        | "ID"
+        | "TITLE_DEED"
+        | "WATER_BILL"
+        | "ELECTRICITY_BILL";
+      status:
+        | "PENDING"
+        | "ACTION_REQUIRED"
+        | "APPROVED"
+        | "REJECTED";
+      fileName: string;
+    }[];
+
     landlordProfile: {
       phone: string | null;
       city: string | null;
@@ -93,18 +108,33 @@ export default function VerificationQueue() {
             const profile =
               verification.landlord.landlordProfile;
 
+            const titleDeed =
+              verification.landlord.verificationDocuments.find(
+                (document) => document.type === "TITLE_DEED"
+              );
+
             return (
               <Link
                 key={verification.id}
                 href={`/dashboard/admin/verifications/${verification.id}`}
-                className="block rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-brand-blue/30 hover:shadow-md"
+                className="group block rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-blue/40 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
               >
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h3 className="font-semibold text-slate-900">
-                      {verification.landlord.name ||
-                        "Unnamed Landlord"}
-                    </h3>
+                  {/* Landlord information */}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <h3 className="font-semibold text-slate-900 transition-colors group-hover:text-brand-blue">
+                        {verification.landlord.name || "Unnamed Landlord"}
+                      </h3>
+
+                      <span className="hidden text-xs text-slate-400 sm:inline">
+                        •
+                      </span>
+
+                      <span className="hidden text-xs font-medium text-slate-400 sm:inline">
+                        Review request
+                      </span>
+                    </div>
 
                     <p className="mt-1 text-sm text-slate-500">
                       {verification.landlord.email}
@@ -112,23 +142,41 @@ export default function VerificationQueue() {
 
                     <p className="mt-2 text-sm text-slate-600">
                       {profile?.city || "City not provided"}
-                      {profile?.province
-                        ? `, ${profile.province}`
-                        : ""}
+                      {profile?.province ? `, ${profile.province}` : ""}
                     </p>
                   </div>
 
-                  <div className="flex flex-col items-start gap-2 sm:items-end">
-                    <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                      {verification.status ===
-                      "ACTION_REQUIRED"
-                        ? "Action Required"
-                        : "Pending"}
-                    </span>
+                  {/* Status + action */}
+                  <div className="flex items-center justify-between gap-6 sm:justify-end">
+                    <div className="flex flex-col items-start gap-2 sm:items-end">
+                      <span
+                        className={
+                          verification.status === "ACTION_REQUIRED"
+                            ? "rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700"
+                            : "rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
+                        }
+                      >
+                        {verification.status === "ACTION_REQUIRED"
+                          ? "Action Required"
+                          : "Pending"}
+                      </span>
 
-                    <span className="text-xs text-slate-500">
-                      Title Deed:{" "}
-                      {verification.titleDeedStatus}
+                      <span className="text-xs text-slate-500">
+                        Title Deed:{" "}
+                        <span className="font-medium text-slate-700">
+                          {titleDeed?.status ?? "NOT SUBMITTED"}
+                        </span>
+                      </span>
+                    </div>
+
+                    {/* Click affordance */}
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-400 transition-all group-hover:border-brand-blue/30 group-hover:bg-blue-50 group-hover:text-brand-blue">
+                      <span
+                        className="text-lg transition-transform group-hover:translate-x-0.5"
+                        aria-hidden="true"
+                      >
+                        →
+                      </span>
                     </span>
                   </div>
                 </div>

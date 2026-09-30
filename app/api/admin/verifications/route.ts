@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
+    // ------------------------------------------------------------
+    // ADMIN AUTHENTICATION
+    // ------------------------------------------------------------
+
     const user = await getCurrentUser();
 
     if (!user) {
@@ -20,6 +24,10 @@ export async function GET() {
       );
     }
 
+    // ------------------------------------------------------------
+    // GET PENDING VERIFICATIONS
+    // ------------------------------------------------------------
+
     const verifications =
       await prisma.landlordVerification.findMany({
         where: {
@@ -27,6 +35,7 @@ export async function GET() {
             in: ["PENDING", "ACTION_REQUIRED"],
           },
         },
+
         include: {
           landlord: {
             select: {
@@ -34,6 +43,15 @@ export async function GET() {
               name: true,
               email: true,
               verified: true,
+
+              verificationDocuments: {
+                select: {
+                  type: true,
+                  status: true,
+                  fileName: true,
+                },
+              },
+
               landlordProfile: {
                 select: {
                   phone: true,
@@ -45,6 +63,7 @@ export async function GET() {
             },
           },
         },
+
         orderBy: {
           createdAt: "asc",
         },
@@ -58,7 +77,9 @@ export async function GET() {
     );
 
     return NextResponse.json(
-      { error: "Failed to load verifications" },
+      {
+        error: "Failed to load verifications",
+      },
       { status: 500 }
     );
   }

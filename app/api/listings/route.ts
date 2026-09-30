@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Amenity } from "@/generated/prisma";
+import {
+  Amenity,
+  BathroomFeature,
+  BathroomLocation,
+} from "@/generated/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
 // ============================================================
@@ -123,7 +127,6 @@ function calculateDistanceKm(
   return earthRadiusKm * c;
 }
 
-
 // ============================================================
 // GET — Listings
 // ============================================================
@@ -133,7 +136,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const status = searchParams.get("status");
-    const universityId = searchParams.get("university");
+    const universityId =
+      searchParams.get("university");
     const ids = searchParams.get("ids");
 
     // ==========================================================
@@ -141,36 +145,42 @@ export async function GET(request: Request) {
     // ==========================================================
 
     if (status === "PUBLISHED") {
-      const listings = await prisma.listing.findMany({
-        where: {
-          status: "PUBLISHED",
-          isActive: true,
+      const listings =
+        await prisma.listing.findMany({
+          where: {
+            status: "PUBLISHED",
+            isActive: true,
 
-          ...(universityId
-            ? {
-                universityId,
-              }
-            : {}),
-        },
+            ...(universityId
+              ? {
+                  universityId,
+                }
+              : {}),
+          },
 
-        include: {
-          university: true,
+          include: {
+            university: true,
 
-          photos: {
-            orderBy: {
-              sortOrder: "asc",
+            photos: {
+              orderBy: {
+                sortOrder: "asc",
+              },
+            },
+
+            bathrooms: {
+              orderBy: {
+                sortOrder: "asc",
+              },
             },
           },
-        },
 
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
 
       return NextResponse.json(listings);
     }
-
 
     // ==========================================================
     // AUTHENTICATION
@@ -199,41 +209,48 @@ export async function GET(request: Request) {
         .map((id) => id.trim())
         .filter(Boolean);
 
-      const listings = await prisma.listing.findMany({
-        where: {
-          id: {
-            in: listingIds,
+      const listings =
+        await prisma.listing.findMany({
+          where: {
+            id: {
+              in: listingIds,
+            },
+            status: "PUBLISHED",
+            isActive: true,
           },
-          status: "PUBLISHED",
-          isActive: true,
-        },
 
-        include: {
-          university: true,
+          include: {
+            university: true,
 
-          landlord: {
-            select: {
-              name: true,
-              email: true,
-              landlordProfile: {
-                select: {
-                  phone: true,
+            landlord: {
+              select: {
+                name: true,
+                email: true,
+                landlordProfile: {
+                  select: {
+                    phone: true,
+                  },
                 },
+              },
+            },
+
+            photos: {
+              orderBy: {
+                sortOrder: "asc",
+              },
+            },
+
+            bathrooms: {
+              orderBy: {
+                sortOrder: "asc",
               },
             },
           },
 
-          photos: {
-            orderBy: {
-              sortOrder: "asc",
-            },
+          orderBy: {
+            createdAt: "desc",
           },
-        },
-
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
+        });
 
       return NextResponse.json(listings);
     }
@@ -243,10 +260,49 @@ export async function GET(request: Request) {
     // ==========================================================
 
     if (status === "ARCHIVED") {
-      const listings = await prisma.listing.findMany({
+      const listings =
+        await prisma.listing.findMany({
+          where: {
+            landlordId: user.id,
+            status: "ARCHIVED",
+          },
+
+          include: {
+            university: true,
+
+            photos: {
+              orderBy: {
+                sortOrder: "asc",
+              },
+            },
+
+            bathrooms: {
+              orderBy: {
+                sortOrder: "asc",
+              },
+            },
+          },
+
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+      return NextResponse.json(listings);
+    }
+
+    // ==========================================================
+    // LANDLORD ACTIVE LISTINGS
+    // ==========================================================
+
+    const listings =
+      await prisma.listing.findMany({
         where: {
           landlordId: user.id,
-          status: "ARCHIVED",
+
+          status: {
+            in: ["DRAFT", "PUBLISHED"],
+          },
         },
 
         include: {
@@ -257,43 +313,18 @@ export async function GET(request: Request) {
               sortOrder: "asc",
             },
           },
+
+          bathrooms: {
+            orderBy: {
+              sortOrder: "asc",
+            },
+          },
         },
 
         orderBy: {
           createdAt: "desc",
         },
       });
-
-      return NextResponse.json(listings);
-    }
-
-    // ==========================================================
-    // LANDLORD ACTIVE LISTINGS
-    // ==========================================================
-
-    const listings = await prisma.listing.findMany({
-      where: {
-        landlordId: user.id,
-
-        status: {
-          in: ["DRAFT", "PUBLISHED"],
-        },
-      },
-
-      include: {
-        university: true,
-
-        photos: {
-          orderBy: {
-            sortOrder: "asc",
-          },
-        },
-      },
-
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
 
     const requiredPhotoCategories = {
       LIVING_ROOM: 2,
@@ -340,8 +371,10 @@ export async function GET(request: Request) {
 
         return {
           ...listing,
+
           canPublish:
             missingPhotoCategories.length === 0,
+
           missingPhotoCategories,
         };
       });
@@ -349,13 +382,16 @@ export async function GET(request: Request) {
     return NextResponse.json(
       listingsWithPublishStatus
     );
-
   } catch (error) {
-    console.error("Failed to load listings:", error);
+    console.error(
+      "Failed to load listings:",
+      error
+    );
 
     return NextResponse.json(
       {
-        error: "Something went wrong while loading listings.",
+        error:
+          "Something went wrong while loading listings.",
       },
       {
         status: 500,
@@ -394,7 +430,8 @@ export async function POST(request: Request) {
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error: "Only landlords can create listings.",
+          error:
+            "Only landlords can create listings.",
         },
         {
           status: 403,
@@ -413,14 +450,18 @@ export async function POST(request: Request) {
         },
       });
 
-    if (!verification || verification.status !== "APPROVED") {
+    if (
+      !verification ||
+      verification.status !== "APPROVED"
+    ) {
       return NextResponse.json(
         {
           error:
             "Your landlord account must be verified before you can create a listing.",
           code: "VERIFICATION_REQUIRED",
           verificationStatus:
-            verification?.status ?? "NOT_STARTED",
+            verification?.status ??
+            "NOT_STARTED",
         },
         {
           status: 403,
@@ -483,7 +524,7 @@ export async function POST(request: Request) {
         }
       );
     }
-    
+
     // ----------------------------------------------------------
     // Find University
     // ----------------------------------------------------------
@@ -511,13 +552,14 @@ export async function POST(request: Request) {
     // Geocode Property Address
     // ----------------------------------------------------------
 
-    const coordinates = await geocodeAddress(
-      address,
-      suburb,
-      city,
-      province,
-      country
-    );
+    const coordinates =
+      await geocodeAddress(
+        address,
+        suburb,
+        city,
+        province,
+        country
+      );
 
     if (!coordinates) {
       return NextResponse.json(
@@ -543,82 +585,237 @@ export async function POST(request: Request) {
         university.longitude
       );
 
-    // ----------------------------------------------------------
-    // Amenities
-    // ----------------------------------------------------------
+    // ==========================================================
+    // AMENITIES
+    // ==========================================================
 
-    const amenities = Array.isArray(body.amenities)
+    const amenities = Array.isArray(
+      body.amenities
+    )
       ? body.amenities.filter(
-          (amenity: unknown): amenity is Amenity =>
+          (
+            amenity: unknown
+          ): amenity is Amenity =>
             typeof amenity === "string" &&
-            Object.values(Amenity).includes(amenity as Amenity)
+            Object.values(Amenity).includes(
+              amenity as Amenity
+            )
         )
       : [];
 
-    // ----------------------------------------------------------
-    // Create listing
-    // ----------------------------------------------------------
+    // ==========================================================
+    // BATHROOMS
+    // ==========================================================
 
-    const listing = await prisma.listing.create({
-      data: {
-        landlordId: user.id,
-        title,
-        address,
-        suburb,
-        city,
-        province,
-        country,
-        description,
-        propertyType,
-        universityId,
-        monthlyRent: Number(monthlyRent),
-        depositRequired: Boolean(depositRequired),
-        depositAmount:
-          depositRequired && depositAmount
-            ? Number(depositAmount)
-            : null,
-        additionalFees:
-          additionalFees?.trim() || null,
-        utilitiesIncluded:
-          utilitiesIncluded?.trim() || null,
-        internetCharges:
-          internetCharges?.trim() || null,
-        solarBackupCapacity:
-          solarBackupCapacity || null,
-        internetProvider:
-          internetProvider || null,
+    type IncomingBathroom = {
+      location?: unknown;
+      features?: unknown;
+    };
 
-        waterSource:
-          waterSource || null,
+    const incomingBathrooms =
+      Array.isArray(body.bathrooms)
+        ? (body.bathrooms as IncomingBathroom[])
+        : [];
 
-        waterDrinkable:
-          waterDrinkable === true
-            ? true
-            : waterDrinkable === false
-              ? false
+    const bathrooms =
+      incomingBathrooms
+        .map((bathroom) => {
+          // ----------------------------------------------
+          // Validate location
+          // ----------------------------------------------
+
+          const location =
+            typeof bathroom.location ===
+            "string"
+              ? bathroom.location
+              : "INSIDE";
+
+          if (
+            !Object.values(
+              BathroomLocation
+            ).includes(
+              location as BathroomLocation
+            )
+          ) {
+            return null;
+          }
+
+          // ----------------------------------------------
+          // Validate bathroom features
+          // ----------------------------------------------
+
+          const features =
+            Array.isArray(
+              bathroom.features
+            )
+              ? bathroom.features.filter(
+                  (
+                    feature: unknown
+                  ): feature is BathroomFeature =>
+                    typeof feature ===
+                      "string" &&
+                    Object.values(
+                      BathroomFeature
+                    ).includes(
+                      feature as BathroomFeature
+                    )
+                )
+              : [];
+
+          // ----------------------------------------------
+          // Require at least one feature
+          // ----------------------------------------------
+
+          if (features.length === 0) {
+            return null;
+          }
+
+          return {
+            location:
+              location as BathroomLocation,
+
+            features: {
+              set: features,
+            },
+          };
+        })
+        .filter(
+          (
+            bathroom
+          ): bathroom is {
+            location: BathroomLocation;
+            features: {
+              set: BathroomFeature[];
+            };
+          } => bathroom !== null
+        );
+
+    // ==========================================================
+    // CREATE LISTING
+    // ==========================================================
+
+    const listing =
+      await prisma.listing.create({
+        data: {
+          landlordId: user.id,
+
+          title,
+          address,
+          suburb,
+          city,
+          province,
+          country,
+
+          description,
+
+          propertyType,
+
+          universityId,
+
+          monthlyRent:
+            Number(monthlyRent),
+
+          depositRequired:
+            Boolean(depositRequired),
+
+          depositAmount:
+            depositRequired &&
+            depositAmount
+              ? Number(depositAmount)
               : null,
-        roomType,
-        genderPreference,
-        status: "DRAFT",
-        isActive: true,
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
-        distanceToUniversityKm,
-        amenities,
-      },
 
-      include: {
-        university: true,
+          additionalFees:
+            additionalFees?.trim() ||
+            null,
 
-        photos: true,
-      },
-    });
+          utilitiesIncluded:
+            utilitiesIncluded?.trim() ||
+            null,
 
-    return NextResponse.json(listing, {
-      status: 201,
-    });
+          internetCharges:
+            internetCharges?.trim() ||
+            null,
+
+          solarBackupCapacity:
+            solarBackupCapacity || null,
+
+          internetProvider:
+            internetProvider || null,
+
+          waterSource:
+            waterSource || null,
+
+          waterDrinkable:
+            waterDrinkable === true
+              ? true
+              : waterDrinkable === false
+                ? false
+                : null,
+
+          roomType,
+
+          genderPreference,
+
+          status: "DRAFT",
+
+          isActive: true,
+
+          latitude:
+            coordinates.latitude,
+
+          longitude:
+            coordinates.longitude,
+
+          distanceToUniversityKm,
+
+          amenities,
+
+          // ------------------------------------------------
+          // CREATE BATHROOMS
+          // ------------------------------------------------
+
+          bathrooms: {
+            create: bathrooms.map(
+              (
+                bathroom,
+                index
+              ) => ({
+                sortOrder: index,
+
+                location:
+                  bathroom.location,
+
+                features:
+                  bathroom.features,
+              })
+            ),
+          },
+        },
+
+        include: {
+          university: true,
+
+          photos: true,
+
+          bathrooms: {
+            orderBy: {
+              sortOrder: "asc",
+            },
+          },
+        },
+      });
+
+    return NextResponse.json(
+      listing,
+      {
+        status: 201,
+      }
+    );
   } catch (error) {
-    console.error("Failed to create listing:", error);
+    console.error(
+      "Failed to create listing:",
+      error
+    );
 
     return NextResponse.json(
       {

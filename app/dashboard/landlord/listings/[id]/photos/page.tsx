@@ -53,49 +53,56 @@ const REQUIRED_CATEGORIES: CategoryConfig[] = [
     label: "Living Room",
     icon: "🛋️",
     required: 2,
-    description: "Show the main living area from different angles.",
+    description:
+      "Show the main living area from different angles.",
   },
   {
     key: "BEDROOM",
     label: "Bedrooms",
     icon: "🛏️",
     required: 2,
-    description: "Show the available bedroom spaces clearly.",
+    description:
+      "Show the available bedroom spaces clearly.",
   },
   {
     key: "BATHROOM",
     label: "Bathrooms",
     icon: "🚿",
     required: 2,
-    description: "Show the bathroom facilities and condition.",
+    description:
+      "Show the bathroom facilities and condition.",
   },
   {
     key: "FRONT_YARD",
     label: "Front Yard / Exterior",
     icon: "🌳",
     required: 1,
-    description: "Show the property from the front.",
+    description:
+      "Show the property from the front.",
   },
   {
     key: "PARKING",
     label: "Parking",
     icon: "🚗",
     required: 1,
-    description: "Show available parking space.",
+    description:
+      "Show available parking space.",
   },
   {
     key: "MAIN_ENTRANCE",
     label: "Main Entrance",
     icon: "🚪",
     required: 1,
-    description: "Show the main entrance to the property.",
+    description:
+      "Show the main entrance to the property.",
   },
   {
     key: "VERANDA",
     label: "Veranda",
     icon: "🏡",
     required: 1,
-    description: "Show the veranda or covered outdoor area.",
+    description:
+      "Show the veranda or covered outdoor area.",
   },
 ];
 
@@ -105,21 +112,24 @@ const OPTIONAL_CATEGORIES: CategoryConfig[] = [
     label: "Beds",
     icon: "🛏️",
     required: 0,
-    description: "Show beds or sleeping arrangements.",
+    description:
+      "Show beds or sleeping arrangements.",
   },
   {
     key: "CORRIDOR",
     label: "Corridors",
     icon: "🚪",
     required: 0,
-    description: "Show hallways and common passageways.",
+    description:
+      "Show hallways and common passageways.",
   },
   {
     key: "BACK_YARD",
     label: "Back Yard",
     icon: "🌳",
     required: 0,
-    description: "Show the back yard or outdoor space.",
+    description:
+      "Show the back yard or outdoor space.",
   },
 ];
 
@@ -221,9 +231,7 @@ export default function ManagePhotosPage() {
         );
 
       const data =
-        await getJsonResponse(
-          response
-        );
+        await getJsonResponse(response);
 
       if (!response.ok) {
         throw new Error(
@@ -232,10 +240,16 @@ export default function ManagePhotosPage() {
         );
       }
 
-      setPhotos(
+      const loadedPhotos =
         Array.isArray(data.photos)
           ? data.photos
-          : []
+          : [];
+
+      setPhotos(
+        loadedPhotos.sort(
+          (a: Photo, b: Photo) =>
+            a.sortOrder - b.sortOrder
+        )
       );
     } catch (error) {
       console.error(
@@ -262,7 +276,7 @@ export default function ManagePhotosPage() {
   }, [listingId]);
 
   // ============================================================
-  // GET CATEGORY PHOTO COUNT
+  // CATEGORY COUNT
   // ============================================================
 
   function getCategoryCount(
@@ -300,7 +314,7 @@ export default function ManagePhotosPage() {
     MIN_PHOTOS_TO_PUBLISH;
 
   // ============================================================
-  // OPEN CATEGORY FILE PICKER
+  // OPEN FILE PICKER
   // ============================================================
 
   function openFilePicker(
@@ -404,10 +418,15 @@ export default function ManagePhotosPage() {
 
         if (data.photo) {
           setPhotos(
-            (currentPhotos) => [
-              ...currentPhotos,
-              data.photo,
-            ]
+            (currentPhotos) =>
+              [
+                ...currentPhotos,
+                data.photo,
+              ].sort(
+                (a, b) =>
+                  a.sortOrder -
+                  b.sortOrder
+              )
           );
         }
 
@@ -514,19 +533,11 @@ export default function ManagePhotosPage() {
         );
       }
 
-      setPhotos(
-        (currentPhotos) =>
-          currentPhotos.filter(
-            (item) =>
-              item.id !== photoId
-          )
-      );
+      await loadPhotos();
 
       setSuccess(
         "Photo deleted successfully."
       );
-
-      await loadPhotos();
     } catch (error) {
       console.error(
         "Delete error:",
@@ -727,7 +738,7 @@ export default function ManagePhotosPage() {
       movedPhoto
     );
 
-    setPhotos(
+    const updatedPhotos =
       reorderedPhotos.map(
         (photo, index) => ({
           ...photo,
@@ -735,7 +746,10 @@ export default function ManagePhotosPage() {
           isCover:
             index === 0,
         })
-      )
+      );
+
+    setPhotos(
+      updatedPhotos
     );
 
     await savePhotoOrder(
@@ -779,7 +793,7 @@ export default function ManagePhotosPage() {
       selectedPhoto
     );
 
-    setPhotos(
+    const updatedPhotos =
       reorderedPhotos.map(
         (photo, index) => ({
           ...photo,
@@ -787,7 +801,10 @@ export default function ManagePhotosPage() {
           isCover:
             index === 0,
         })
-      )
+      );
+
+    setPhotos(
+      updatedPhotos
     );
 
     await savePhotoOrder(
@@ -828,7 +845,7 @@ export default function ManagePhotosPage() {
       index - 1
     ] = temp;
 
-    setPhotos(
+    const updatedPhotos =
       reorderedPhotos.map(
         (photo, index) => ({
           ...photo,
@@ -836,7 +853,10 @@ export default function ManagePhotosPage() {
           isCover:
             index === 0,
         })
-      )
+      );
+
+    setPhotos(
+      updatedPhotos
     );
 
     await savePhotoOrder(
@@ -881,7 +901,7 @@ export default function ManagePhotosPage() {
       index + 1
     ] = temp;
 
-    setPhotos(
+    const updatedPhotos =
       reorderedPhotos.map(
         (photo, index) => ({
           ...photo,
@@ -889,7 +909,10 @@ export default function ManagePhotosPage() {
           isCover:
             index === 0,
         })
-      )
+      );
+
+    setPhotos(
+      updatedPhotos
     );
 
     await savePhotoOrder(
@@ -1040,8 +1063,6 @@ export default function ManagePhotosPage() {
               </p>
             </div>
           </div>
-
-          {/* Progress bar */}
 
           <div className="mt-5">
             <div className="h-2 overflow-hidden rounded-full bg-slate-200">
@@ -1366,6 +1387,7 @@ function CategorySection({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
       {/* Category Header */}
 
       <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -1431,9 +1453,7 @@ function CategorySection({
         >
           {uploading
             ? "Uploading..."
-            : `📸 Add ${
-                category.label
-              } Photos`}
+            : `📸 Add ${category.label} Photos`}
         </button>
       </div>
 
@@ -1502,6 +1522,7 @@ function CategorySection({
                       : "border-slate-200"
                   }`}
                 >
+
                   {/* Image */}
 
                   <div className="relative aspect-[4/3] bg-slate-100">
@@ -1527,7 +1548,7 @@ function CategorySection({
                       </div>
                     )}
 
-                    {/* Photo Number */}
+                    {/* Global Photo Number */}
 
                     <div className="absolute bottom-3 right-3 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white">
                       {photo.sortOrder + 1}
@@ -1542,6 +1563,7 @@ function CategorySection({
                     </p>
 
                     <div className="mt-3 flex flex-wrap gap-2">
+
                       <button
                         type="button"
                         onClick={() =>
@@ -1550,12 +1572,12 @@ function CategorySection({
                           )
                         }
                         disabled={
-                          index ===
+                          photo.sortOrder ===
                             0 ||
                           savingOrder
                         }
                         className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                        title="Move left"
+                        title="Move earlier in gallery"
                       >
                         ←
                       </button>
@@ -1568,13 +1590,12 @@ function CategorySection({
                           )
                         }
                         disabled={
-                          index ===
-                            photos.length -
-                              1 ||
+                          photo.sortOrder ===
+                            MAX_PHOTOS - 1 ||
                           savingOrder
                         }
                         className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                        title="Move right"
+                        title="Move later in gallery"
                       >
                         →
                       </button>

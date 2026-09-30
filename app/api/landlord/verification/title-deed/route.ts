@@ -12,6 +12,14 @@ const ALLOWED_TYPES = [
   "image/png",
 ];
 
+const ALLOWED_DOCUMENT_TYPES = [
+  "WATER_BILL",
+  "ELECTRICITY_BILL",
+  "TITLE_DEED",
+] as const;
+
+type DocumentType = (typeof ALLOWED_DOCUMENT_TYPES)[number];
+
 export async function POST(request: Request) {
   try {
     // ------------------------------------------------------------
@@ -29,7 +37,10 @@ export async function POST(request: Request) {
 
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
-        { error: "Only landlords can upload a title deed." },
+        {
+          error:
+            "Only landlords can upload verification documents.",
+        },
         { status: 403 }
       );
     }
@@ -49,7 +60,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Please start landlord verification before uploading your title deed.",
+            "Please start landlord verification before uploading verification documents.",
         },
         { status: 400 }
       );
@@ -67,28 +78,52 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "You must complete identity verification before uploading your title deed.",
+            "You must complete identity verification before uploading verification documents.",
         },
         { status: 400 }
       );
     }
 
     // ------------------------------------------------------------
-    // GET FILE
+    // GET FILE + DOCUMENT TYPE
     // ------------------------------------------------------------
 
     const formData = await request.formData();
+
     const file = formData.get("file");
+    const type = formData.get("type");
 
     if (!(file instanceof File)) {
       return NextResponse.json(
-        { error: "Please upload a title deed file." },
+        {
+          error: "Please upload a verification document.",
+        },
         { status: 400 }
       );
     }
 
     // ------------------------------------------------------------
-    // VALIDATE FILE
+    // VALIDATE DOCUMENT TYPE
+    // ------------------------------------------------------------
+
+    if (
+      typeof type !== "string" ||
+      !ALLOWED_DOCUMENT_TYPES.includes(
+        type as DocumentType
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error: "Invalid verification document type.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const documentType = type as DocumentType;
+
+    // ------------------------------------------------------------
+    // VALIDATE FILE TYPE
     // ------------------------------------------------------------
 
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -101,17 +136,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // ------------------------------------------------------------
+    // VALIDATE FILE SIZE
+    // ------------------------------------------------------------
+
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
         {
-          error: "File is too large. Maximum size is 10 MB.",
+          error:
+            "File is too large. Maximum size is 10 MB.",
         },
         { status: 400 }
       );
     }
 
     // ------------------------------------------------------------
-    // CREATE STORAGE PATH
+    // DETERMINE FILE EXTENSION
     // ------------------------------------------------------------
 
     const extension =
@@ -121,8 +161,12 @@ export async function POST(request: Request) {
           ? "png"
           : "jpg";
 
+    // ------------------------------------------------------------
+    // CREATE STORAGE PATH
+    // ------------------------------------------------------------
+
     const filePath =
-      `title-deeds/${user.id}/${Date.now()}.${extension}`;
+      `landlords/${user.id}/verification/${documentType}/${Date.now()}.${extension}`;
 
     // ------------------------------------------------------------
     // UPLOAD TO PRIVATE SUPABASE BUCKET
@@ -142,20 +186,47 @@ export async function POST(request: Request) {
 
     if (uploadError) {
       console.error(
-        "Title deed upload error:",
+        "Verification document upload error:",
         uploadError
       );
 
       return NextResponse.json(
         {
-          error: "Failed to upload title deed.",
+          error:
+            "Failed to upload verification document.",
         },
         { status: 500 }
       );
     }
 
     // ------------------------------------------------------------
-    // SAVE STORAGE PATH
+    // SAVE DOCUMENT RECORD
+    // ------------------------------------------------------------
+
+    await prisma.verificationDocument.upsert({
+      where: {
+        userId_type: {
+          userId: user.id,
+          type: documentType,
+        },
+      },
+      update: {
+        filePath,
+        fileName: file.name,
+        status: "PENDING",
+        reviewedAt: null,
+      },
+      create: {
+        userId: user.id,
+        type: documentType,
+        filePath,
+        fileName: file.name,
+        status: "PENDING",
+      },
+    });
+
+    // ------------------------------------------------------------
+    // UPDATE OVERALL VERIFICATION STATUS
     // ------------------------------------------------------------
 
     await prisma.landlordVerification.update({
@@ -163,8 +234,6 @@ export async function POST(request: Request) {
         landlordId: user.id,
       },
       data: {
-        titleDeedUrl: filePath,
-        titleDeedStatus: "PENDING",
         status: "PENDING",
         rejectionReason: null,
         reviewedAt: null,
@@ -172,20 +241,25 @@ export async function POST(request: Request) {
       },
     });
 
+    // ------------------------------------------------------------
+    // SUCCESS
+    // ------------------------------------------------------------
+
     return NextResponse.json({
       success: true,
-      message: "Title deed uploaded successfully.",
+      message:
+        "Verification document uploaded successfully.",
     });
   } catch (error) {
     console.error(
-      "Title deed upload error:",
+      "Verification document upload error:",
       error
     );
 
     return NextResponse.json(
       {
         error:
-          "Something went wrong while uploading the title deed.",
+          "Something went wrong while uploading the verification document.",
       },
       { status: 500 }
     );

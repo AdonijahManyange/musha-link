@@ -46,7 +46,7 @@ export async function GET(
           id,
         },
         select: {
-          titleDeedUrl: true,
+          landlordId: true,
         },
       });
 
@@ -57,7 +57,26 @@ export async function GET(
       );
     }
 
-    if (!verification.titleDeedUrl) {
+    // ------------------------------------------------------------
+    // GET OPTIONAL TITLE DEED
+    // ------------------------------------------------------------
+
+    const titleDeed =
+      await prisma.verificationDocument.findUnique({
+        where: {
+          userId_type: {
+            userId: verification.landlordId,
+            type: "TITLE_DEED",
+          },
+        },
+        select: {
+          filePath: true,
+          fileName: true,
+          status: true,
+        },
+      });
+
+    if (!titleDeed) {
       return NextResponse.json(
         { error: "No title deed has been uploaded." },
         { status: 404 }
@@ -72,7 +91,7 @@ export async function GET(
       await supabaseAdmin.storage
         .from(BUCKET)
         .createSignedUrl(
-          verification.titleDeedUrl,
+          titleDeed.filePath,
           60 * 10
         );
 
@@ -90,6 +109,8 @@ export async function GET(
 
     return NextResponse.json({
       url: data.signedUrl,
+      fileName: titleDeed.fileName,
+      status: titleDeed.status,
     });
   } catch (error) {
     console.error(

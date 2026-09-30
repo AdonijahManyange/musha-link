@@ -67,21 +67,50 @@ export default async function LandlordDashboard() {
           {/* MY LISTINGS */}
           {/* ================================================== */}
 
-          <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">
-              My Listings
-            </h2>
+          <div
+            className={`flex h-full flex-col rounded-2xl border bg-white p-6 shadow-sm ${
+              isVerified
+                ? "border-slate-200"
+                : "border-orange-200"
+            }`}
+          >
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                My Listings
+              </h2>
 
-            <p className="mt-2 text-sm text-slate-600">
-              Create and manage your student accommodation listings.
-            </p>
+              <p className="mt-2 text-sm text-slate-600">
+                Create and manage your student accommodation listings.
+              </p>
 
-            <Link
-              href="/dashboard/landlord/listings"
-              className="mt-auto inline-block w-fit rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
-            >
-              Manage Listings
-            </Link>
+              {!isVerified && (
+                <div className="mt-4 rounded-xl bg-orange-50 p-3">
+                  <p className="text-sm font-semibold text-orange-800">
+                    Verification required
+                  </p>
+
+                  <p className="mt-1 text-xs text-orange-700">
+                    Complete landlord verification before you can manage listings.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {isVerified ? (
+              <Link
+                href="/dashboard/landlord/listings"
+                className="mt-auto inline-block w-fit rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
+              >
+                Manage Listings
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard/landlord/verification"
+                className="mt-auto inline-block w-fit rounded-xl border border-orange-300 bg-orange-50 px-5 py-3 font-semibold text-orange-700 transition hover:bg-orange-100"
+              >
+                Complete Verification
+              </Link>
+            )}
           </div>
 
           {/* ================================================== */}

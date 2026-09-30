@@ -30,12 +30,10 @@ export async function PATCH(
     }
 
     const { id } = await params;
-
     const body = await request.json();
 
     const action = body.action;
-    const rejectionReason =
-      body.rejectionReason;
+    const rejectionReason = body.rejectionReason;
 
     if (
       action !== "APPROVE" &&
@@ -47,10 +45,21 @@ export async function PATCH(
       );
     }
 
+    // ------------------------------------------------------------
+    // GET VERIFICATION
+    // ------------------------------------------------------------
+
     const verification =
       await prisma.landlordVerification.findUnique({
         where: {
           id,
+        },
+        include: {
+          landlord: {
+            include: {
+              verificationDocuments: true,
+            },
+          },
         },
       });
 
@@ -61,24 +70,64 @@ export async function PATCH(
       );
     }
 
-    if (!verification.titleDeedUrl) {
+    // ------------------------------------------------------------
+    // REQUIRED DOCUMENTS
+    // ------------------------------------------------------------
+
+    const documents =
+      verification.landlord.verificationDocuments;
+
+    const waterBill = documents.find(
+      (document) =>
+        document.type === "WATER_BILL"
+    );
+
+    const electricityBill = documents.find(
+      (document) =>
+        document.type === "ELECTRICITY_BILL"
+    );
+
+    // ------------------------------------------------------------
+    // REQUIRE BOTH DOCUMENTS BEFORE REVIEW
+    // ------------------------------------------------------------
+
+    if (!waterBill || !electricityBill) {
       return NextResponse.json(
         {
           error:
-            "A title deed must be uploaded before review.",
+            "Both a water bill and an electricity bill are required before verification can be reviewed.",
         },
         { status: 400 }
       );
     }
 
+    // ------------------------------------------------------------
+    // APPROVE
+    // ------------------------------------------------------------
+
     if (action === "APPROVE") {
       await prisma.$transaction([
+        prisma.verificationDocument.updateMany({
+          where: {
+            userId: verification.landlordId,
+            type: {
+              in: [
+                "WATER_BILL",
+                "ELECTRICITY_BILL",
+              ],
+            },
+          },
+          data: {
+            status: "APPROVED",
+            reviewedAt: new Date(),
+          },
+        }),
+
         prisma.landlordVerification.update({
           where: {
             id,
           },
           data: {
-            titleDeedStatus: "APPROVED",
             status: "APPROVED",
             reviewedById: user.id,
             reviewedAt: new Date(),
@@ -102,6 +151,10 @@ export async function PATCH(
       });
     }
 
+    // ------------------------------------------------------------
+    // REJECT
+    // ------------------------------------------------------------
+
     if (
       !rejectionReason ||
       typeof rejectionReason !== "string" ||
@@ -117,12 +170,27 @@ export async function PATCH(
     }
 
     await prisma.$transaction([
+      prisma.verificationDocument.updateMany({
+        where: {
+          userId: verification.landlordId,
+          type: {
+            in: [
+              "WATER_BILL",
+              "ELECTRICITY_BILL",
+            ],
+          },
+        },
+        data: {
+          status: "REJECTED",
+          reviewedAt: new Date(),
+        },
+      }),
+
       prisma.landlordVerification.update({
         where: {
           id,
         },
         data: {
-          titleDeedStatus: "REJECTED",
           status: "REJECTED",
           reviewedById: user.id,
           reviewedAt: new Date(),

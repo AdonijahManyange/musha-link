@@ -3,7 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function TitleDeedUpload() {
+type DocumentType =
+  | "WATER_BILL"
+  | "ELECTRICITY_BILL"
+  | "TITLE_DEED";
+
+type DocumentUploadProps = {
+  type: DocumentType;
+  title: string;
+  description: string;
+};
+
+export default function TitleDeedUpload({
+  type,
+  title,
+  description,
+}: DocumentUploadProps) {
   const router = useRouter();
 
   const [file, setFile] = useState<File | null>(null);
@@ -13,7 +28,7 @@ export default function TitleDeedUpload() {
 
   async function handleUpload() {
     if (!file) {
-      setError("Please select your title deed.");
+      setError(`Please select your ${title.toLowerCase()}.`);
       return;
     }
 
@@ -23,8 +38,18 @@ export default function TitleDeedUpload() {
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
 
+      formData.append("file", file);
+      formData.append("type", type);
+
+      /*
+       * Keep the existing endpoint.
+       *
+       * The backend already accepts:
+       * WATER_BILL
+       * ELECTRICITY_BILL
+       * TITLE_DEED
+       */
       const response = await fetch(
         "/api/landlord/verification/title-deed",
         {
@@ -37,11 +62,15 @@ export default function TitleDeedUpload() {
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Failed to upload title deed."
+          data.error ||
+            `Failed to upload ${title.toLowerCase()}.`
         );
       }
 
-      setSuccess("Title deed uploaded successfully.");
+      setSuccess(
+        `${title} uploaded successfully.`
+      );
+
       setFile(null);
 
       router.refresh();
@@ -56,30 +85,37 @@ export default function TitleDeedUpload() {
     }
   }
 
+  const inputId = `verification-${type.toLowerCase()}`;
+
   return (
-    <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-semibold text-slate-900">
-        Property ownership
-      </h2>
+    <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-5">
+      <div>
+        <h3 className="font-semibold text-slate-900">
+          {title}
+        </h3>
 
-      <p className="mt-2 text-sm text-slate-600">
-        Upload your property title deed for MushaLink to review.
-      </p>
+        <p className="mt-1 text-sm text-slate-600">
+          {description}
+        </p>
+      </div>
 
-      <div className="mt-5">
+      <div className="mt-4">
         <label
-          htmlFor="titleDeed"
+          htmlFor={inputId}
           className="block text-sm font-medium text-slate-700"
         >
-          Title deed
+          Select document
         </label>
 
         <input
-          id="titleDeed"
+          id={inputId}
           type="file"
           accept=".pdf,.jpg,.jpeg,.png"
           onChange={(event) => {
-            setFile(event.target.files?.[0] ?? null);
+            setFile(
+              event.target.files?.[0] ?? null
+            );
+
             setError("");
             setSuccess("");
           }}
@@ -118,7 +154,9 @@ export default function TitleDeedUpload() {
         disabled={!file || loading}
         className="mt-5 rounded-xl bg-brand-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? "Uploading..." : "Upload Title Deed"}
+        {loading
+          ? "Uploading..."
+          : `Upload ${title}`}
       </button>
     </div>
   );
