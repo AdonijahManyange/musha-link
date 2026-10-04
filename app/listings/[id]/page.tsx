@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import ListingGallery from "@/components/ListingGallery";
+import ContactLandlordButton from "@/components/ContactLandlordButton";
 
 type ListingPageProps = {
   params: Promise<{
@@ -579,12 +580,9 @@ export default async function PublicListingPage({
 
               <div className="mt-6 space-y-3">
 
-                <button
-                  type="button"
-                  className="w-full rounded-xl bg-brand-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark"
-                >
-                  Contact Landlord
-                </button>
+                <ContactLandlordButton
+                  listingId={listing.id}
+                />
 
                 <button
                   type="button"

@@ -1,5 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  Amenity,
+  GenderPreference,
+  InternetProvider,
+  PropertyType,
+  RoomType,
+  SolarBackupCapacity,
+  WaterSource,
+} from "@/generated/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
 type RouteContext = {
@@ -31,8 +40,7 @@ export async function GET(
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error:
-            "Only landlords can access listings.",
+          error: "Only landlords can access listings.",
         },
         { status: 403 }
       );
@@ -40,23 +48,22 @@ export async function GET(
 
     const { id } = await context.params;
 
-    const listing =
-      await prisma.listing.findFirst({
-        where: {
-          id,
-          landlordId: user.id,
-        },
+    const listing = await prisma.listing.findFirst({
+      where: {
+        id,
+        landlordId: user.id,
+      },
 
-        include: {
-          university: true,
+      include: {
+        university: true,
 
-          photos: {
-            orderBy: {
-              sortOrder: "asc",
-            },
+        photos: {
+          orderBy: {
+            sortOrder: "asc",
           },
         },
-      });
+      },
+    });
 
     if (!listing) {
       return NextResponse.json(
@@ -71,10 +78,7 @@ export async function GET(
       listing,
     });
   } catch (error) {
-    console.error(
-      "Failed to load listing:",
-      error
-    );
+    console.error("Failed to load listing:", error);
 
     return NextResponse.json(
       {
@@ -117,8 +121,7 @@ export async function PUT(
     if (user.role !== "LANDLORD") {
       return NextResponse.json(
         {
-          error:
-            "Only landlords can modify listings.",
+          error: "Only landlords can modify listings.",
         },
         { status: 403 }
       );
@@ -177,6 +180,7 @@ export async function PUT(
       !province ||
       !country ||
       monthlyRent === undefined ||
+      monthlyRent === null ||
       !roomType ||
       !genderPreference ||
       !universityId
@@ -194,13 +198,12 @@ export async function PUT(
     // Find listing and verify ownership
     // ----------------------------------------------------------
 
-    const listing =
-      await prisma.listing.findFirst({
-        where: {
-          id,
-          landlordId: user.id,
-        },
-      });
+    const listing = await prisma.listing.findFirst({
+      where: {
+        id,
+        landlordId: user.id,
+      },
+    });
 
     if (!listing) {
       return NextResponse.json(
@@ -226,8 +229,7 @@ export async function PUT(
     if (!university) {
       return NextResponse.json(
         {
-          error:
-            "Selected university was not found.",
+          error: "Selected university was not found.",
         },
         { status: 400 }
       );
@@ -236,16 +238,112 @@ export async function PUT(
     // ----------------------------------------------------------
     // Normalize amenities
     // ----------------------------------------------------------
+    // Only allow valid Prisma Amenity enum values.
 
-    const selectedAmenities =
-      Array.isArray(amenities)
-        ? amenities
-        : [];
+    const selectedAmenities = Array.isArray(amenities)
+      ? amenities.filter(
+          (amenity: unknown): amenity is Amenity =>
+            typeof amenity === "string" &&
+            Object.values(Amenity).includes(
+              amenity as Amenity
+            )
+        )
+      : [];
+
+    // ----------------------------------------------------------
+    // Normalize deposit
+    // ----------------------------------------------------------
+
+    const hasDeposit = depositRequired === true;
+
+    const normalizedDepositAmount =
+      hasDeposit &&
+      depositAmount !== null &&
+      depositAmount !== undefined &&
+      depositAmount !== ""
+        ? Number(depositAmount)
+        : null;
+
+    // ----------------------------------------------------------
+    // Validate numeric values
+    // ----------------------------------------------------------
+
+    const normalizedMonthlyRent =
+      Number(monthlyRent);
+
+    if (
+      !Number.isFinite(normalizedMonthlyRent) ||
+      normalizedMonthlyRent < 0
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Monthly rent must be a valid amount.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      normalizedDepositAmount !== null &&
+      (!Number.isFinite(normalizedDepositAmount) ||
+        normalizedDepositAmount < 0)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Security deposit must be a valid amount.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // ----------------------------------------------------------
+    // Normalize enum fields
+    // ----------------------------------------------------------
+    // These fields are Prisma enums, not plain strings.
+    // Validate them before sending them to Prisma.
+
+    const normalizedInternetProvider =
+      typeof internetProvider === "string" &&
+      Object.values(InternetProvider).includes(
+        internetProvider as InternetProvider
+      )
+        ? (internetProvider as InternetProvider)
+        : null;
+
+    const normalizedWaterSource =
+      typeof waterSource === "string" &&
+      Object.values(WaterSource).includes(
+        waterSource as WaterSource
+      )
+        ? (waterSource as WaterSource)
+        : null;
+
+    const normalizedSolarBackupCapacity =
+      typeof solarBackupCapacity === "string" &&
+      Object.values(SolarBackupCapacity).includes(
+        solarBackupCapacity as SolarBackupCapacity
+      )
+        ? (solarBackupCapacity as SolarBackupCapacity)
+        : null;
+
+    // ----------------------------------------------------------
+    // Normalize water drinkable
+    // ----------------------------------------------------------
+
+    const normalizedWaterDrinkable =
+      waterDrinkable === true
+        ? true
+        : waterDrinkable === false
+          ? false
+          : null;
 
     // ----------------------------------------------------------
     // Update listing
     //
     // Coordinates and distance remain protected.
+    // They are intentionally NOT included in this update.
     // ----------------------------------------------------------
 
     const updatedListing =
@@ -255,6 +353,10 @@ export async function PUT(
         },
 
         data: {
+          // ----------------------------------------------------
+          // Basic information
+          // ----------------------------------------------------
+
           title: title.trim(),
 
           propertyType,
@@ -269,74 +371,78 @@ export async function PUT(
 
           country: country.trim(),
 
-          monthlyRent:
-            Number(monthlyRent),
+          // ----------------------------------------------------
+          // Pricing
+          // ----------------------------------------------------
 
-          // ----------------------------------------------------------
-          // Pricing & Costs
-          // ----------------------------------------------------------
+          monthlyRent:
+            normalizedMonthlyRent,
 
           depositRequired:
-            Boolean(depositRequired),
+            hasDeposit,
 
           depositAmount:
-            depositRequired && depositAmount
-              ? Number(depositAmount)
-              : null,
+            normalizedDepositAmount,
 
           additionalFees:
             typeof additionalFees === "string"
-              ? additionalFees.trim()
+              ? additionalFees.trim() || null
               : null,
+
+          // ----------------------------------------------------
+          // Utilities / Services
+          // ----------------------------------------------------
 
           utilitiesIncluded:
             typeof utilitiesIncluded === "string"
-              ? utilitiesIncluded.trim()
+              ? utilitiesIncluded.trim() || null
               : null,
 
           internetCharges:
             typeof internetCharges === "string"
-              ? internetCharges.trim()
+              ? internetCharges.trim() || null
               : null,
 
-          // ----------------------------------------------------------
-          // Utilities & Services
-          // ----------------------------------------------------------
-
           internetProvider:
-            internetProvider || null,
+            normalizedInternetProvider,
 
           waterSource:
-            waterSource || null,
+            normalizedWaterSource,
 
           waterDrinkable:
-            waterDrinkable === true
-              ? true
-              : waterDrinkable === false
-                ? false
-                : null,
+            normalizedWaterDrinkable,
 
           solarBackupCapacity:
-            solarBackupCapacity || null,
+            normalizedSolarBackupCapacity,
 
-          // ----------------------------------------------------------
-          // Other listing details
-          // ----------------------------------------------------------
+          // ----------------------------------------------------
+          // Room information
+          // ----------------------------------------------------
 
           roomType,
 
           genderPreference,
 
+          // ----------------------------------------------------
+          // University
+          // ----------------------------------------------------
+
           universityId,
+
+          // ----------------------------------------------------
+          // Description
+          // ----------------------------------------------------
 
           description:
             typeof description === "string"
               ? description.trim()
               : "",
 
-          // ----------------------------------------------------------
-          // Replace amenities
-          // ----------------------------------------------------------
+          // ----------------------------------------------------
+          // Amenities
+          // ----------------------------------------------------
+          // Replace the existing amenities with the current
+          // selections from the Edit Listing form.
 
           amenities: selectedAmenities,
         },
@@ -352,9 +458,12 @@ export async function PUT(
         },
       });
 
+    // ----------------------------------------------------------
+    // Success response
+    // ----------------------------------------------------------
+
     return NextResponse.json({
-      message:
-        "Listing updated successfully.",
+      message: "Listing updated successfully.",
 
       listing: updatedListing,
     });
@@ -439,8 +548,7 @@ export async function PATCH(
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
         {
-          error:
-            "Invalid listing status.",
+          error: "Invalid listing status.",
         },
         { status: 400 }
       );
@@ -486,6 +594,7 @@ export async function PATCH(
       // ==========================================================
       // A listing must have all required photo categories before
       // it can be published. Extra optional photos are allowed.
+
       const requiredPhotoCategories = {
         LIVING_ROOM: 2,
         BEDROOM: 2,
@@ -497,17 +606,24 @@ export async function PATCH(
       } as const;
 
       // Check how many photos exist in each required category.
+
       const missingCategories = Object.entries(
         requiredPhotoCategories
-      ).filter(([category, requiredCount]) => {
-        const actualCount = listing.photos.filter(
-          (photo) => photo.category === category
-        ).length;
+      ).filter(
+        ([category, requiredCount]) => {
+          const actualCount =
+            listing.photos.filter(
+              (photo) =>
+                photo.category === category
+            ).length;
 
-        return actualCount < requiredCount;
-      });
+          return actualCount < requiredCount;
+        }
+      );
 
-      // Block publishing if any required category is incomplete.
+      // Block publishing if any required category
+      // is incomplete.
+
       if (missingCategories.length > 0) {
         const categoryLabels: Record<
           keyof typeof requiredPhotoCategories,
@@ -522,39 +638,46 @@ export async function PATCH(
           VERANDA: "Veranda",
         };
 
-        const missingDescription = missingCategories
-          .map(([category, requiredCount]) => {
-            const label =
-              categoryLabels[
-                category as keyof typeof requiredPhotoCategories
-              ];
+        const missingDescription =
+          missingCategories
+            .map(
+              ([category, requiredCount]) => {
+                const label =
+                  categoryLabels[
+                    category as keyof typeof requiredPhotoCategories
+                  ];
 
-            return `${label} (${requiredCount} required)`;
-          })
-          .join(", ");
+                return `${label} (${requiredCount} required)`;
+              }
+            )
+            .join(", ");
 
         return NextResponse.json(
           {
             error:
               "You must complete all required photo categories before publishing.",
-            missingCategories: missingCategories.map(
-              ([category, requiredCount]) => ({
-                category,
-                required: requiredCount,
-                uploaded: listing.photos.filter(
-                  (photo) => photo.category === category
-                ).length,
-              })
-            ),
+
+            missingCategories:
+              missingCategories.map(
+                ([category, requiredCount]) => ({
+                  category,
+                  required: requiredCount,
+                  uploaded:
+                    listing.photos.filter(
+                      (photo) =>
+                        photo.category ===
+                        category
+                    ).length,
+                })
+              ),
+
             details: `Missing or incomplete categories: ${missingDescription}`,
           },
           { status: 400 }
         );
       }
 
-      if (
-        listing.status === "ARCHIVED"
-      ) {
+      if (listing.status === "ARCHIVED") {
         return NextResponse.json(
           {
             error:
@@ -589,9 +712,7 @@ export async function PATCH(
     // ==========================================================
 
     if (status === "ARCHIVED") {
-      if (
-        listing.status === "ARCHIVED"
-      ) {
+      if (listing.status === "ARCHIVED") {
         return NextResponse.json(
           {
             error:

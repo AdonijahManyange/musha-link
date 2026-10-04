@@ -4,44 +4,70 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+// ============================================================
+// TYPES
+// ============================================================
+
 type University = {
   id: string;
   name: string;
   city: string;
 };
 
-type ListingAmenity = {
-  id: string;
-  amenity: string;
+type Bathroom = {
+  location: "INSIDE" | "OUTSIDE";
+  features: string[];
 };
 
 type Listing = {
   id: string;
+
+  // Basic information
   title: string;
   address: string;
+  suburb: string;
   city: string;
   province: string;
   country: string;
-  monthlyRent: number;
+
   propertyType: string;
+
+  // Rental information
+  monthlyRent: number;
+  depositRequired: boolean;
+  depositAmount: number | null;
+  additionalFees: string | null;
+  utilitiesIncluded: string | null;
+  internetCharges: string | null;
+
   roomType: string;
   genderPreference: string;
-  description: string;
+
+  // University
   universityId: string;
+  distanceToUniversityKm: number | null;
 
-  amenities: ListingAmenity[];
+  // Description
+  description: string;
 
-  distanceToUniversityKm:
-    | number
-    | null;
+  // Amenities
+  amenities: string[];
 
+  // Bathrooms
+  bathrooms: Bathroom[];
+
+  // Utilities
+  internetProvider: string | null;
+  waterSource: string | null;
+  waterDrinkable: boolean | null;
+  solarBackupCapacity: string | null;
+
+  // Coordinates
   latitude: number | null;
   longitude: number | null;
 
-  status:
-    | "DRAFT"
-    | "PUBLISHED"
-    | "ARCHIVED";
+  // Status
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
 };
 
 type Props = {
@@ -49,68 +75,134 @@ type Props = {
   universities: University[];
 };
 
+// ============================================================
+// AMENITIES
+// Keep this synchronized with Create Listing
+// ============================================================
+
 const AMENITIES = [
   {
     value: "WIFI",
     label: "Wi-Fi",
+    icon: "📶",
   },
   {
     value: "SOLAR_POWER",
     label: "Solar Power",
+    icon: "☀️",
   },
   {
     value: "BOREHOLE",
     label: "Borehole",
+    icon: "🚰",
   },
   {
     value: "ELECTRICITY",
     label: "Electricity",
+    icon: "⚡",
   },
   {
     value: "BACKUP_GENERATOR",
     label: "Backup Generator",
+    icon: "🔋",
   },
   {
     value: "WATER",
     label: "Water",
+    icon: "💧",
   },
   {
     value: "SECURITY",
     label: "Security",
+    icon: "🛡️",
   },
   {
     value: "PARKING",
     label: "Parking",
+    icon: "🚗",
   },
   {
     value: "FURNISHED",
     label: "Furnished",
+    icon: "🛏️",
   },
   {
     value: "LAUNDRY",
     label: "Laundry",
+    icon: "🧺",
   },
   {
     value: "KITCHEN",
     label: "Kitchen",
+    icon: "🍳",
   },
   {
     value: "STUDY_AREA",
     label: "Study Area",
+    icon: "📚",
   },
   {
     value: "GARDEN",
     label: "Garden",
+    icon: "🌳",
   },
   {
     value: "SWIMMING_POOL",
     label: "Swimming Pool",
+    icon: "🏊",
+  },
+  {
+    value: "SMART_TV",
+    label: "Smart TV",
+    icon: "📺",
+  },
+  {
+    value: "NETFLIX",
+    label: "Netflix",
+    icon: "🎬",
+  },
+  {
+    value: "PRIME_VIDEO",
+    label: "Prime Video",
+    icon: "▶️",
   },
   {
     value: "DSTV",
     label: "DSTV",
+    icon: "📡",
   },
 ];
+
+// ============================================================
+// BATHROOM FEATURES
+// ============================================================
+
+const BATHROOM_FEATURES = [
+  {
+    value: "SHOWER",
+    label: "Shower",
+    icon: "🚿",
+  },
+  {
+    value: "BATHTUB",
+    label: "Bathtub",
+    icon: "🛁",
+  },
+  {
+    value: "TOILET",
+    label: "Toilet",
+    icon: "🚽",
+  },
+  {
+    value: "SINK",
+    label: "Sink",
+    icon: "🚰",
+  },
+];
+
+// ============================================================
+// COMPONENT
+// ============================================================
 
 export default function EditListingForm({
   listing,
@@ -122,40 +214,56 @@ export default function EditListingForm({
   // BASIC INFORMATION
   // ============================================================
 
-  const [title, setTitle] =
-    useState(listing.title);
+  const [title, setTitle] = useState(listing.title);
 
-  const [address, setAddress] =
-    useState(listing.address);
+  const [propertyType, setPropertyType] = useState(
+    listing.propertyType
+  );
 
-  const [city, setCity] =
-    useState(listing.city);
+  const [address, setAddress] = useState(listing.address);
 
-  const [province, setProvince] =
-    useState(listing.province);
+  const [suburb, setSuburb] = useState(listing.suburb ?? "");
 
-  const [country, setCountry] =
-    useState(listing.country);
+  const [city, setCity] = useState(listing.city);
 
-  const [propertyType, setPropertyType] =
-    useState(listing.propertyType);
+  const [province, setProvince] = useState(listing.province);
+
+  const [country, setCountry] = useState(listing.country);
 
   // ============================================================
   // RENTAL INFORMATION
   // ============================================================
 
-  const [monthlyRent, setMonthlyRent] =
-    useState(
-      String(listing.monthlyRent)
-    );
+  const [monthlyRent, setMonthlyRent] = useState(
+    String(listing.monthlyRent)
+  );
 
-  const [roomType, setRoomType] =
-    useState(listing.roomType);
+  const [depositRequired, setDepositRequired] = useState(
+    listing.depositRequired ?? false
+  );
 
-  const [
-    genderPreference,
-    setGenderPreference,
-  ] = useState(
+  const [depositAmount, setDepositAmount] = useState(
+    listing.depositAmount !== null &&
+      listing.depositAmount !== undefined
+      ? String(listing.depositAmount)
+      : ""
+  );
+
+  const [additionalFees, setAdditionalFees] = useState(
+    listing.additionalFees ?? ""
+  );
+
+  const [utilitiesIncluded, setUtilitiesIncluded] = useState(
+    listing.utilitiesIncluded ?? ""
+  );
+
+  const [internetCharges, setInternetCharges] = useState(
+    listing.internetCharges ?? ""
+  );
+
+  const [roomType, setRoomType] = useState(listing.roomType);
+
+  const [genderPreference, setGenderPreference] = useState(
     listing.genderPreference
   );
 
@@ -163,93 +271,174 @@ export default function EditListingForm({
   // UNIVERSITY
   // ============================================================
 
-  const [
-    universityId,
-    setUniversityId,
-  ] = useState(
+  const [universityId, setUniversityId] = useState(
     listing.universityId
   );
+
+  const [distanceToUniversityKm, setDistanceToUniversityKm] =
+    useState(
+      listing.distanceToUniversityKm !== null &&
+        listing.distanceToUniversityKm !== undefined
+        ? String(listing.distanceToUniversityKm)
+        : ""
+    );
 
   // ============================================================
   // DESCRIPTION
   // ============================================================
 
-  const [
-    description,
-    setDescription,
-  ] = useState(
-    listing.description
+  const [description, setDescription] = useState(
+    listing.description ?? ""
   );
 
   // ============================================================
   // AMENITIES
   // ============================================================
 
-  const [
-    amenities,
-    setAmenities,
-  ] = useState<string[]>(
-    listing.amenities?.map(
-      (item) => item.amenity
-    ) ?? []
+  const [amenities, setAmenities] = useState<string[]>(
+    listing.amenities ?? []
   );
 
   // ============================================================
-  // PROTECTED LOCATION VALUES
+  // BATHROOMS
   // ============================================================
 
-  const [
-    distanceToUniversityKm,
-    setDistanceToUniversityKm,
-  ] = useState(
-    listing.distanceToUniversityKm !==
-      null
-      ? String(
-          listing.distanceToUniversityKm
-        )
+  const [bathrooms, setBathrooms] = useState<Bathroom[]>(
+    listing.bathrooms ?? []
+  );
+
+  // ============================================================
+  // UTILITIES & SERVICES
+  // ============================================================
+
+  const [internetProvider, setInternetProvider] = useState(
+    listing.internetProvider ?? ""
+  );
+
+  const [waterSource, setWaterSource] = useState(
+    listing.waterSource ?? ""
+  );
+
+  const [waterDrinkable, setWaterDrinkable] = useState<string>(
+    listing.waterDrinkable === true
+      ? "YES"
+      : listing.waterDrinkable === false
+        ? "NO"
+        : ""
+  );
+
+  const [solarBackupCapacity, setSolarBackupCapacity] =
+    useState(listing.solarBackupCapacity ?? "");
+
+  // ============================================================
+  // COORDINATES
+  // ============================================================
+
+  const [latitude, setLatitude] = useState(
+    listing.latitude !== null &&
+      listing.latitude !== undefined
+      ? String(listing.latitude)
       : ""
   );
 
-  const [latitude, setLatitude] =
-    useState(
-      listing.latitude !== null
-        ? String(listing.latitude)
-        : ""
-    );
-
-  const [longitude, setLongitude] =
-    useState(
-      listing.longitude !== null
-        ? String(listing.longitude)
-        : ""
-    );
+  const [longitude, setLongitude] = useState(
+    listing.longitude !== null &&
+      listing.longitude !== undefined
+      ? String(listing.longitude)
+      : ""
+  );
 
   // ============================================================
   // UI STATE
   // ============================================================
 
-  const [saving, setSaving] =
-    useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
-  const [success, setSuccess] =
-    useState("");
+  const [success, setSuccess] = useState("");
 
   // ============================================================
   // TOGGLE AMENITY
   // ============================================================
 
-  function toggleAmenity(
-    amenity: string
-  ) {
+  function toggleAmenity(amenity: string) {
     setAmenities((current) =>
       current.includes(amenity)
-        ? current.filter(
-            (item) => item !== amenity
-          )
+        ? current.filter((item) => item !== amenity)
         : [...current, amenity]
+    );
+  }
+
+  // ============================================================
+  // ADD BATHROOM
+  // ============================================================
+
+  function addBathroom() {
+    setBathrooms((current) => [
+      ...current,
+      {
+        location: "INSIDE",
+        features: [],
+      },
+    ]);
+  }
+
+  // ============================================================
+  // REMOVE BATHROOM
+  // ============================================================
+
+  function removeBathroom(index: number) {
+    setBathrooms((current) =>
+      current.filter((_, bathroomIndex) => bathroomIndex !== index)
+    );
+  }
+
+  // ============================================================
+  // UPDATE BATHROOM LOCATION
+  // ============================================================
+
+  function updateBathroomLocation(
+    index: number,
+    location: "INSIDE" | "OUTSIDE"
+  ) {
+    setBathrooms((current) =>
+      current.map((bathroom, bathroomIndex) =>
+        bathroomIndex === index
+          ? {
+              ...bathroom,
+              location,
+            }
+          : bathroom
+      )
+    );
+  }
+
+  // ============================================================
+  // TOGGLE BATHROOM FEATURE
+  // ============================================================
+
+  function toggleBathroomFeature(
+    bathroomIndex: number,
+    feature: string
+  ) {
+    setBathrooms((current) =>
+      current.map((bathroom, index) => {
+        if (index !== bathroomIndex) {
+          return bathroom;
+        }
+
+        const features = bathroom.features.includes(feature)
+          ? bathroom.features.filter(
+              (item) => item !== feature
+            )
+          : [...bathroom.features, feature];
+
+        return {
+          ...bathroom,
+          features,
+        };
+      })
     );
   }
 
@@ -267,83 +456,131 @@ export default function EditListingForm({
     setSuccess("");
 
     try {
-      const response =
-        await fetch(
-          `/api/listings/${listing.id}`,
-          {
-            method: "PUT",
+      const response = await fetch(
+        `/api/listings/${listing.id}`,
+        {
+          method: "PUT",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-            body: JSON.stringify({
-              title,
-              address,
-              city,
-              province,
-              country,
+          body: JSON.stringify({
+            // ==================================================
+            // BASIC INFORMATION
+            // ==================================================
 
-              monthlyRent:
-                Number(monthlyRent),
+            title,
+            propertyType,
+            address,
+            suburb,
+            city,
+            province,
+            country,
 
-              propertyType,
+            // ==================================================
+            // RENTAL INFORMATION
+            // ==================================================
 
-              roomType,
+            monthlyRent: Number(monthlyRent),
 
-              genderPreference,
+            depositRequired,
 
-              description,
+            depositAmount:
+              depositRequired && depositAmount !== ""
+                ? Number(depositAmount)
+                : null,
 
-              universityId,
+            additionalFees:
+              additionalFees.trim() || null,
 
-              amenities,
+            utilitiesIncluded:
+              utilitiesIncluded.trim() || null,
 
-              // These are included for
-              // completeness, but the API
-              // intentionally does not modify
-              // them.
-              distanceToUniversityKm:
-                distanceToUniversityKm ===
-                ""
-                  ? null
-                  : Number(
-                      distanceToUniversityKm
-                    ),
+            internetCharges:
+              internetCharges.trim() || null,
 
-              latitude:
-                latitude === ""
-                  ? null
-                  : Number(latitude),
+            roomType,
+            genderPreference,
 
-              longitude:
-                longitude === ""
-                  ? null
-                  : Number(longitude),
-            }),
-          }
-        );
+            // ==================================================
+            // UNIVERSITY
+            // ==================================================
 
-      const data =
-        await response.json();
+            universityId,
+
+            distanceToUniversityKm:
+              distanceToUniversityKm === ""
+                ? null
+                : Number(distanceToUniversityKm),
+
+            // ==================================================
+            // DESCRIPTION
+            // ==================================================
+
+            description,
+
+            // ==================================================
+            // AMENITIES
+            // ==================================================
+
+            amenities,
+
+            // ==================================================
+            // BATHROOMS
+            // ==================================================
+
+            bathrooms,
+
+            // ==================================================
+            // UTILITIES & SERVICES
+            // ==================================================
+
+            internetProvider:
+              internetProvider.trim() || null,
+
+            waterSource:
+              waterSource.trim() || null,
+
+            waterDrinkable:
+              waterDrinkable === "YES"
+                ? true
+                : waterDrinkable === "NO"
+                  ? false
+                  : null,
+
+            solarBackupCapacity:
+              solarBackupCapacity.trim() || null,
+
+            // ==================================================
+            // COORDINATES
+            // ==================================================
+
+            latitude:
+              latitude === ""
+                ? null
+                : Number(latitude),
+
+            longitude:
+              longitude === ""
+                ? null
+                : Number(longitude),
+          }),
+        }
+      );
+
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.error ||
-            "Failed to update listing."
+          data.error || "Failed to update listing."
         );
       }
 
-      setSuccess(
-        "Listing updated successfully."
-      );
+      setSuccess("Listing updated successfully.");
 
       setTimeout(() => {
-        router.push(
-          "/dashboard/landlord/listings"
-        );
-
+        router.push("/dashboard/landlord/listings");
         router.refresh();
       }, 700);
     } catch (error) {
@@ -359,12 +596,28 @@ export default function EditListingForm({
     }
   }
 
+  // ============================================================
+  // STYLES
+  // ============================================================
+
+  const inputClass =
+    "mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20";
+
+  const selectClass =
+    "mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20";
+
+  const labelClass =
+    "block text-sm font-medium text-slate-700";
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-6"
     >
-
       {/* ====================================================== */}
       {/* ERROR */}
       {/* ====================================================== */}
@@ -390,19 +643,19 @@ export default function EditListingForm({
       {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
         <h2 className="text-lg font-semibold text-slate-900">
           Property Information
         </h2>
 
+        <p className="mt-1 text-sm text-slate-500">
+          Update the basic information about your property.
+        </p>
+
         <div className="mt-6 space-y-5">
-
-          {/* Title */}
-
           <div>
             <label
               htmlFor="title"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Property Title
             </label>
@@ -412,21 +665,17 @@ export default function EditListingForm({
               type="text"
               value={title}
               onChange={(event) =>
-                setTitle(
-                  event.target.value
-                )
+                setTitle(event.target.value)
               }
               required
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={inputClass}
             />
           </div>
-
-          {/* Property Type */}
 
           <div>
             <label
               htmlFor="propertyType"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Property Type
             </label>
@@ -435,49 +684,27 @@ export default function EditListingForm({
               id="propertyType"
               value={propertyType}
               onChange={(event) =>
-                setPropertyType(
-                  event.target.value
-                )
+                setPropertyType(event.target.value)
               }
               required
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={selectClass}
             >
-              <option value="HOUSE">
-                House
-              </option>
-
-              <option value="FLAT">
-                Flat
-              </option>
-
-              <option value="APARTMENT">
-                Apartment
-              </option>
-
-              <option value="TOWNHOUSE">
-                Townhouse
-              </option>
-
-              <option value="COTTAGE">
-                Cottage
-              </option>
-
+              <option value="HOUSE">House</option>
+              <option value="FLAT">Flat</option>
+              <option value="APARTMENT">Apartment</option>
+              <option value="TOWNHOUSE">Townhouse</option>
+              <option value="COTTAGE">Cottage</option>
               <option value="ROOMING_HOUSE">
                 Rooming House
               </option>
-
-              <option value="OTHER">
-                Other
-              </option>
+              <option value="OTHER">Other</option>
             </select>
           </div>
-
-          {/* Address */}
 
           <div>
             <label
               htmlFor="address"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Address
             </label>
@@ -487,23 +714,43 @@ export default function EditListingForm({
               type="text"
               value={address}
               onChange={(event) =>
-                setAddress(
-                  event.target.value
-                )
+                setAddress(event.target.value)
               }
               required
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={inputClass}
+            />
+
+            <p className="mt-1 text-xs text-slate-500">
+              Full address is kept private and is not shown
+              publicly.
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="suburb"
+              className={labelClass}
+            >
+              Suburb
+            </label>
+
+            <input
+              id="suburb"
+              type="text"
+              value={suburb}
+              onChange={(event) =>
+                setSuburb(event.target.value)
+              }
+              required
+              className={inputClass}
             />
           </div>
 
-          {/* Location */}
-
           <div className="grid gap-5 sm:grid-cols-2">
-
             <div>
               <label
                 htmlFor="city"
-                className="block text-sm font-medium text-slate-700"
+                className={labelClass}
               >
                 City
               </label>
@@ -513,19 +760,17 @@ export default function EditListingForm({
                 type="text"
                 value={city}
                 onChange={(event) =>
-                  setCity(
-                    event.target.value
-                  )
+                  setCity(event.target.value)
                 }
                 required
-                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                className={inputClass}
               />
             </div>
 
             <div>
               <label
                 htmlFor="province"
-                className="block text-sm font-medium text-slate-700"
+                className={labelClass}
               >
                 Province
               </label>
@@ -535,23 +780,18 @@ export default function EditListingForm({
                 type="text"
                 value={province}
                 onChange={(event) =>
-                  setProvince(
-                    event.target.value
-                  )
+                  setProvince(event.target.value)
                 }
                 required
-                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                className={inputClass}
               />
             </div>
-
           </div>
-
-          {/* Country */}
 
           <div>
             <label
               htmlFor="country"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Country
             </label>
@@ -561,15 +801,12 @@ export default function EditListingForm({
               type="text"
               value={country}
               onChange={(event) =>
-                setCountry(
-                  event.target.value
-                )
+                setCountry(event.target.value)
               }
               required
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={inputClass}
             />
           </div>
-
         </div>
       </section>
 
@@ -578,19 +815,20 @@ export default function EditListingForm({
       {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
         <h2 className="text-lg font-semibold text-slate-900">
           Rental Information
         </h2>
 
+        <p className="mt-1 text-sm text-slate-500">
+          Provide the full cost information students
+          should know before booking.
+        </p>
+
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
-
-          {/* Rent */}
-
           <div>
             <label
               htmlFor="monthlyRent"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Monthly Rent
             </label>
@@ -602,21 +840,17 @@ export default function EditListingForm({
               step="1"
               value={monthlyRent}
               onChange={(event) =>
-                setMonthlyRent(
-                  event.target.value
-                )
+                setMonthlyRent(event.target.value)
               }
               required
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={inputClass}
             />
           </div>
-
-          {/* Room Type */}
 
           <div>
             <label
               htmlFor="roomType"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Room Type
             </label>
@@ -625,12 +859,10 @@ export default function EditListingForm({
               id="roomType"
               value={roomType}
               onChange={(event) =>
-                setRoomType(
-                  event.target.value
-                )
+                setRoomType(event.target.value)
               }
               required
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={selectClass}
             >
               <option value="PRIVATE">
                 Private Room
@@ -646,12 +878,61 @@ export default function EditListingForm({
             </select>
           </div>
 
-          {/* Gender */}
+          <div>
+            <label
+              htmlFor="depositRequired"
+              className={labelClass}
+            >
+              Security Deposit Required
+            </label>
+
+            <select
+              id="depositRequired"
+              value={depositRequired ? "YES" : "NO"}
+              onChange={(event) => {
+                const required =
+                  event.target.value === "YES";
+
+                setDepositRequired(required);
+
+                if (!required) {
+                  setDepositAmount("");
+                }
+              }}
+              className={selectClass}
+            >
+              <option value="NO">No</option>
+              <option value="YES">Yes</option>
+            </select>
+          </div>
+
+          {depositRequired && (
+            <div>
+              <label
+                htmlFor="depositAmount"
+                className={labelClass}
+              >
+                Deposit Amount
+              </label>
+
+              <input
+                id="depositAmount"
+                type="number"
+                min="0"
+                step="1"
+                value={depositAmount}
+                onChange={(event) =>
+                  setDepositAmount(event.target.value)
+                }
+                className={inputClass}
+              />
+            </div>
+          )}
 
           <div>
             <label
               htmlFor="genderPreference"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Gender Preference
             </label>
@@ -660,27 +941,76 @@ export default function EditListingForm({
               id="genderPreference"
               value={genderPreference}
               onChange={(event) =>
-                setGenderPreference(
-                  event.target.value
-                )
+                setGenderPreference(event.target.value)
               }
               required
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={selectClass}
             >
-              <option value="ANY">
-                Any Gender
-              </option>
-
-              <option value="MALE">
-                Male
-              </option>
-
-              <option value="FEMALE">
-                Female
-              </option>
+              <option value="ANY">Any Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
             </select>
           </div>
 
+          <div>
+            <label
+              htmlFor="additionalFees"
+              className={labelClass}
+            >
+              Additional Fees
+            </label>
+
+            <input
+              id="additionalFees"
+              type="text"
+              value={additionalFees}
+              onChange={(event) =>
+                setAdditionalFees(event.target.value)
+              }
+              className={inputClass}
+              placeholder="e.g. $20 cleaning fee"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="utilitiesIncluded"
+              className={labelClass}
+            >
+              Utilities Included
+            </label>
+
+            <input
+              id="utilitiesIncluded"
+              type="text"
+              value={utilitiesIncluded}
+              onChange={(event) =>
+                setUtilitiesIncluded(event.target.value)
+              }
+              className={inputClass}
+              placeholder="e.g. Water, electricity"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="internetCharges"
+              className={labelClass}
+            >
+              Internet Charges
+            </label>
+
+            <input
+              id="internetCharges"
+              type="text"
+              value={internetCharges}
+              onChange={(event) =>
+                setInternetCharges(event.target.value)
+              }
+              className={inputClass}
+              placeholder="e.g. Included / $20 monthly"
+            />
+          </div>
         </div>
       </section>
 
@@ -689,65 +1019,220 @@ export default function EditListingForm({
       {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
         <h2 className="text-lg font-semibold text-slate-900">
           Amenities & Facilities
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Select everything available at
-          the property.
+          Select everything available at the property.
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+          {AMENITIES.map((amenity) => {
+            const selected = amenities.includes(
+              amenity.value
+            );
 
-          {AMENITIES.map(
-            (amenity) => {
-              const selected =
-                amenities.includes(
-                  amenity.value
-                );
+            return (
+              <label
+                key={amenity.value}
+                className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition ${
+                  selected
+                    ? "border-brand-blue bg-blue-50"
+                    : "border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={selected}
+                  onChange={() =>
+                    toggleAmenity(amenity.value)
+                  }
+                  className="h-4 w-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                />
 
-              return (
-                <label
-                  key={amenity.value}
-                  className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition ${
-                    selected
-                      ? "border-brand-blue bg-blue-50"
-                      : "border-slate-200 hover:bg-slate-50"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    onChange={() =>
-                      toggleAmenity(
-                        amenity.value
-                      )
-                    }
-                    className="h-4 w-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
-                  />
+                <span className="text-lg">
+                  {amenity.icon}
+                </span>
 
-                  <span className="text-sm font-medium text-slate-700">
-                    {amenity.label}
-                  </span>
-                </label>
-              );
-            }
-          )}
-
+                <span className="text-sm font-medium text-slate-700">
+                  {amenity.label}
+                </span>
+              </label>
+            );
+          })}
         </div>
 
-        {amenities.length > 0 && (
-          <p className="mt-4 text-sm text-slate-500">
-            {amenities.length}{" "}
+        <div className="mt-5 rounded-xl bg-slate-50 px-4 py-3">
+          <p className="text-sm text-slate-600">
+            <span className="font-semibold text-slate-900">
+              {amenities.length}
+            </span>{" "}
             {amenities.length === 1
               ? "amenity"
               : "amenities"}{" "}
             selected.
           </p>
+        </div>
+      </section>
+
+      {/* ====================================================== */}
+      {/* BATHROOMS */}
+      {/* ====================================================== */}
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">
+              Bathrooms
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Add each bathroom and specify its location
+              and available features.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={addBathroom}
+            className="rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-blue-dark"
+          >
+            + Add Bathroom
+          </button>
+        </div>
+
+        {bathrooms.length === 0 ? (
+          <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center">
+            <p className="text-sm text-slate-500">
+              No bathrooms added yet.
+            </p>
+
+            <button
+              type="button"
+              onClick={addBathroom}
+              className="mt-3 text-sm font-semibold text-brand-blue hover:underline"
+            >
+              Add your first bathroom
+            </button>
+          </div>
+        ) : (
+          <div className="mt-6 space-y-4">
+            {bathrooms.map((bathroom, index) => (
+              <div
+                key={index}
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <h3 className="font-semibold text-slate-900">
+                    Bathroom {index + 1}
+                  </h3>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeBathroom(index)
+                    }
+                    className="text-sm font-semibold text-red-600 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                <div className="mt-5">
+                  <label
+                    htmlFor={`bathroom-location-${index}`}
+                    className={labelClass}
+                  >
+                    Bathroom Location
+                  </label>
+
+                  <select
+                    id={`bathroom-location-${index}`}
+                    value={bathroom.location}
+                    onChange={(event) =>
+                      updateBathroomLocation(
+                        index,
+                        event.target.value as
+                          | "INSIDE"
+                          | "OUTSIDE"
+                      )
+                    }
+                    className={selectClass}
+                  >
+                    <option value="INSIDE">
+                      Inside the Property
+                    </option>
+
+                    <option value="OUTSIDE">
+                      Outside the Property
+                    </option>
+                  </select>
+                </div>
+
+                <div className="mt-5">
+                  <p className={labelClass}>
+                    Bathroom Features
+                  </p>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {BATHROOM_FEATURES.map(
+                      (feature) => {
+                        const selected =
+                          bathroom.features.includes(
+                            feature.value
+                          );
+
+                        return (
+                          <label
+                            key={feature.value}
+                            className={`flex cursor-pointer items-center gap-3 rounded-xl border bg-white p-3 transition ${
+                              selected
+                                ? "border-brand-blue bg-blue-50"
+                                : "border-slate-200 hover:bg-slate-50"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selected}
+                              onChange={() =>
+                                toggleBathroomFeature(
+                                  index,
+                                  feature.value
+                                )
+                              }
+                              className="h-4 w-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue"
+                            />
+
+                            <span className="text-lg">
+                              {feature.icon}
+                            </span>
+
+                            <span className="text-sm font-medium text-slate-700">
+                              {feature.label}
+                            </span>
+                          </label>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
 
+        <div className="mt-5 rounded-xl bg-slate-50 px-4 py-3">
+          <p className="text-sm text-slate-600">
+            <span className="font-semibold text-slate-900">
+              {bathrooms.length}
+            </span>{" "}
+            {bathrooms.length === 1
+              ? "bathroom"
+              : "bathrooms"}{" "}
+            added.
+          </p>
+        </div>
       </section>
 
       {/* ====================================================== */}
@@ -755,17 +1240,20 @@ export default function EditListingForm({
       {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
         <h2 className="text-lg font-semibold text-slate-900">
           University
         </h2>
 
-        <div className="mt-6 space-y-5">
+        <p className="mt-1 text-sm text-slate-500">
+          Connect this property to the university
+          students are searching for.
+        </p>
 
+        <div className="mt-6 space-y-5">
           <div>
             <label
               htmlFor="universityId"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               University
             </label>
@@ -774,31 +1262,26 @@ export default function EditListingForm({
               id="universityId"
               value={universityId}
               onChange={(event) =>
-                setUniversityId(
-                  event.target.value
-                )
+                setUniversityId(event.target.value)
               }
               required
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={selectClass}
             >
-              {universities.map(
-                (university) => (
-                  <option
-                    key={university.id}
-                    value={university.id}
-                  >
-                    {university.name} —{" "}
-                    {university.city}
-                  </option>
-                )
-              )}
+              {universities.map((university) => (
+                <option
+                  key={university.id}
+                  value={university.id}
+                >
+                  {university.name} — {university.city}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
             <label
               htmlFor="distanceToUniversityKm"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Distance to University (km)
             </label>
@@ -808,18 +1291,118 @@ export default function EditListingForm({
               type="number"
               min="0"
               step="0.1"
-              value={
-                distanceToUniversityKm
-              }
+              value={distanceToUniversityKm}
               onChange={(event) =>
                 setDistanceToUniversityKm(
                   event.target.value
                 )
               }
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={inputClass}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ====================================================== */}
+      {/* UTILITIES & SERVICES */}
+      {/* ====================================================== */}
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <h2 className="text-lg font-semibold text-slate-900">
+          Utilities & Services
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          Provide accurate information about internet,
+          water, and backup power available at the property.
+        </p>
+
+        <div className="mt-6 space-y-5">
+          <div>
+            <label
+              htmlFor="internetProvider"
+              className={labelClass}
+            >
+              Internet Service Provider
+            </label>
+
+            <input
+              id="internetProvider"
+              type="text"
+              value={internetProvider}
+              onChange={(event) =>
+                setInternetProvider(
+                  event.target.value
+                )
+              }
+              className={inputClass}
+              placeholder="e.g. Starlink"
             />
           </div>
 
+          <div>
+            <label
+              htmlFor="waterSource"
+              className={labelClass}
+            >
+              Water Source
+            </label>
+
+            <input
+              id="waterSource"
+              type="text"
+              value={waterSource}
+              onChange={(event) =>
+                setWaterSource(event.target.value)
+              }
+              className={inputClass}
+              placeholder="e.g. Tap Fresh Water"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="waterDrinkable"
+              className={labelClass}
+            >
+              Drinkable Water
+            </label>
+
+            <select
+              id="waterDrinkable"
+              value={waterDrinkable}
+              onChange={(event) =>
+                setWaterDrinkable(event.target.value)
+              }
+              className={selectClass}
+            >
+              <option value="">Select</option>
+              <option value="YES">Yes</option>
+              <option value="NO">No</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="solarBackupCapacity"
+              className={labelClass}
+            >
+              Solar Backup Capacity
+            </label>
+
+            <input
+              id="solarBackupCapacity"
+              type="text"
+              value={solarBackupCapacity}
+              onChange={(event) =>
+                setSolarBackupCapacity(
+                  event.target.value
+                )
+              }
+              className={inputClass}
+              placeholder="e.g. 5kVA"
+            />
+          </div>
         </div>
       </section>
 
@@ -828,26 +1411,26 @@ export default function EditListingForm({
       {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
         <h2 className="text-lg font-semibold text-slate-900">
           Description
         </h2>
 
-        <div className="mt-6">
+        <p className="mt-1 text-sm text-slate-500">
+          Tell students what makes this property
+          suitable for them.
+        </p>
 
+        <div className="mt-6">
           <textarea
             value={description}
             onChange={(event) =>
-              setDescription(
-                event.target.value
-              )
+              setDescription(event.target.value)
             }
             rows={7}
             required
             className="w-full resize-y rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
             placeholder="Describe the property, rooms, location, and anything students should know..."
           />
-
         </div>
       </section>
 
@@ -856,22 +1439,20 @@ export default function EditListingForm({
       {/* ====================================================== */}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
         <h2 className="text-lg font-semibold text-slate-900">
           Location Coordinates
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Optional. These can be used later
-          for displaying the property on a map.
+          Optional. These can be used later for displaying
+          the property on a map.
         </p>
 
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
-
           <div>
             <label
               htmlFor="latitude"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Latitude
             </label>
@@ -882,18 +1463,16 @@ export default function EditListingForm({
               step="any"
               value={latitude}
               onChange={(event) =>
-                setLatitude(
-                  event.target.value
-                )
+                setLatitude(event.target.value)
               }
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={inputClass}
             />
           </div>
 
           <div>
             <label
               htmlFor="longitude"
-              className="block text-sm font-medium text-slate-700"
+              className={labelClass}
             >
               Longitude
             </label>
@@ -904,14 +1483,11 @@ export default function EditListingForm({
               step="any"
               value={longitude}
               onChange={(event) =>
-                setLongitude(
-                  event.target.value
-                )
+                setLongitude(event.target.value)
               }
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+              className={inputClass}
             />
           </div>
-
         </div>
       </section>
 
@@ -920,7 +1496,6 @@ export default function EditListingForm({
       {/* ====================================================== */}
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-
         <Link
           href="/dashboard/landlord/listings"
           className="rounded-xl border border-slate-300 px-6 py-3 text-center font-semibold text-slate-700 transition hover:bg-slate-50"
@@ -937,9 +1512,7 @@ export default function EditListingForm({
             ? "Saving Changes..."
             : "Save Changes"}
         </button>
-
       </div>
-
     </form>
   );
 }

@@ -56,6 +56,19 @@ const BATHROOM_FEATURES = [
 ];
 
 // ============================================================
+// REQUIRED FIELD ASTERISK
+// ============================================================
+
+function RequiredMark() {
+  return (
+    <span className="text-red-500" aria-hidden="true">
+      {" "}
+      *
+    </span>
+  );
+}
+
+// ============================================================
 // PAGE
 // ============================================================
 
@@ -138,9 +151,6 @@ export default function NewListingPage() {
   const [checkingVerification, setCheckingVerification] =
     useState(true);
 
-  const [verificationStatus, setVerificationStatus] =
-    useState<string | null>(null);
-
   // ==========================================================
   // CHECK LANDLORD VERIFICATION
   // ==========================================================
@@ -160,11 +170,8 @@ export default function NewListingPage() {
               "Unable to check verification status."
           );
         }
-
-        setVerificationStatus(data.status);
       } catch (error) {
         console.error(error);
-        setVerificationStatus("UNKNOWN");
       } finally {
         setCheckingVerification(false);
       }
@@ -288,7 +295,149 @@ export default function NewListingPage() {
   }
 
   // ==========================================================
-  // SUBMIT
+  // SAVE DRAFT
+  // ==========================================================
+
+  async function saveDraft() {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "/api/listings",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            saveAsDraft: true,
+
+            title:
+              propertyTitle.trim() || null,
+
+            address:
+              address.trim() || null,
+
+            suburb:
+              suburb.trim() || null,
+
+            city:
+              city.trim() || null,
+
+            province:
+              province.trim() || null,
+
+            country:
+              country || "Zimbabwe",
+
+            universityId:
+              universityId || null,
+
+            monthlyRent:
+              rent
+                ? Number(rent)
+                : null,
+
+            propertyType:
+              propertyType || null,
+
+            roomType:
+              roomType || null,
+
+            genderPreference:
+              genderPreference || null,
+
+            depositRequired:
+              depositRequired === "yes"
+                ? true
+                : depositRequired === "no"
+                  ? false
+                  : null,
+
+            depositAmount:
+              depositAmount
+                ? Number(depositAmount)
+                : null,
+
+            additionalFees:
+              additionalFees.trim() || null,
+
+            utilitiesIncluded:
+              utilitiesIncluded.trim() || null,
+
+            internetCharges:
+              internetCharges.trim() || null,
+
+            internetProvider:
+              internetProvider || null,
+
+            waterSource:
+              waterSource || null,
+
+            waterDrinkable:
+              waterDrinkable === "yes"
+                ? true
+                : waterDrinkable === "no"
+                  ? false
+                  : null,
+
+            solarBackupCapacity:
+              solarBackupCapacity || null,
+
+            description:
+              description.trim() || null,
+
+            amenities,
+
+            bathrooms,
+          }),
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        alert(
+          data.error ||
+            "Failed to save draft."
+        );
+
+        return;
+      }
+
+      if (!data.id) {
+        alert(
+          "Draft was saved, but no listing ID was returned."
+        );
+
+        return;
+      }
+
+      router.push(
+        "/dashboard/landlord/listings"
+      );
+    } catch (error) {
+      console.error(
+        "Failed to save listing draft:",
+        error
+      );
+
+      alert(
+        "Something went wrong while saving your draft."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ==========================================================
+  // SUBMIT LISTING
   // ==========================================================
 
   async function handleSubmit(
@@ -309,6 +458,8 @@ export default function NewListingPage() {
           },
 
           body: JSON.stringify({
+            saveAsDraft: false,
+
             title: propertyTitle,
 
             address,
@@ -319,14 +470,17 @@ export default function NewListingPage() {
 
             universityId,
 
-            monthlyRent: rent,
+            monthlyRent:
+              rent
+                ? Number(rent)
+                : null,
 
             depositRequired:
               depositRequired === "yes",
 
             depositAmount:
               depositRequired === "yes"
-                ? depositAmount
+                ? Number(depositAmount)
                 : null,
 
             additionalFees,
@@ -373,17 +527,22 @@ export default function NewListingPage() {
         return;
       }
 
-      alert(
-        "Listing created successfully!"
-      );
+      if (!data.id) {
+        alert(
+          "Listing was created, but we could not find its ID."
+        );
+
+        return;
+      }
 
       router.push(
-        "/dashboard/landlord/listings"
+        `/dashboard/landlord/listings/${data.id}/photos`
       );
-
-      router.refresh();
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Failed to create listing:",
+        error
+      );
 
       alert(
         "Something went wrong."
@@ -421,10 +580,30 @@ export default function NewListingPage() {
             Add a Property
           </h1>
 
-          <p className="mt-2 text-slate-600">
-            Create a listing for students
-            looking for accommodation.
-          </p>
+          <div className="mt-2 text-slate-600">
+            <p>
+              Create a listing for students
+              looking for accommodation.
+            </p>
+
+            <div className="mt-4 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <span className="text-lg">
+                💾
+              </span>
+
+              <div>
+                <p className="text-sm font-semibold text-slate-800">
+                  Don&apos;t have all the information yet?
+                </p>
+
+                <p className="mt-1 text-sm leading-5 text-slate-600">
+                  You can save your listing as a
+                  draft and come back later to
+                  finish it.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* ================================================== */}
@@ -433,13 +612,11 @@ export default function NewListingPage() {
 
         <div className="mb-8 rounded-2xl border border-blue-200 bg-blue-50 p-5 sm:p-6">
           <div className="flex items-start gap-4">
-
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-xl shadow-sm">
               📋
             </div>
 
             <div className="flex-1">
-
               <h2 className="text-base font-semibold text-slate-900">
                 Before You List Your Property
               </h2>
@@ -463,7 +640,6 @@ export default function NewListingPage() {
                   ↗
                 </span>
               </a>
-
             </div>
           </div>
         </div>
@@ -482,14 +658,12 @@ export default function NewListingPage() {
           {/* ================================================== */}
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
             <h2 className="text-lg font-semibold text-slate-900">
               Property Information
             </h2>
 
             <p className="mt-1 text-sm text-slate-600">
-              Tell students about the
-              property.
+              Tell students about the property.
             </p>
 
             <div className="mt-6 space-y-5">
@@ -499,6 +673,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Property Title
+                  <RequiredMark />
                 </label>
 
                 <input
@@ -520,6 +695,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Property Address
+                  <RequiredMark />
                 </label>
 
                 <div className="space-y-4">
@@ -527,6 +703,7 @@ export default function NewListingPage() {
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-600">
                       House Number & Street
+                      <RequiredMark />
                     </label>
 
                     <input
@@ -546,6 +723,7 @@ export default function NewListingPage() {
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-600">
                       Suburb
+                      <RequiredMark />
                     </label>
 
                     <input
@@ -563,10 +741,10 @@ export default function NewListingPage() {
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
-
                     <div>
                       <label className="mb-2 block text-sm font-medium text-slate-600">
                         City
+                        <RequiredMark />
                       </label>
 
                       <input
@@ -586,6 +764,7 @@ export default function NewListingPage() {
                     <div>
                       <label className="mb-2 block text-sm font-medium text-slate-600">
                         Province
+                        <RequiredMark />
                       </label>
 
                       <input
@@ -601,12 +780,12 @@ export default function NewListingPage() {
                         className="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
                       />
                     </div>
-
                   </div>
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-600">
                       Country
+                      <RequiredMark />
                     </label>
 
                     <select
@@ -624,7 +803,6 @@ export default function NewListingPage() {
                       </option>
                     </select>
                   </div>
-
                 </div>
               </div>
 
@@ -633,6 +811,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Nearby University
+                  <RequiredMark />
                 </label>
 
                 <select
@@ -675,6 +854,7 @@ export default function NewListingPage() {
                 <div>
                   <label className="mb-2 block font-medium text-slate-700">
                     Monthly Rent
+                    <RequiredMark />
                   </label>
 
                   <input
@@ -695,6 +875,7 @@ export default function NewListingPage() {
                 <div>
                   <label className="mb-2 block font-medium text-slate-700">
                     Property Type
+                    <RequiredMark />
                   </label>
 
                   <select
@@ -744,6 +925,7 @@ export default function NewListingPage() {
                 <div>
                   <label className="mb-2 block font-medium text-slate-700">
                     Room Type
+                    <RequiredMark />
                   </label>
 
                   <select
@@ -773,7 +955,6 @@ export default function NewListingPage() {
                     </option>
                   </select>
                 </div>
-
               </div>
 
               {/* Gender */}
@@ -781,6 +962,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Gender Preference
+                  <RequiredMark />
                 </label>
 
                 <select
@@ -810,7 +992,6 @@ export default function NewListingPage() {
                   </option>
                 </select>
               </div>
-
             </div>
           </section>
 
@@ -819,7 +1000,6 @@ export default function NewListingPage() {
           {/* ================================================== */}
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
             <h2 className="text-lg font-semibold text-slate-900">
               Pricing & Costs
             </h2>
@@ -835,6 +1015,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Security Deposit Required?
+                  <RequiredMark />
                 </label>
 
                 <select
@@ -873,6 +1054,7 @@ export default function NewListingPage() {
                 <div>
                   <label className="mb-2 block font-medium text-slate-700">
                     Security Deposit Amount
+                    <RequiredMark />
                   </label>
 
                   <input
@@ -912,6 +1094,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Utilities
+                  <RequiredMark />
                 </label>
 
                 <textarea
@@ -945,7 +1128,6 @@ export default function NewListingPage() {
                   className="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
                 />
               </div>
-
             </div>
           </section>
 
@@ -954,7 +1136,6 @@ export default function NewListingPage() {
           {/* ================================================== */}
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-
             <h2 className="text-lg font-semibold text-slate-900">
               Amenities & Facilities
             </h2>
@@ -965,7 +1146,6 @@ export default function NewListingPage() {
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-
               {AMENITIES.map(
                 (amenity) => {
                   const selected =
@@ -1000,7 +1180,6 @@ export default function NewListingPage() {
                   );
                 }
               )}
-
             </div>
 
             {amenities.length > 0 && (
@@ -1012,7 +1191,6 @@ export default function NewListingPage() {
                 selected.
               </p>
             )}
-
           </section>
 
           {/* ================================================== */}
@@ -1022,7 +1200,6 @@ export default function NewListingPage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">
                   Bathrooms
@@ -1043,7 +1220,6 @@ export default function NewListingPage() {
               >
                 + Add Bathroom
               </button>
-
             </div>
 
             {bathrooms.length === 0 ? (
@@ -1060,7 +1236,6 @@ export default function NewListingPage() {
               </div>
             ) : (
               <div className="mt-6 space-y-5">
-
                 {bathrooms.map(
                   (
                     bathroom,
@@ -1070,9 +1245,7 @@ export default function NewListingPage() {
                       key={bathroomIndex}
                       className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
                     >
-
                       <div className="flex items-start justify-between gap-4">
-
                         <div>
                           <h3 className="font-semibold text-slate-900">
                             Bathroom{" "}
@@ -1096,13 +1269,9 @@ export default function NewListingPage() {
                         >
                           Remove
                         </button>
-
                       </div>
 
-                      {/* Location */}
-
                       <div className="mt-5">
-
                         <label className="mb-2 block text-sm font-medium text-slate-700">
                           Bathroom Location
                         </label>
@@ -1130,19 +1299,14 @@ export default function NewListingPage() {
                             Outside / Separate
                           </option>
                         </select>
-
                       </div>
 
-                      {/* Features */}
-
                       <div className="mt-5">
-
                         <label className="mb-3 block text-sm font-medium text-slate-700">
                           Bathroom Features
                         </label>
 
                         <div className="grid gap-3 sm:grid-cols-2">
-
                           {BATHROOM_FEATURES.map(
                             (feature) => {
                               const selected =
@@ -1184,7 +1348,6 @@ export default function NewListingPage() {
                               );
                             }
                           )}
-
                         </div>
 
                         {bathroom.features
@@ -1194,16 +1357,12 @@ export default function NewListingPage() {
                             bathroom feature.
                           </p>
                         )}
-
                       </div>
-
                     </div>
                   )
                 )}
-
               </div>
             )}
-
           </section>
 
           {/* ================================================== */}
@@ -1229,6 +1388,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Internet Service Provider
+                  <RequiredMark />
                 </label>
 
                 <select
@@ -1304,6 +1464,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Water Source
+                  <RequiredMark />
                 </label>
 
                 <select
@@ -1347,6 +1508,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   Is the Water Drinkable?
+                  <RequiredMark />
                 </label>
 
                 <select
@@ -1382,6 +1544,7 @@ export default function NewListingPage() {
               <div>
                 <label className="mb-2 block font-medium text-slate-700">
                   ☀️ Solar Backup Capacity
+                  <RequiredMark />
                 </label>
 
                 <select
@@ -1421,7 +1584,6 @@ export default function NewListingPage() {
                   </option>
                 </select>
               </div>
-
             </div>
 
             {/* Solar Guide */}
@@ -1556,10 +1718,8 @@ export default function NewListingPage() {
                     configuration, and
                     simultaneous usage.
                   </p>
-
                 </div>
               )}
-
           </section>
 
           {/* ================================================== */}
@@ -1570,6 +1730,7 @@ export default function NewListingPage() {
 
             <h2 className="text-lg font-semibold text-slate-900">
               Description
+              <RequiredMark />
             </h2>
 
             <p className="mt-1 text-sm text-slate-600">
@@ -1579,7 +1740,6 @@ export default function NewListingPage() {
             </p>
 
             <div className="mt-6">
-
               <textarea
                 value={description}
                 onChange={(e) =>
@@ -1592,16 +1752,32 @@ export default function NewListingPage() {
                 required
                 className="w-full resize-none rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
               />
-
             </div>
-
           </section>
 
           {/* ================================================== */}
           {/* ACTIONS */}
           {/* ================================================== */}
 
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+
+            {/* SAVE DRAFT */}
+
+            <button
+              type="button"
+              onClick={saveDraft}
+              disabled={
+                loading ||
+                checkingVerification
+              }
+              className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-center font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {loading
+                ? "Saving Draft..."
+                : "💾 Save Draft"}
+            </button>
+
+            {/* CANCEL */}
 
             <Link
               href="/dashboard/landlord/listings"
@@ -1609,6 +1785,8 @@ export default function NewListingPage() {
             >
               Cancel
             </Link>
+
+            {/* CREATE LISTING */}
 
             <button
               type="submit"
@@ -1620,12 +1798,10 @@ export default function NewListingPage() {
               className="rounded-xl bg-brand-blue px-6 py-3 font-semibold text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading
-                ? "Creating Listing..."
-                : "Create Listing"}
+                ? "Saving Listing..."
+                : "Save & Continue to Photos →"}
             </button>
-
           </div>
-
         </form>
       </div>
     </main>
