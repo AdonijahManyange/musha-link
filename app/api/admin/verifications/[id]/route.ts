@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendNotificationEmail } from "@/lib/email";
 
 type Props = {
   params: Promise<{
@@ -111,10 +112,7 @@ export async function PATCH(
           where: {
             userId: verification.landlordId,
             type: {
-              in: [
-                "WATER_BILL",
-                "ELECTRICITY_BILL",
-              ],
+              in: ["WATER_BILL", "ELECTRICITY_BILL"],
             },
           },
           data: {
@@ -124,9 +122,7 @@ export async function PATCH(
         }),
 
         prisma.landlordVerification.update({
-          where: {
-            id,
-          },
+          where: { id },
           data: {
             status: "APPROVED",
             reviewedById: user.id,
@@ -143,7 +139,29 @@ export async function PATCH(
             verified: true,
           },
         }),
+
+        prisma.notification.create({
+          data: {
+            userId: verification.landlordId,
+            type: "VERIFICATION_APPROVED",
+            title: "Verification approved",
+            message:
+              "Your landlord verification has been approved.",
+            link: "/dashboard/landlord/verification",
+          },
+        }),
       ]);
+
+      // Email AFTER transaction
+      await sendNotificationEmail({
+        to: verification.landlord.email,
+        subject: "Your MushaLink verification was approved",
+        title: "Verification approved",
+        message:
+          "Your landlord verification has been approved. You can now use your verified landlord account on MushaLink.",
+        actionUrl: "/dashboard/landlord/verification",
+        actionText: "View Verification",
+      });
 
       return NextResponse.json({
         success: true,
@@ -207,7 +225,26 @@ export async function PATCH(
           verified: false,
         },
       }),
+
+      prisma.notification.create({
+        data: {
+          userId: verification.landlordId,
+          type: "VERIFICATION_REJECTED",
+          title: "Verification rejected",
+          message: `Your landlord verification was rejected. Reason: ${rejectionReason.trim()}`,
+          link: "/dashboard/landlord/verification",
+        },
+      }),
     ]);
+
+    await sendNotificationEmail({
+      to: verification.landlord.email,
+      subject: "Your MushaLink verification was rejected",
+      title: "Verification rejected",
+      message: `Your landlord verification was rejected. Reason: ${rejectionReason.trim()}`,
+      actionUrl: "/dashboard/landlord/verification",
+      actionText: "View Verification",
+    });
 
     return NextResponse.json({
       success: true,

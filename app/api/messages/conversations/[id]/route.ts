@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { sendNotificationEmail } from "@/lib/email";
 
 type RouteContext = {
   params: Promise<{
@@ -151,20 +152,35 @@ export async function GET(
     }
 
     // ----------------------------------------------------------
-    // Mark received messages as read
+    // Mark received messages + related notifications as read
     // ----------------------------------------------------------
 
-    await prisma.message.updateMany({
-      where: {
-        conversationId: conversation.id,
-        recipientId: user.id,
-        read: false,
-      },
+    await prisma.$transaction([
+      prisma.message.updateMany({
+        where: {
+          conversationId: conversation.id,
+          recipientId: user.id,
+          read: false,
+        },
 
-      data: {
-        read: true,
-      },
-    });
+        data: {
+          read: true,
+        },
+      }),
+
+      prisma.notification.updateMany({
+        where: {
+          userId: user.id,
+          type: "NEW_MESSAGE",
+          link: `/messages/${conversation.id}`,
+          read: false,
+        },
+
+        data: {
+          read: true,
+        },
+      }),
+    ]);
 
     // ----------------------------------------------------------
     // Return conversation
@@ -243,6 +259,20 @@ export async function POST(
           studentId: true,
           landlordId: true,
           listingId: true,
+
+          student: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+
+          landlord: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
         },
       });
 
@@ -291,43 +321,78 @@ export async function POST(
         ? conversation.landlordId
         : conversation.studentId;
 
-    // ----------------------------------------------------------
-    // Create message
-    // ----------------------------------------------------------
-
-    const createdMessage =
-      await prisma.message.create({
-        data: {
-          conversationId: conversation.id,
-          senderId: user.id,
-          recipientId,
-          content,
-        },
-
-        select: {
-          id: true,
-          conversationId: true,
-          senderId: true,
-          recipientId: true,
-          content: true,
-          read: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+    const recipient =
+      user.id === conversation.studentId
+        ? conversation.landlord
+        : conversation.student;
 
     // ----------------------------------------------------------
-    // Update conversation timestamp
+    // Create message + notification
     // ----------------------------------------------------------
 
-    await prisma.conversation.update({
-      where: {
-        id: conversation.id,
-      },
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // Create the message
+        const createdMessage =
+          await tx.message.create({
+            data: {
+              conversationId: conversation.id,
+              senderId: user.id,
+              recipientId,
+              content,
+            },
 
-      data: {
-        updatedAt: new Date(),
-      },
+            select: {
+              id: true,
+              conversationId: true,
+              senderId: true,
+              recipientId: true,
+              content: true,
+              read: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          });
+
+        // Create notification for recipient
+        await tx.notification.create({
+          data: {
+            userId: recipientId,
+            type: "NEW_MESSAGE",
+            title: "New message",
+            message: "You have a new message.",
+            link: `/messages/${conversation.id}`,
+          },
+        });
+
+        // Update conversation timestamp
+        await tx.conversation.update({
+          where: {
+            id: conversation.id,
+          },
+
+          data: {
+            updatedAt: new Date(),
+          },
+        });
+
+        return createdMessage;
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Send email notification
+    // ----------------------------------------------------------
+
+    await sendNotificationEmail({
+      to: recipient.email,
+      subject: "You have a new message on MushaLink",
+      title: "New message",
+      message: `${
+        user.name || "Someone"
+      } sent you a new message on MushaLink.`,
+      actionUrl: `/messages/${conversation.id}`,
+      actionText: "View Message",
     });
 
     // ----------------------------------------------------------
@@ -336,7 +401,7 @@ export async function POST(
 
     return NextResponse.json(
       {
-        message: createdMessage,
+        message: result,
       },
       { status: 201 }
     );
@@ -421,11 +486,14 @@ export async function PATCH(
     }
 
     // ----------------------------------------------------------
-    // Mark unread messages received by current user as read
+    // Mark messages + related notifications as read
     // ----------------------------------------------------------
 
-    const result =
-      await prisma.message.updateMany({
+    const [
+      messageResult,
+      notificationResult,
+    ] = await prisma.$transaction([
+      prisma.message.updateMany({
         where: {
           conversationId: conversation.id,
           recipientId: user.id,
@@ -435,15 +503,32 @@ export async function PATCH(
         data: {
           read: true,
         },
-      });
+      }),
+
+      prisma.notification.updateMany({
+        where: {
+          userId: user.id,
+          type: "NEW_MESSAGE",
+          link: `/messages/${conversation.id}`,
+          read: false,
+        },
+
+        data: {
+          read: true,
+        },
+      }),
+    ]);
 
     // ----------------------------------------------------------
     // Response
     // ----------------------------------------------------------
 
     return NextResponse.json({
-      message: "Messages marked as read.",
-      updatedCount: result.count,
+      message:
+        "Messages and notifications marked as read.",
+      updatedCount: messageResult.count,
+      notificationsUpdatedCount:
+        notificationResult.count,
     });
   } catch (error) {
     console.error(

@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
 import ProfileMenu from "./ProfileMenu";
+import NotificationBell from "./NotificationBell";
 
 export default async function Navbar() {
   const user = await getCurrentUser();
@@ -58,6 +59,8 @@ export default async function Navbar() {
               >
                 Dashboard
               </Link>
+
+              <NotificationBell />
 
               {/* Profile Menu */}
               <div className="hidden md:block">
