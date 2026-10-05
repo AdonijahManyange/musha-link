@@ -250,7 +250,14 @@ export async function GET() {
       const conversations =
         await prisma.conversation.findMany({
           where: {
-            studentId: user.id,
+            OR: [
+              {
+                studentId: user.id,
+              },
+              {
+                landlordId: user.id,
+              },
+            ],
           },
 
           orderBy: {
@@ -263,7 +270,30 @@ export async function GET() {
                 id: true,
                 title: true,
                 city: true,
+                province: true,
                 suburb: true,
+
+                photos: {
+                  orderBy: {
+                    sortOrder: "asc",
+                  },
+
+                  take: 1,
+                },
+              },
+            },
+
+            student: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+
+                studentProfile: {
+                  select: {
+                    profilePhotoUrl: true,
+                  },
+                },
               },
             },
 
@@ -271,6 +301,14 @@ export async function GET() {
               select: {
                 id: true,
                 name: true,
+                email: true,
+
+                landlordProfile: {
+                  select: {
+                    phone: true,
+                    profilePhotoUrl: true,
+                  },
+                },
               },
             },
 
@@ -280,6 +318,16 @@ export async function GET() {
               },
 
               take: 1,
+
+              select: {
+                id: true,
+                content: true,
+                senderId: true,
+                recipientId: true,
+                read: true,
+                createdAt: true,
+                updatedAt: true,
+              },
             },
           },
         });
@@ -318,6 +366,13 @@ export async function GET() {
               select: {
                 id: true,
                 name: true,
+                email: true,
+
+                studentProfile: {
+                  select: {
+                    profilePhotoUrl: true,
+                  },
+                },
               },
             },
 

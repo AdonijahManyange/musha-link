@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import LogoutButton from "@/components/LogoutButton";
 import Link from "next/link";
 
@@ -14,11 +15,25 @@ export default async function StudentDashboard() {
     redirect("/dashboard");
   }
 
+  // ============================================================
+  // UNREAD MESSAGES
+  // ============================================================
+
+  const unreadMessageCount =
+    await prisma.message.count({
+      where: {
+        recipientId: user.id,
+        read: false,
+      },
+    });
+
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12">
       <div className="mx-auto max-w-6xl">
 
-        {/* Header */}
+        {/* ================================================== */}
+        {/* HEADER */}
+        {/* ================================================== */}
 
         <div className="mb-10">
           <p className="text-sm font-medium text-brand-blue">
@@ -26,7 +41,8 @@ export default async function StudentDashboard() {
           </p>
 
           <h1 className="mt-2 text-3xl font-bold text-slate-900">
-            Welcome {user.name ? `, ${user.name}` : ""}! 👋
+            Welcome
+            {user.name ? `, ${user.name}` : ""}! 👋
           </h1>
 
           <p className="mt-2 text-slate-600">
@@ -36,18 +52,22 @@ export default async function StudentDashboard() {
           <LogoutButton />
         </div>
 
-        {/* Dashboard Cards */}
+        {/* ================================================== */}
+        {/* DASHBOARD CARDS */}
+        {/* ================================================== */}
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
 
-          {/* Find Accommodation */}
+          {/* ================================================== */}
+          {/* FIND ACCOMMODATION */}
+          {/* ================================================== */}
 
           <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
               Find Accommodation
             </h2>
 
-            <p className="mt-2 text-slate-600">
+            <p className="mt-2 text-sm text-slate-600">
               Browse available student accommodation near your university.
             </p>
 
@@ -59,14 +79,16 @@ export default async function StudentDashboard() {
             </Link>
           </div>
 
-          {/* Saved Listings */}
+          {/* ================================================== */}
+          {/* SAVED LISTINGS */}
+          {/* ================================================== */}
 
           <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
               Saved Listings
             </h2>
 
-            <p className="mt-2 text-slate-600">
+            <p className="mt-2 text-sm text-slate-600">
               Keep track of accommodation you're interested in.
             </p>
 
@@ -78,14 +100,16 @@ export default async function StudentDashboard() {
             </Link>
           </div>
 
-          {/* Viewing Requests */}
+          {/* ================================================== */}
+          {/* VIEWING REQUESTS */}
+          {/* ================================================== */}
 
           <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900">
               Viewing Requests
             </h2>
 
-            <p className="mt-2 text-slate-600">
+            <p className="mt-2 text-sm text-slate-600">
               Check the status of your accommodation viewing requests.
             </p>
 
@@ -97,18 +121,79 @@ export default async function StudentDashboard() {
             </Link>
           </div>
 
+          {/* ================================================== */}
+          {/* MESSAGES */}
+          {/* ================================================== */}
+
+          <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div>
+              <div className="flex items-start justify-between gap-4">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Messages
+                </h2>
+
+                {unreadMessageCount > 0 && (
+                  <span className="flex min-w-6 items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">
+                    {unreadMessageCount > 99
+                      ? "99+"
+                      : unreadMessageCount}
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-2 text-sm text-slate-600">
+                View and respond to landlords about properties you're interested in.
+              </p>
+
+              {unreadMessageCount > 0 ? (
+                <div className="mt-4 rounded-xl bg-red-50 p-3">
+                  <p className="text-sm font-semibold text-red-800">
+                    {unreadMessageCount === 1
+                      ? "1 unread message"
+                      : `${unreadMessageCount} unread messages`}
+                  </p>
+
+                  <p className="mt-1 text-xs text-red-700">
+                    You have messages waiting for a response.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-xl bg-slate-50 p-3">
+                  <p className="text-sm font-medium text-slate-700">
+                    No unread messages
+                  </p>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    New landlord conversations will appear here.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/messages"
+              className="mt-auto inline-block w-fit rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
+            >
+              View Messages
+            </Link>
+          </div>
+
         </div>
 
-        {/* Account */}
+        {/* ================================================== */}
+        {/* ACCOUNT */}
+        {/* ================================================== */}
 
         <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
                 Account
               </h2>
 
               <div className="mt-4 space-y-2 text-sm text-slate-600">
+
                 <p>
                   <span className="font-medium text-slate-900">
                     Name:
@@ -129,6 +214,7 @@ export default async function StudentDashboard() {
                   </span>{" "}
                   Student
                 </p>
+
               </div>
             </div>
 
@@ -138,8 +224,10 @@ export default async function StudentDashboard() {
             >
               Edit Profile
             </Link>
+
           </div>
         </div>
+
       </div>
     </main>
   );

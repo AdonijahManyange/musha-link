@@ -58,6 +58,10 @@ export async function GET(
         },
 
         include: {
+          // ----------------------------------------------------
+          // Listing
+          // ----------------------------------------------------
+
           listing: {
             select: {
               id: true,
@@ -76,13 +80,27 @@ export async function GET(
             },
           },
 
+          // ----------------------------------------------------
+          // Student
+          // ----------------------------------------------------
+
           student: {
             select: {
               id: true,
               name: true,
               email: true,
+
+              studentProfile: {
+                select: {
+                  profilePhotoUrl: true,
+                },
+              },
             },
           },
+
+          // ----------------------------------------------------
+          // Landlord
+          // ----------------------------------------------------
 
           landlord: {
             select: {
@@ -98,6 +116,10 @@ export async function GET(
               },
             },
           },
+
+          // ----------------------------------------------------
+          // Messages
+          // ----------------------------------------------------
 
           messages: {
             orderBy: {
@@ -277,11 +299,8 @@ export async function POST(
       await prisma.message.create({
         data: {
           conversationId: conversation.id,
-
           senderId: user.id,
-
           recipientId,
-
           content,
         },
 
@@ -409,9 +428,7 @@ export async function PATCH(
       await prisma.message.updateMany({
         where: {
           conversationId: conversation.id,
-
           recipientId: user.id,
-
           read: false,
         },
 
@@ -425,9 +442,7 @@ export async function PATCH(
     // ----------------------------------------------------------
 
     return NextResponse.json({
-      message:
-        "Messages marked as read.",
-
+      message: "Messages marked as read.",
       updatedCount: result.count,
     });
   } catch (error) {

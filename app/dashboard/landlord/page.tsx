@@ -32,7 +32,19 @@ export default async function LandlordDashboard() {
     verification?.status ?? "NOT_STARTED";
 
   const isVerified =
-  verificationStatus === "APPROVED";
+    verificationStatus === "APPROVED";
+
+  // ============================================================
+  // UNREAD MESSAGES
+  // ============================================================
+
+  const unreadMessageCount =
+    await prisma.message.count({
+      where: {
+        recipientId: user.id,
+        read: false,
+      },
+    });
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-12">
@@ -169,23 +181,59 @@ export default async function LandlordDashboard() {
           </div>
 
           {/* ================================================== */}
-          {/* VIEWING REQUESTS */}
+          {/* MESSAGES */}
           {/* ================================================== */}
 
           <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Viewing Requests
-            </h2>
+            <div>
+              <div className="flex items-start justify-between gap-4">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Messages
+                </h2>
 
-            <p className="mt-2 text-sm text-slate-600">
-              Review students interested in viewing your properties.
-            </p>
+                {unreadMessageCount > 0 && (
+                  <span className="flex min-w-6 items-center justify-center rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white">
+                    {unreadMessageCount > 99
+                      ? "99+"
+                      : unreadMessageCount}
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-2 text-sm text-slate-600">
+                View and respond to students interested in your properties.
+              </p>
+
+              {unreadMessageCount > 0 ? (
+                <div className="mt-4 rounded-xl bg-red-50 p-3">
+                  <p className="text-sm font-semibold text-red-800">
+                    {unreadMessageCount === 1
+                      ? "1 unread message"
+                      : `${unreadMessageCount} unread messages`}
+                  </p>
+
+                  <p className="mt-1 text-xs text-red-700">
+                    You have student messages waiting for a response.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-xl bg-slate-50 p-3">
+                  <p className="text-sm font-medium text-slate-700">
+                    No unread messages
+                  </p>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    New student conversations will appear here.
+                  </p>
+                </div>
+              )}
+            </div>
 
             <Link
-              href="/dashboard/landlord/requests"
-              className="mt-auto inline-block w-fit rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+              href="/messages"
+              className="mt-auto inline-block w-fit rounded-xl bg-brand-blue px-5 py-3 font-semibold text-white transition hover:bg-brand-blue-dark"
             >
-              View Requests
+              View Messages
             </Link>
           </div>
 

@@ -29,6 +29,7 @@ model User {
   receivedMessages      Message[]      @relation("ReceivedMessages")
   studentConversations  Conversation[] @relation("StudentConversations")
   landlordConversations Conversation[] @relation("LandlordConversations")
+  notifications         Notification[]
 }
 
 model LandlordProfile {
@@ -265,6 +266,29 @@ model Message {
   @@index([createdAt])
 }
 
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+
+  type    NotificationType
+  title   String
+  message String
+
+  read Boolean @default(false)
+
+  // Where the user should go when they click
+  // the notification.
+  link String?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
 enum Role {
   STUDENT
   LANDLORD
@@ -389,4 +413,17 @@ enum SolarBackupCapacity {
   STANDARD_3_4KVA
   HIGH_CAPACITY_5_6KVA
   PREMIUM_7KVA_PLUS
+}
+
+enum NotificationType {
+  NEW_MESSAGE
+  LISTING_APPROVED
+  LISTING_REJECTED
+  LISTING_PUBLISHED
+  VIEWING_REQUEST
+  VIEWING_CONFIRMED
+  VIEWING_CANCELLED
+  VERIFICATION_APPROVED
+  VERIFICATION_REJECTED
+  SYSTEM
 }

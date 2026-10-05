@@ -64,6 +64,12 @@ export async function GET() {
               id: true,
               name: true,
               email: true,
+
+              studentProfile: {
+                select: {
+                  profilePhotoUrl: true,
+                },
+              },
             },
           },
 
@@ -368,6 +374,12 @@ export async function POST(
               id: true,
               name: true,
               email: true,
+
+              studentProfile: {
+                select: {
+                  profilePhotoUrl: true,
+                },
+              },
             },
           },
 

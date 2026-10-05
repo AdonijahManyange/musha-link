@@ -24,10 +24,18 @@ type Listing = {
   photos: Photo[];
 };
 
+type StudentProfile = {
+  profilePhotoUrl: string | null;
+};
+
 type Person = {
   id: string;
   name: string | null;
   email: string;
+};
+
+type Student = Person & {
+  studentProfile: StudentProfile | null;
 };
 
 type LandlordProfile = {
@@ -57,7 +65,7 @@ type Conversation = {
   updatedAt: string;
 
   listing: Listing;
-  student: Person;
+  student: Student;
   landlord: Landlord;
 
   messages: Message[];
@@ -111,16 +119,21 @@ function getConversationPhoto(
   conversation: Conversation,
   currentUserId: string
 ) {
-  if (
-    conversation.studentId === currentUserId
-  ) {
+  // Current user is the student.
+  // The other person is the landlord.
+  if (conversation.studentId === currentUserId) {
     return (
       conversation.landlord.landlordProfile
         ?.profilePhotoUrl ?? null
     );
   }
 
-  return null;
+  // Current user is the landlord.
+  // The other person is the student.
+  return (
+    conversation.student.studentProfile
+      ?.profilePhotoUrl ?? null
+  );
 }
 
 // ============================================================

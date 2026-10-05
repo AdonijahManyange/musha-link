@@ -36,6 +36,14 @@ type Person = {
   email: string;
 };
 
+type StudentProfile = {
+  profilePhotoUrl: string | null;
+};
+
+type Student = Person & {
+  studentProfile: StudentProfile | null;
+};
+
 type LandlordProfile = {
   phone: string | null;
   profilePhotoUrl: string | null;
@@ -65,7 +73,7 @@ type Conversation = {
   updatedAt: string;
 
   listing: Listing;
-  student: Person;
+  student: Student;
   landlord: Landlord;
 
   messages: Message[];
@@ -123,6 +131,43 @@ function formatMessageDate(
         ? "numeric"
         : undefined,
   });
+}
+
+// ============================================================
+// GET PERSON PHOTO
+// ============================================================
+
+function getPersonPhoto(
+  person: Student | Landlord
+) {
+  // Student
+  if ("studentProfile" in person) {
+    return (
+      person.studentProfile
+        ?.profilePhotoUrl ?? null
+    );
+  }
+
+  // Landlord
+  return (
+    person.landlordProfile
+      ?.profilePhotoUrl ?? null
+  );
+}
+
+// ============================================================
+// GET PERSON INITIAL
+// ============================================================
+
+function getPersonInitial(
+  person: Student | Landlord
+) {
+  const name =
+    person.name ?? person.email;
+
+  return (
+    name.charAt(0).toUpperCase()
+  );
 }
 
 // ============================================================
@@ -375,7 +420,7 @@ export default function ConversationPage() {
   }
 
   // ==========================================================
-  // LOADING STATE
+  // LOADING
   // ==========================================================
 
   if (loading) {
@@ -395,7 +440,7 @@ export default function ConversationPage() {
   }
 
   // ==========================================================
-  // ERROR STATE
+  // ERROR
   // ==========================================================
 
   if (error && !conversation) {
@@ -427,12 +472,15 @@ export default function ConversationPage() {
     );
   }
 
-  if (!conversation || !currentUserId) {
+  if (
+    !conversation ||
+    !currentUserId
+  ) {
     return null;
   }
 
   // ==========================================================
-  // DETERMINE OTHER PERSON
+  // DETERMINE PEOPLE
   // ==========================================================
 
   const isStudent =
@@ -447,12 +495,8 @@ export default function ConversationPage() {
     otherPerson.name ??
     otherPerson.email;
 
-  const profilePhoto =
-    isStudent
-      ? conversation.landlord
-          .landlordProfile
-          ?.profilePhotoUrl ?? null
-      : null;
+  const otherPersonPhoto =
+    getPersonPhoto(otherPerson);
 
   const listingPhoto =
     conversation.listing.photos[0]?.url ??
@@ -466,12 +510,14 @@ export default function ConversationPage() {
     <main className="min-h-screen bg-gray-50">
       <div className="mx-auto flex h-screen max-w-6xl flex-col px-0 sm:px-4 sm:py-4">
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white sm:rounded-2xl sm:border sm:border-gray-200 sm:shadow-sm">
+
           {/* ==================================================
               HEADER
           ================================================== */}
 
           <header className="flex shrink-0 items-center gap-3 border-b border-gray-200 px-4 py-3 sm:px-5">
-            {/* Back button */}
+
+            {/* Back */}
 
             <Link
               href="/messages"
@@ -496,17 +542,17 @@ export default function ConversationPage() {
             {/* Profile */}
 
             <div className="shrink-0">
-              {profilePhoto ? (
+              {otherPersonPhoto ? (
                 <img
-                  src={profilePhoto}
+                  src={otherPersonPhoto}
                   alt={otherPersonName}
                   className="h-10 w-10 rounded-full object-cover"
                 />
               ) : (
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900 text-sm font-semibold text-white">
-                  {otherPersonName
-                    .charAt(0)
-                    .toUpperCase()}
+                  {getPersonInitial(
+                    otherPerson
+                  )}
                 </div>
               )}
             </div>
@@ -551,7 +597,7 @@ export default function ConversationPage() {
           </header>
 
           {/* ==================================================
-              LISTING INFO — MOBILE
+              MOBILE LISTING INFO
           ================================================== */}
 
           <Link
@@ -607,6 +653,7 @@ export default function ConversationPage() {
 
           <div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 sm:px-6">
             <div className="mx-auto max-w-3xl">
+
               {/* Conversation intro */}
 
               <div className="mb-8 text-center">
@@ -647,6 +694,10 @@ export default function ConversationPage() {
                 </p>
               </div>
 
+              {/* =================================================
+                  MESSAGE LIST
+              ================================================= */}
+
               {conversation.messages.length ===
               0 ? (
                 <div className="py-12 text-center">
@@ -661,53 +712,162 @@ export default function ConversationPage() {
                 </div>
               ) : (
                 <div className="space-y-5">
-                  {conversation.messages.map(
-                    (item, index) => {
-                      const mine =
-                        item.senderId ===
-                        currentUserId;
 
-                      const previous =
-                        conversation.messages[
-                          index - 1
-                        ];
+                  {conversation.messages.map((item, index) => {
+                    const mine =
+                      item.senderId === currentUserId;
 
-                      const showDate =
-                        !previous ||
-                        new Date(
-                          item.createdAt
-                        ).toDateString() !==
-                          new Date(
-                            previous.createdAt
-                          ).toDateString();
+                    const previous =
+                      conversation.messages[index - 1];
 
-                      return (
+                    const next =
+                      conversation.messages[index + 1];
+
+                    // ----------------------------------------------------------
+                    // DATE SEPARATOR
+                    // ----------------------------------------------------------
+
+                    const showDate =
+                      !previous ||
+                      new Date(item.createdAt).toDateString() !==
+                        new Date(previous.createdAt).toDateString();
+
+                    // ----------------------------------------------------------
+                    // MESSAGE GROUPING
+                    // ----------------------------------------------------------
+
+                    const previousIsSameSender =
+                      previous &&
+                      previous.senderId === item.senderId;
+
+                    const nextIsSameSender =
+                      next &&
+                      next.senderId === item.senderId;
+
+                    // Show the avatar only on the LAST message
+                    // in a consecutive group from the same sender.
+                    const showAvatar = !nextIsSameSender;
+
+                    // Give grouped messages tighter spacing.
+                    const isFirstInGroup = !previousIsSameSender;
+
+                    // ----------------------------------------------------------
+                    // DETERMINE PROFILE PHOTO
+                    // ----------------------------------------------------------
+
+                    let senderPhoto: string | null = null;
+                    let senderName = "";
+
+                    if (mine) {
+                      // Current user
+                      if (isStudent) {
+                        senderPhoto =
+                          conversation.student.studentProfile
+                            ?.profilePhotoUrl ?? null;
+                      } else {
+                        senderPhoto =
+                          conversation.landlord.landlordProfile
+                            ?.profilePhotoUrl ?? null;
+                      }
+
+                      senderName =
+                        (isStudent
+                          ? conversation.student.name
+                          : conversation.landlord.name) ??
+                        (isStudent
+                          ? conversation.student.email
+                          : conversation.landlord.email);
+                    } else {
+                      // Other person
+                      if (isStudent) {
+                        senderPhoto =
+                          conversation.landlord.landlordProfile
+                            ?.profilePhotoUrl ?? null;
+
+                        senderName =
+                          conversation.landlord.name ??
+                          conversation.landlord.email;
+                      } else {
+                        senderPhoto =
+                          conversation.student.studentProfile
+                            ?.profilePhotoUrl ?? null;
+
+                        senderName =
+                          conversation.student.name ??
+                          conversation.student.email;
+                      }
+                    }
+
+                    return (
+                      <div key={item.id}>
+                        {/* ------------------------------------------------------
+                            DATE SEPARATOR
+                        ------------------------------------------------------ */}
+
+                        {showDate && (
+                          <div className="my-6 flex items-center gap-3">
+                            <div className="h-px flex-1 bg-gray-100" />
+
+                            <span className="text-[11px] font-medium text-gray-400">
+                              {formatMessageDate(item.createdAt)}
+                            </span>
+
+                            <div className="h-px flex-1 bg-gray-100" />
+                          </div>
+                        )}
+
+                        {/* ------------------------------------------------------
+                            MESSAGE
+                        ------------------------------------------------------ */}
+
                         <div
-                          key={item.id}
+                          className={`flex ${
+                            mine
+                              ? "justify-end"
+                              : "justify-start"
+                          } ${
+                            isFirstInGroup
+                              ? "mt-3"
+                              : "mt-1"
+                          }`}
                         >
-                          {showDate && (
-                            <div className="my-6 flex items-center gap-3">
-                              <div className="h-px flex-1 bg-gray-100" />
-
-                              <span className="text-[11px] font-medium text-gray-400">
-                                {formatMessageDate(
-                                  item.createdAt
-                                )}
-                              </span>
-
-                              <div className="h-px flex-1 bg-gray-100" />
-                            </div>
-                          )}
-
                           <div
-                            className={`flex ${
+                            className={`flex max-w-[82%] items-end gap-2 sm:max-w-[70%] ${
                               mine
-                                ? "justify-end"
-                                : "justify-start"
+                                ? "flex-row-reverse"
+                                : "flex-row"
                             }`}
                           >
+                            {/* --------------------------------------------------
+                                AVATAR
+
+                                Only rendered on the LAST message of a group.
+                            -------------------------------------------------- */}
+
+                            <div className="w-8 shrink-0">
+                              {showAvatar ? (
+                                senderPhoto ? (
+                                  <img
+                                    src={senderPhoto}
+                                    alt={senderName}
+                                    className="h-8 w-8 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-[11px] font-semibold text-white">
+                                    {senderName
+                                      .charAt(0)
+                                      .toUpperCase()}
+                                  </div>
+                                )
+                              ) : null}
+                            </div>
+
+                            {/* --------------------------------------------------
+                                BUBBLE + TIME
+                            -------------------------------------------------- */}
+
                             <div
-                              className={`max-w-[82%] sm:max-w-[70%] ${
+                              className={`flex flex-col ${
                                 mine
                                   ? "items-end"
                                   : "items-start"
@@ -716,8 +876,16 @@ export default function ConversationPage() {
                               <div
                                 className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
                                   mine
-                                    ? "rounded-br-md bg-black text-white"
-                                    : "rounded-bl-md bg-gray-100 text-gray-900"
+                                    ? `bg-black text-white ${
+                                        nextIsSameSender
+                                          ? "rounded-br-md"
+                                          : "rounded-br-md"
+                                      }`
+                                    : `bg-gray-100 text-gray-900 ${
+                                        nextIsSameSender
+                                          ? "rounded-bl-md"
+                                          : "rounded-bl-md"
+                                      }`
                                 }`}
                               >
                                 <p className="whitespace-pre-wrap break-words">
@@ -725,43 +893,50 @@ export default function ConversationPage() {
                                 </p>
                               </div>
 
-                              <div
-                                className={`mt-1 flex items-center gap-1 px-1 ${
-                                  mine
-                                    ? "justify-end"
-                                    : "justify-start"
-                                }`}
-                              >
-                                <span className="text-[10px] text-gray-400">
-                                  {formatMessageTime(
-                                    item.createdAt
-                                  )}
-                                </span>
+                              {/* ----------------------------------------------
+                                  TIME / READ STATUS
 
-                                {mine && (
-                                  <span
-                                    className={`text-[10px] ${
-                                      item.read
-                                        ? "text-blue-500"
-                                        : "text-gray-400"
-                                    }`}
-                                  >
-                                    {item.read
-                                      ? "Read"
-                                      : "Sent"}
+                                  Only show these normally on the last message
+                                  in a group.
+                              ---------------------------------------------- */}
+
+                              {showAvatar && (
+                                <div
+                                  className={`mt-1 flex items-center gap-1 px-1 ${
+                                    mine
+                                      ? "justify-end"
+                                      : "justify-start"
+                                  }`}
+                                >
+                                  <span className="text-[10px] text-gray-400">
+                                    {formatMessageTime(
+                                      item.createdAt
+                                    )}
                                   </span>
-                                )}
-                              </div>
+
+                                  {mine && (
+                                    <span
+                                      className={`text-[10px] ${
+                                        item.read
+                                          ? "text-blue-500"
+                                          : "text-gray-400"
+                                      }`}
+                                    >
+                                      {item.read
+                                        ? "Read"
+                                        : "Sent"}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
-                      );
-                    }
-                  )}
+                      </div>
+                    );
+                  })}
 
-                  <div
-                    ref={messagesEndRef}
-                  />
+                  <div ref={messagesEndRef} />
                 </div>
               )}
             </div>
@@ -786,10 +961,13 @@ export default function ConversationPage() {
             className="shrink-0 border-t border-gray-200 bg-white p-3 sm:p-4"
           >
             <div className="mx-auto flex max-w-3xl items-end gap-2">
+
               <textarea
                 value={message}
                 onChange={(event) =>
-                  setMessage(event.target.value)
+                  setMessage(
+                    event.target.value
+                  )
                 }
                 onKeyDown={(event) => {
                   if (
