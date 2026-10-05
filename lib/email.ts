@@ -1,6 +1,13 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+type SendNotificationEmailProps = {
+  to: string;
+  subject: string;
+  title: string;
+  message: string;
+  actionUrl?: string;
+  actionText?: string;
+};
 
 export async function sendNotificationEmail({
   to,
@@ -9,15 +16,19 @@ export async function sendNotificationEmail({
   message,
   actionUrl,
   actionText = "Open MushaLink",
-}: {
-  to: string;
-  subject: string;
-  title: string;
-  message: string;
-  actionUrl?: string;
-  actionText?: string;
-}) {
+}: SendNotificationEmailProps) {
+  // ------------------------------------------------------------
+  // ENVIRONMENT VARIABLES
+  // ------------------------------------------------------------
+
+  const resendApiKey = process.env.RESEND_API_KEY;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (!resendApiKey) {
+    throw new Error(
+      "RESEND_API_KEY is not configured."
+    );
+  }
 
   if (!appUrl) {
     throw new Error(
@@ -25,17 +36,47 @@ export async function sendNotificationEmail({
     );
   }
 
+  // ------------------------------------------------------------
+  // CREATE RESEND CLIENT
+  // ------------------------------------------------------------
+
+  const resend = new Resend(resendApiKey);
+
+  // ------------------------------------------------------------
+  // SEND EMAIL
+  // ------------------------------------------------------------
+
   const { error } = await resend.emails.send({
     from: "MushaLink <onboarding@resend.dev>",
     to,
     subject,
+
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 32px;">
-        <h1 style="color: #1f3b73;">
+      <div
+        style="
+          font-family: Arial, sans-serif;
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 32px;
+          color: #1e293b;
+        "
+      >
+
+        <h1
+          style="
+            color: #1f3b73;
+            margin-bottom: 16px;
+          "
+        >
           ${title}
         </h1>
 
-        <p>
+        <p
+          style="
+            font-size: 15px;
+            line-height: 1.6;
+          "
+        >
           ${message}
         </p>
 
@@ -49,7 +90,7 @@ export async function sendNotificationEmail({
                     display: inline-block;
                     padding: 14px 24px;
                     background-color: #1f3b73;
-                    color: white;
+                    color: #ffffff;
                     text-decoration: none;
                     border-radius: 6px;
                     font-weight: bold;
@@ -62,15 +103,36 @@ export async function sendNotificationEmail({
             : ""
         }
 
-        <p>
+        <p
+          style="
+            margin-top: 32px;
+            font-size: 14px;
+            color: #64748b;
+          "
+        >
           — The MushaLink Team
         </p>
+
       </div>
     `,
   });
 
+  // ------------------------------------------------------------
+  // HANDLE RESEND ERROR
+  // ------------------------------------------------------------
+
   if (error) {
-    console.error("Email notification error:", error);
-    throw new Error("Failed to send notification email.");
+    console.error(
+      "Email notification error:",
+      error
+    );
+
+    throw new Error(
+      "Failed to send notification email."
+    );
   }
+
+  return {
+    success: true,
+  };
 }
