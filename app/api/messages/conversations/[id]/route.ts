@@ -384,16 +384,28 @@ export async function POST(
     // Send email notification
     // ----------------------------------------------------------
 
-    await sendNotificationEmail({
-      to: recipient.email,
-      subject: "You have a new message on MushaLink",
-      title: "New message",
-      message: `${
-        user.name || "Someone"
-      } sent you a new message on MushaLink.`,
-      actionUrl: `/messages/${conversation.id}`,
-      actionText: "View Message",
-    });
+    // Email is a secondary notification channel.
+    // If email fails, the message and in-app notification
+    // should still be considered successful.
+
+    try {
+      await sendNotificationEmail({
+        to: recipient.email,
+        subject: "You have a new message on MushaLink",
+        title: "New message",
+        message: `${
+          user.name || "Someone"
+        } sent you a new message on MushaLink.`,
+        actionUrl: `/messages/${conversation.id}`,
+        actionText: "View Message",
+      });
+    } catch (emailError) {
+      // Do NOT fail the message request if email fails.
+      console.error(
+        "Failed to send message notification email:",
+        emailError
+      );
+    }
 
     // ----------------------------------------------------------
     // Response
