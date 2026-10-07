@@ -509,13 +509,13 @@ export default function ConversationPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="mx-auto flex h-screen max-w-6xl flex-col px-0 sm:px-4 sm:py-4">
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white sm:rounded-2xl sm:border sm:border-gray-200 sm:shadow-sm">
+        <div className="flex min-h-0 flex-1 flex-col bg-white sm:rounded-2xl sm:border sm:border-gray-200 sm:shadow-sm">
 
           {/* ==================================================
               HEADER
           ================================================== */}
 
-          <header className="flex shrink-0 items-center gap-3 border-b border-gray-200 px-4 py-3 sm:px-5">
+          <header className="sticky top-[90px] z-30 flex shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
 
             {/* Back */}
 
@@ -628,7 +628,7 @@ export default function ConversationPage() {
               </div>
             )}
 
-            <div className="min-w-0 flex-1">
+            <div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 sm:px-6">
               <p className="truncate text-sm font-medium text-gray-900">
                 {conversation.listing.title}
               </p>
