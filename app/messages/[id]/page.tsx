@@ -204,6 +204,9 @@ export default function ConversationPage() {
   const messagesEndRef =
     useRef<HTMLDivElement | null>(null);
 
+  const messagesContainerRef =
+  useRef<HTMLDivElement | null>(null);
+
   // ==========================================================
   // LOAD CURRENT USER
   // ==========================================================
@@ -323,8 +326,19 @@ export default function ConversationPage() {
       return;
     }
 
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
+    const container =
+      messagesContainerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    // Always open the conversation at the newest message.
+    requestAnimationFrame(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "auto",
+      });
     });
   }, [conversation]);
 
@@ -507,7 +521,7 @@ export default function ConversationPage() {
   // ==========================================================
 
   return (
-    <main className="min-h-dvh bg-gray-50">
+    <main className="h-[calc(100dvh-90px)] overflow-hidden bg-gray-50">
       <div className="mx-auto flex h-[calc(100dvh-90px)] max-w-6xl flex-col px-0 sm:px-4 sm:py-4">
         <div className="flex min-h-0 flex-1 flex-col bg-white sm:rounded-2xl sm:border sm:border-gray-200 sm:shadow-sm">
 
@@ -515,7 +529,7 @@ export default function ConversationPage() {
               HEADER
           ================================================== */}
 
-          <header className="sticky top-[90px] z-30 flex shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
+          <header className="flex shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
 
             {/* Back */}
 
@@ -602,7 +616,10 @@ export default function ConversationPage() {
               MESSAGES
           ================================================== */}
 
-          <div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 sm:px-6">
+          <div
+            ref={messagesContainerRef}
+            className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 sm:px-6"
+          >
             <div className="mx-auto max-w-3xl">
 
               {/* =================================================
@@ -847,7 +864,10 @@ export default function ConversationPage() {
                     );
                   })}
 
-                  <div ref={messagesEndRef} />
+                  <div
+                    ref={messagesEndRef}
+                    className="h-2"
+                  />
                 </div>
               )}
             </div>
@@ -893,7 +913,7 @@ export default function ConversationPage() {
                 placeholder="Write a message..."
                 rows={1}
                 disabled={sending}
-                className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
               />
 
               <button
