@@ -425,7 +425,7 @@ export default function ConversationPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-dvh bg-gray-50">
         <div className="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4">
           <div className="text-center">
             <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-black" />
@@ -445,7 +445,7 @@ export default function ConversationPage() {
 
   if (error && !conversation) {
     return (
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-dvh bg-gray-50">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
           <div className="rounded-2xl border border-red-200 bg-white p-8 text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
@@ -507,8 +507,8 @@ export default function ConversationPage() {
   // ==========================================================
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto flex h-screen max-w-6xl flex-col px-0 sm:px-4 sm:py-4">
+    <main className="min-h-dvh bg-gray-50">
+      <div className="mx-auto flex h-[calc(100dvh-90px)] max-w-6xl flex-col px-0 sm:px-4 sm:py-4">
         <div className="flex min-h-0 flex-1 flex-col bg-white sm:rounded-2xl sm:border sm:border-gray-200 sm:shadow-sm">
 
           {/* ==================================================
@@ -596,56 +596,7 @@ export default function ConversationPage() {
             </Link>
           </header>
 
-          {/* ==================================================
-              MOBILE LISTING INFO
-          ================================================== */}
-
-          <Link
-            href={`/listings/${conversation.listing.id}`}
-            className="flex shrink-0 items-center gap-3 border-b border-gray-100 bg-gray-50 px-4 py-3 sm:hidden"
-          >
-            {listingPhoto ? (
-              <img
-                src={listingPhoto}
-                alt=""
-                className="h-12 w-12 rounded-xl object-cover"
-              />
-            ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-200">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="h-5 w-5 text-gray-500"
-                >
-                  <path
-                    d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            )}
-
-            <div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 sm:px-6">
-              <p className="truncate text-sm font-medium text-gray-900">
-                {conversation.listing.title}
-              </p>
-
-              <p className="truncate text-xs text-gray-500">
-                {conversation.listing.suburb
-                  ? `${conversation.listing.suburb}, `
-                  : ""}
-                {conversation.listing.city},{" "}
-                {conversation.listing.province}
-              </p>
-            </div>
-
-            <span className="text-xs font-medium text-gray-600">
-              View
-            </span>
-          </Link>
+        
 
           {/* ==================================================
               MESSAGES
@@ -653,46 +604,6 @@ export default function ConversationPage() {
 
           <div className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 sm:px-6">
             <div className="mx-auto max-w-3xl">
-
-              {/* Conversation intro */}
-
-              <div className="mb-8 text-center">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-                  {listingPhoto ? (
-                    <img
-                      src={listingPhoto}
-                      alt=""
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="h-6 w-6 text-gray-500"
-                    >
-                      <path
-                        d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5"
-                        stroke="currentColor"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
-                </div>
-
-                <p className="text-sm font-medium text-gray-800">
-                  {conversation.listing.title}
-                </p>
-
-                <p className="mt-1 text-xs text-gray-400">
-                  {conversation.listing.suburb
-                    ? `${conversation.listing.suburb}, `
-                    : ""}
-                  {conversation.listing.city},{" "}
-                  {conversation.listing.province}
-                </p>
-              </div>
 
               {/* =================================================
                   MESSAGE LIST
@@ -958,7 +869,7 @@ export default function ConversationPage() {
 
           <form
             onSubmit={handleSendMessage}
-            className="shrink-0 border-t border-gray-200 bg-white p-3 sm:p-4"
+            className="shrink-0 border-t border-gray-200 bg-white px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:p-4"
           >
             <div className="mx-auto flex max-w-3xl items-end gap-2">
 
