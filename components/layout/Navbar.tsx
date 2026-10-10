@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import MessagesButton from "./MessagesButton";
 import { getCurrentUser } from "@/lib/auth";
 import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
@@ -14,7 +15,10 @@ export default async function Navbar() {
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
       <nav className="mx-auto flex w-full items-center justify-between px-4 py-3 md:h-28">
 
-        {/* Logo */}
+        {/* ======================================================
+            LOGO
+            ====================================================== */}
+
         <div>
           <Link href="/#top">
             <Image
@@ -27,22 +31,32 @@ export default async function Navbar() {
           </Link>
         </div>
 
-        {/* Navigation */}
+        {/* ======================================================
+            DESKTOP NAVIGATION
+            ====================================================== */}
+
         <div className="hidden items-center gap-8 font-medium text-slate-700 md:flex">
           <NavLinks />
         </div>
 
-        {/* Desktop Buttons */}
+        {/* ======================================================
+            DESKTOP BUTTONS
+            ====================================================== */}
+
         <div className="flex items-center gap-3">
 
           {!isLoggedIn ? (
             <>
+              {/* Login */}
+
               <Link
                 href="/auth/login"
                 className="hidden rounded-lg px-4 py-2 text-slate-700 transition hover:bg-slate-100 md:block"
               >
                 Login
               </Link>
+
+              {/* Sign Up */}
 
               <Link
                 href="/auth/signup"
@@ -53,6 +67,8 @@ export default async function Navbar() {
             </>
           ) : (
             <>
+              {/* Dashboard */}
+
               <Link
                 href="/dashboard"
                 className="hidden rounded-lg bg-brand-blue px-5 py-2 font-medium text-white transition hover:bg-brand-blue-dark md:block"
@@ -60,9 +76,22 @@ export default async function Navbar() {
                 Dashboard
               </Link>
 
+              {/* ==================================================
+                  MESSAGES
+                  ================================================== */}
+
+              <MessagesButton />
+
+              {/* ==================================================
+                  NOTIFICATIONS
+                  ================================================== */}
+
               <NotificationBell />
 
-              {/* Profile Menu */}
+              {/* ==================================================
+                  PROFILE MENU
+                  ================================================== */}
+
               <div className="hidden md:block">
                 <ProfileMenu
                   name={user.name}
@@ -81,7 +110,10 @@ export default async function Navbar() {
             </>
           )}
 
-          {/* Mobile Navigation */}
+          {/* ======================================================
+              MOBILE NAVIGATION
+              ====================================================== */}
+
           <MobileMenu
             isLoggedIn={isLoggedIn}
             name={user?.name ?? null}

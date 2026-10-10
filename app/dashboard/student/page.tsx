@@ -105,17 +105,19 @@ export default async function StudentDashboard() {
           {/* ================================================== */}
 
           <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Viewing Requests
-            </h2>
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Viewing Requests
+              </h2>
 
-            <p className="mt-2 text-sm text-slate-600">
-              Check the status of your accommodation viewing requests.
-            </p>
+              <p className="mt-2 text-sm text-slate-600">
+                Check the status of your accommodation viewing requests.
+              </p>
+            </div>
 
             <Link
-              href="/dashboard/student/requests"
-              className="mt-auto inline-block w-fit rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+              href="/dashboard/student/viewing-requests"
+              className="mt-auto inline-flex w-fit items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               View Requests
             </Link>

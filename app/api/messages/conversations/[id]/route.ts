@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { sendNotificationEmail } from "@/lib/email";
+import { sendPushNotification } from "@/lib/push-notifications";
 
 type RouteContext = {
   params: Promise<{
@@ -43,103 +44,88 @@ export async function GET(
     // Find conversation
     // ----------------------------------------------------------
 
-    const conversation =
-      await prisma.conversation.findFirst({
-        where: {
-          id,
-
-          OR: [
-            {
-              studentId: user.id,
-            },
-            {
-              landlordId: user.id,
-            },
-          ],
-        },
-
-        include: {
-          // ----------------------------------------------------
-          // Listing
-          // ----------------------------------------------------
-
-          listing: {
-            select: {
-              id: true,
-              title: true,
-              city: true,
-              province: true,
-              suburb: true,
-
-              photos: {
-                orderBy: {
-                  sortOrder: "asc",
-                },
-
-                take: 1,
-              },
-            },
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            studentId: user.id,
           },
-
-          // ----------------------------------------------------
-          // Student
-          // ----------------------------------------------------
-
-          student: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-
-              studentProfile: {
-                select: {
-                  profilePhotoUrl: true,
-                },
-              },
-            },
+          {
+            landlordId: user.id,
           },
+        ],
+      },
 
-          // ----------------------------------------------------
-          // Landlord
-          // ----------------------------------------------------
+      include: {
+        // Listing
+        listing: {
+          select: {
+            id: true,
+            title: true,
+            city: true,
+            province: true,
+            suburb: true,
 
-          landlord: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-
-              landlordProfile: {
-                select: {
-                  phone: true,
-                  profilePhotoUrl: true,
-                },
+            photos: {
+              orderBy: {
+                sortOrder: "asc",
               },
-            },
-          },
-
-          // ----------------------------------------------------
-          // Messages
-          // ----------------------------------------------------
-
-          messages: {
-            orderBy: {
-              createdAt: "asc",
-            },
-
-            select: {
-              id: true,
-              conversationId: true,
-              senderId: true,
-              recipientId: true,
-              content: true,
-              read: true,
-              createdAt: true,
-              updatedAt: true,
+              take: 1,
             },
           },
         },
-      });
+
+        // Student
+        student: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+
+            studentProfile: {
+              select: {
+                profilePhotoUrl: true,
+              },
+            },
+          },
+        },
+
+        // Landlord
+        landlord: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+
+            landlordProfile: {
+              select: {
+                phone: true,
+                profilePhotoUrl: true,
+              },
+            },
+          },
+        },
+
+        // Messages
+        messages: {
+          orderBy: {
+            createdAt: "asc",
+          },
+
+          select: {
+            id: true,
+            conversationId: true,
+            senderId: true,
+            recipientId: true,
+            content: true,
+            read: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
 
     if (!conversation) {
       return NextResponse.json(
@@ -152,7 +138,7 @@ export async function GET(
     }
 
     // ----------------------------------------------------------
-    // Mark received messages + related notifications as read
+    // Mark received messages and related notifications as read
     // ----------------------------------------------------------
 
     await prisma.$transaction([
@@ -190,10 +176,7 @@ export async function GET(
       conversation,
     });
   } catch (error) {
-    console.error(
-      "Failed to load conversation:",
-      error
-    );
+    console.error("Failed to load conversation:", error);
 
     return NextResponse.json(
       {
@@ -239,42 +222,40 @@ export async function POST(
     // Verify conversation access
     // ----------------------------------------------------------
 
-    const conversation =
-      await prisma.conversation.findFirst({
-        where: {
-          id,
-
-          OR: [
-            {
-              studentId: user.id,
-            },
-            {
-              landlordId: user.id,
-            },
-          ],
-        },
-
-        select: {
-          id: true,
-          studentId: true,
-          landlordId: true,
-          listingId: true,
-
-          student: {
-            select: {
-              name: true,
-              email: true,
-            },
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            studentId: user.id,
           },
+          {
+            landlordId: user.id,
+          },
+        ],
+      },
 
-          landlord: {
-            select: {
-              name: true,
-              email: true,
-            },
+      select: {
+        id: true,
+        studentId: true,
+        landlordId: true,
+        listingId: true,
+
+        student: {
+          select: {
+            name: true,
+            email: true,
           },
         },
-      });
+
+        landlord: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
 
     if (!conversation) {
       return NextResponse.json(
@@ -291,7 +272,6 @@ export async function POST(
     // ----------------------------------------------------------
 
     const body = await request.json();
-
     const { message } = body;
 
     // ----------------------------------------------------------
@@ -327,34 +307,33 @@ export async function POST(
         : conversation.student;
 
     // ----------------------------------------------------------
-    // Create message + notification
+    // Create message + in-app notification
     // ----------------------------------------------------------
 
     const result = await prisma.$transaction(
       async (tx) => {
         // Create the message
-        const createdMessage =
-          await tx.message.create({
-            data: {
-              conversationId: conversation.id,
-              senderId: user.id,
-              recipientId,
-              content,
-            },
+        const createdMessage = await tx.message.create({
+          data: {
+            conversationId: conversation.id,
+            senderId: user.id,
+            recipientId,
+            content,
+          },
 
-            select: {
-              id: true,
-              conversationId: true,
-              senderId: true,
-              recipientId: true,
-              content: true,
-              read: true,
-              createdAt: true,
-              updatedAt: true,
-            },
-          });
+          select: {
+            id: true,
+            conversationId: true,
+            senderId: true,
+            recipientId: true,
+            content: true,
+            read: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
 
-        // Create notification for recipient
+        // Create in-app notification for recipient
         await tx.notification.create({
           data: {
             userId: recipientId,
@@ -381,12 +360,33 @@ export async function POST(
     );
 
     // ----------------------------------------------------------
+    // Send browser push notification
+    // ----------------------------------------------------------
+
+    // The database transaction has completed successfully.
+    // Push delivery is a secondary notification channel.
+    // Its failure must not invalidate the saved message.
+
+    try {
+      await sendPushNotification({
+        userId: recipientId,
+        title: "New message on MushaLink",
+        message: `${user.name || "Someone"} sent you a new message.`,
+        link: `/messages/${conversation.id}`,
+      });
+    } catch (pushError) {
+      console.error(
+        "Failed to send browser push notification:",
+        pushError
+      );
+    }
+
+    // ----------------------------------------------------------
     // Send email notification
     // ----------------------------------------------------------
 
-    // Email is a secondary notification channel.
-    // If email fails, the message and in-app notification
-    // should still be considered successful.
+    // Email is another secondary notification channel.
+    // An email failure must not invalidate the saved message.
 
     try {
       await sendNotificationEmail({
@@ -400,7 +400,6 @@ export async function POST(
         actionText: "View Message",
       });
     } catch (emailError) {
-      // Do NOT fail the message request if email fails.
       console.error(
         "Failed to send message notification email:",
         emailError
@@ -418,10 +417,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error(
-      "Failed to send message:",
-      error
-    );
+    console.error("Failed to send message:", error);
 
     return NextResponse.json(
       {
@@ -467,25 +463,23 @@ export async function PATCH(
     // Verify conversation access
     // ----------------------------------------------------------
 
-    const conversation =
-      await prisma.conversation.findFirst({
-        where: {
-          id,
+    const conversation = await prisma.conversation.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            studentId: user.id,
+          },
+          {
+            landlordId: user.id,
+          },
+        ],
+      },
 
-          OR: [
-            {
-              studentId: user.id,
-            },
-            {
-              landlordId: user.id,
-            },
-          ],
-        },
-
-        select: {
-          id: true,
-        },
-      });
+      select: {
+        id: true,
+      },
+    });
 
     if (!conversation) {
       return NextResponse.json(
@@ -498,7 +492,7 @@ export async function PATCH(
     }
 
     // ----------------------------------------------------------
-    // Mark messages + related notifications as read
+    // Mark messages and related notifications as read
     // ----------------------------------------------------------
 
     const [
@@ -536,17 +530,13 @@ export async function PATCH(
     // ----------------------------------------------------------
 
     return NextResponse.json({
-      message:
-        "Messages and notifications marked as read.",
+      message: "Messages and notifications marked as read.",
       updatedCount: messageResult.count,
       notificationsUpdatedCount:
         notificationResult.count,
     });
   } catch (error) {
-    console.error(
-      "Failed to mark messages as read:",
-      error
-    );
+    console.error("Failed to mark messages as read:", error);
 
     return NextResponse.json(
       {

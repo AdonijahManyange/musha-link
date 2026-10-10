@@ -22,12 +22,14 @@ export async function getCurrentUser() {
 
       studentProfile: {
         select: {
+          phone: true,
           profilePhotoUrl: true,
         },
       },
 
       landlordProfile: {
         select: {
+          phone: true,
           profilePhotoUrl: true,
         },
       },

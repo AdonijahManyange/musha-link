@@ -11,6 +11,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import ListingGallery from "@/components/ListingGallery";
 import ContactLandlordButton from "@/components/ContactLandlordButton";
+import DatabaseListingActions from "@/components/listing/DatabaseListingActions";
 
 type ListingPageProps = {
   params: Promise<{
@@ -584,14 +585,15 @@ export default async function PublicListingPage({
                   listingId={listing.id}
                 />
 
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  <CalendarDays size={17} />
-
-                  Request Viewing
-                </button>
+                <DatabaseListingActions
+                  listingId={listing.id}
+                  listingTitle={listing.title}
+                  landlord={{
+                    name: listing.landlord.name || "Landlord",
+                    phone: "",
+                    email: "",
+                  }}
+                />
 
               </div>
 

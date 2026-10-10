@@ -88,25 +88,23 @@ export async function PATCH(
         document.type === "ELECTRICITY_BILL"
     );
 
-    // ------------------------------------------------------------
-    // REQUIRE BOTH DOCUMENTS BEFORE REVIEW
-    // ------------------------------------------------------------
-
-    if (!waterBill || !electricityBill) {
-      return NextResponse.json(
-        {
-          error:
-            "Both a water bill and an electricity bill are required before verification can be reviewed.",
-        },
-        { status: 400 }
-      );
-    }
 
     // ------------------------------------------------------------
     // APPROVE
     // ------------------------------------------------------------
 
     if (action === "APPROVE") {
+      // Both documents are required for approval.
+      if (!waterBill || !electricityBill) {
+        return NextResponse.json(
+          {
+            error:
+              "Both a water bill and an electricity bill are required before verification can be approved.",
+          },
+          { status: 400 }
+        );
+      }
+
       await prisma.$transaction([
         prisma.verificationDocument.updateMany({
           where: {
@@ -153,15 +151,22 @@ export async function PATCH(
       ]);
 
       // Email AFTER transaction
-      await sendNotificationEmail({
-        to: verification.landlord.email,
-        subject: "Your MushaLink verification was approved",
-        title: "Verification approved",
-        message:
-          "Your landlord verification has been approved. You can now use your verified landlord account on MushaLink.",
-        actionUrl: "/dashboard/landlord/verification",
-        actionText: "View Verification",
-      });
+      try {
+        await sendNotificationEmail({
+          to: verification.landlord.email,
+          subject: "Your MushaLink verification was approved",
+          title: "Verification approved",
+          message:
+            "Your landlord verification has been approved. You can now use your verified landlord account on MushaLink.",
+          actionUrl: "/dashboard/landlord/verification",
+          actionText: "View Verification",
+        });
+      } catch (emailError) {
+        console.error(
+          "Verification approval email failed:",
+          emailError
+        );
+      }
 
       return NextResponse.json({
         success: true,
@@ -237,14 +242,21 @@ export async function PATCH(
       }),
     ]);
 
-    await sendNotificationEmail({
-      to: verification.landlord.email,
-      subject: "Your MushaLink verification was rejected",
-      title: "Verification rejected",
-      message: `Your landlord verification was rejected. Reason: ${rejectionReason.trim()}`,
-      actionUrl: "/dashboard/landlord/verification",
-      actionText: "View Verification",
-    });
+    try {
+      await sendNotificationEmail({
+        to: verification.landlord.email,
+        subject: "Your MushaLink verification was rejected",
+        title: "Verification rejected",
+        message: `Your landlord verification was rejected. Reason: ${rejectionReason.trim()}`,
+        actionUrl: "/dashboard/landlord/verification",
+        actionText: "View Verification",
+      });
+    } catch (emailError) {
+      console.error(
+        "Verification rejection email failed:",
+        emailError
+      );
+    }
 
     return NextResponse.json({
       success: true,

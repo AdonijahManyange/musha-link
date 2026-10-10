@@ -24,7 +24,7 @@ export default function ListingActions({
   return (
     <>
       <div className="mt-8 space-y-4">
-        {/* Contact */}
+        {/* Contact Landlord */}
         <button
           type="button"
           onClick={() => setIsContactOpen(true)}
@@ -51,7 +51,9 @@ export default function ListingActions({
         listingTitle={listingTitle}
       />
 
-      {/* Schedule Viewing Modal */}
+      {/* Viewing Modal
+          This page uses sample listing data, so it intentionally
+          does not pass a database listing ID. */}
       <ScheduleViewingModal
         isOpen={isViewingOpen}
         onClose={() => setIsViewingOpen(false)}
