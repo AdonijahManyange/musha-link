@@ -521,22 +521,47 @@ export default function ScheduleViewingModal({
                     Preferred Time <span className="text-red-500">*</span>
                   </label>
 
-                  <input
+                  <select
                     id="viewing-time"
                     name="time"
-                    type="time"
                     value={time}
                     onChange={(event) => setTime(event.currentTarget.value)}
                     required
                     disabled={isSubmitting}
                     className="w-full min-w-0 rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:bg-slate-100"
-                  />
+                  >
+                    <option value="">Select a time</option>
+
+                    {Array.from({ length: 24 }, (_, index) => {
+                      const totalMinutes = 8 * 60 + index * 30;
+                      const hours = Math.floor(totalMinutes / 60);
+                      const minutes = totalMinutes % 60;
+
+                      const value = `${String(hours).padStart(2, "0")}:${String(
+                        minutes
+                      ).padStart(2, "0")}`;
+
+                      const period = hours >= 12 ? "PM" : "AM";
+                      const displayHour = hours % 12 || 12;
+
+                      const label = `${displayHour}:${String(minutes).padStart(
+                        2,
+                        "0"
+                      )} ${period}`;
+
+                      return (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
 
                   <p className="mt-1 text-xs text-slate-500">
-                    Select your preferred visiting time.
+                    Choose a time between 8:00 AM and 7:30 PM.
                   </p>
                 </div>
-              </div>
+                </div>
 
               {/* Additional note */}
               <div>
