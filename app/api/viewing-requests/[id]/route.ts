@@ -1,3 +1,4 @@
+import { sendNotificationEmail } from "@/lib/email";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
@@ -109,6 +110,7 @@ export async function PATCH(
       select: {
         id: true,
         studentId: true,
+        studentEmail: true,
         status: true,
         listing: {
           select: {
@@ -239,8 +241,37 @@ export async function PATCH(
       );
     }
 
+    // ------------------------------------------------------------
+    // 6. Attempt email notification
+    // ------------------------------------------------------------
+
+    try {
+      await sendNotificationEmail({
+        to: existingRequest.studentEmail,
+
+        subject:
+          status === "ACCEPTED"
+            ? `Viewing Request Accepted — ${existingRequest.listing.title}`
+            : `Viewing Request Declined — ${existingRequest.listing.title}`,
+
+        title: result.title,
+
+        message: result.message,
+
+        actionUrl: "/dashboard/student/viewing-requests",
+
+        actionText: "View My Requests",
+      });
+    } catch (error) {
+      // Email delivery must not undo a successful database update.
+      console.error(
+        "Failed to send viewing response email:",
+        error
+      );
+    } 
+
     // ----------------------------------------------------------
-    // 6. Return the updated request
+    // 7. Return the updated request
     // ----------------------------------------------------------
 
     return NextResponse.json(
