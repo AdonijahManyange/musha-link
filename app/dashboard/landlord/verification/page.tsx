@@ -218,11 +218,27 @@ export default async function LandlordVerificationPage() {
                         property.
                       </p>
 
-                      <div className="mt-4 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-800">
-                        You may provide a water bill, electricity
-                        bill, title deed, or other supporting
-                        documentation requested by MushaLink.
-                        These documents are reviewed by our team.
+                      <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-4 text-sm text-blue-900">
+                        <p className="font-semibold">
+                          Required documents
+                        </p>
+
+                        <p className="mt-2 leading-6">
+                          To complete landlord verification, you must upload
+                          BOTH a recent water bill AND a recent electricity bill
+                          associated with the property.
+                        </p>
+
+                        <p className="mt-2 leading-6">
+                          A title deed may also be submitted as additional
+                          supporting evidence, but it does not replace either
+                          required bill.
+                        </p>
+
+                        <p className="mt-2 font-medium">
+                          Your account cannot be approved until both required
+                          bills have been submitted and reviewed.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -240,8 +256,8 @@ export default async function LandlordVerificationPage() {
                   ) : (
                     <TitleDeedUpload
                       type="WATER_BILL"
-                      title="Water Bill"
-                      description="Upload a recent water bill showing your connection to the property."
+                      title="Water Bill (Required)"
+                      description="Upload a recent water bill associated with the property. This document is mandatory for landlord verification."
                     />
                   )}
 
@@ -258,8 +274,8 @@ export default async function LandlordVerificationPage() {
                   ) : (
                     <TitleDeedUpload
                       type="ELECTRICITY_BILL"
-                      title="Electricity Bill"
-                      description="Upload a recent electricity bill showing your connection to the property."
+                      title="Electricity Bill (Required)"
+                      description="Upload a recent electricity bill associated with the property. This document is mandatory for landlord verification."
                     />
                   )}
 
