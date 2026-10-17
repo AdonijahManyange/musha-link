@@ -294,18 +294,20 @@ export default function ViewingRequestsPage() {
     }).format(date);
   }
 
-  function formatTime(value: string) {
-    const date = new Date(value);
+  function formatTime(dateString: string) {
+  const date = new Date(dateString);
 
-    if (Number.isNaN(date.getTime())) {
-      return "Invalid time";
-    }
-
-    return new Intl.DateTimeFormat(undefined, {
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(date);
+  if (Number.isNaN(date.getTime())) {
+    return "Time unavailable";
   }
+
+  return date.toLocaleTimeString("en-GB", {
+    timeZone: "Africa/Harare",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
 
   function formatRoomType(value: string) {
     return value

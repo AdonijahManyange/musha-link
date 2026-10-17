@@ -72,9 +72,11 @@ function formatTime(dateString: string) {
     return "Time unavailable";
   }
 
-  return date.toLocaleTimeString(undefined, {
+  return date.toLocaleTimeString("en-GB", {
+    timeZone: "Africa/Harare",
     hour: "numeric",
     minute: "2-digit",
+    hour12: true,
   });
 }
 

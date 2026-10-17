@@ -210,7 +210,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const requestedAt = new Date(`${date}T${time}:00`);
+    // Convert the selected Zimbabwe local time (Africa/Harare, UTC+2)
+    // into the correct UTC timestamp for database storage.
+    const [hours, minutes] = time.split(":").map(Number);
+
+    const requestedAt = new Date(
+      Date.UTC(year, month - 1, day, hours - 2, minutes)
+    );
 
     if (
       Number.isNaN(requestedAt.getTime()) ||
