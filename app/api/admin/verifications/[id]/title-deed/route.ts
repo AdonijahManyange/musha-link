@@ -9,14 +9,23 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+const ALLOWED_DOCUMENT_TYPES = [
+  "WATER_BILL",
+  "ELECTRICITY_BILL",
+  "TITLE_DEED",
+] as const;
+
+type DocumentType =
+  (typeof ALLOWED_DOCUMENT_TYPES)[number];
+
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: Props
 ) {
   try {
-    // ------------------------------------------------------------
-    // ADMIN AUTHENTICATION
-    // ------------------------------------------------------------
+    // ----------------------------------------------------------
+    // ADMIN AUTHORIZATION
+    // ----------------------------------------------------------
 
     const user = await getCurrentUser();
 
@@ -34,17 +43,37 @@ export async function GET(
       );
     }
 
-    // ------------------------------------------------------------
-    // GET VERIFICATION
-    // ------------------------------------------------------------
+    // ----------------------------------------------------------
+    // VALIDATE DOCUMENT TYPE
+    // ----------------------------------------------------------
 
     const { id } = await params;
 
+    const { searchParams } = new URL(request.url);
+
+    const requestedType = searchParams.get("type");
+
+    if (
+      !requestedType ||
+      !ALLOWED_DOCUMENT_TYPES.includes(
+        requestedType as DocumentType
+      )
+    ) {
+      return NextResponse.json(
+        { error: "Invalid document type." },
+        { status: 400 }
+      );
+    }
+
+    const documentType = requestedType as DocumentType;
+
+    // ----------------------------------------------------------
+    // FIND VERIFICATION
+    // ----------------------------------------------------------
+
     const verification =
       await prisma.landlordVerification.findUnique({
-        where: {
-          id,
-        },
+        where: { id },
         select: {
           landlordId: true,
         },
@@ -57,16 +86,16 @@ export async function GET(
       );
     }
 
-    // ------------------------------------------------------------
-    // GET OPTIONAL TITLE DEED
-    // ------------------------------------------------------------
+    // ----------------------------------------------------------
+    // FIND THE REQUESTED DOCUMENT
+    // ----------------------------------------------------------
 
-    const titleDeed =
+    const document =
       await prisma.verificationDocument.findUnique({
         where: {
           userId_type: {
             userId: verification.landlordId,
-            type: "TITLE_DEED",
+            type: documentType,
           },
         },
         select: {
@@ -76,50 +105,53 @@ export async function GET(
         },
       });
 
-    if (!titleDeed) {
+    if (!document) {
       return NextResponse.json(
-        { error: "No title deed has been uploaded." },
+        { error: "This document has not been uploaded." },
         { status: 404 }
       );
     }
 
-    // ------------------------------------------------------------
-    // CREATE TEMPORARY SIGNED URL
-    // ------------------------------------------------------------
+    // ----------------------------------------------------------
+    // GENERATE TEMPORARY SIGNED URL
+    // ----------------------------------------------------------
 
     const { data, error } =
       await supabaseAdmin.storage
         .from(BUCKET)
         .createSignedUrl(
-          titleDeed.filePath,
+          document.filePath,
           60 * 10
         );
 
     if (error || !data?.signedUrl) {
       console.error(
-        "Failed to create title deed signed URL:",
-        error
+        "Failed to create verification document URL:",
+        {
+          documentType,
+          error,
+        }
       );
 
       return NextResponse.json(
-        { error: "Unable to access title deed." },
+        { error: "Unable to access this document." },
         { status: 500 }
       );
     }
 
     return NextResponse.json({
       url: data.signedUrl,
-      fileName: titleDeed.fileName,
-      status: titleDeed.status,
+      fileName: document.fileName,
+      status: document.status,
     });
   } catch (error) {
     console.error(
-      "Title deed access error:",
+      "Verification document access error:",
       error
     );
 
     return NextResponse.json(
-      { error: "Failed to access title deed." },
+      { error: "Failed to access the document." },
       { status: 500 }
     );
   }

@@ -341,6 +341,14 @@ export default async function VerificationReviewPage({
                     Submitted{" "}
                     {waterBill.createdAt.toLocaleDateString()}
                   </p>
+
+                  <div className="mt-4">
+                    <ViewTitleDeedButton
+                      verificationId={verification.id}
+                      documentType="WATER_BILL"
+                      label="View Water Bill"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="mt-4 rounded-lg bg-red-50 px-4 py-3">
@@ -403,6 +411,15 @@ export default async function VerificationReviewPage({
                     Submitted{" "}
                     {electricityBill.createdAt.toLocaleDateString()}
                   </p>
+
+                  <div className="mt-4">
+                    <ViewTitleDeedButton
+                      verificationId={verification.id}
+                      documentType="ELECTRICITY_BILL"
+                      label="View Electricity Bill"
+                    />
+                  </div>
+
                 </div>
               ) : (
                 <div className="mt-4 rounded-lg bg-red-50 px-4 py-3">
@@ -467,13 +484,14 @@ export default async function VerificationReviewPage({
                     {titleDeed.createdAt.toLocaleDateString()}
                   </p>
 
-                  <div className="mt-4">
-                    <ViewTitleDeedButton
-                      verificationId={verification.id}
-                    />
+                  <ViewTitleDeedButton
+                    verificationId={verification.id}
+                    documentType="TITLE_DEED"
+                    label="View Title Deed"
+                  />
                   </div>
 
-                </div>
+                
               ) : (
                 <div className="mt-4 rounded-lg bg-slate-100 px-4 py-3">
                   <p className="text-sm text-slate-600">
