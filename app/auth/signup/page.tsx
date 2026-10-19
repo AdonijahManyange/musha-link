@@ -336,9 +336,12 @@ export default function SignupPage() {
                 Terms of Service
               </span>{" "}
               and{" "}
-              <span className="font-medium text-brand-blue">
+              <Link
+                href="/privacy"
+                className="font-medium text-brand-blue hover:underline"
+              >
                 Privacy Policy
-              </span>
+              </Link>
               .
             </p>
 

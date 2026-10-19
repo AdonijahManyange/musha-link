@@ -5,9 +5,11 @@ import LandlordCTA from "@/components/home/LandlordCTA";
 import Universities from "@/components/home/Universities";
 import StudentAccommodation from "@/components/home/StudentAccommodation";
 import EnableNotifications from "@/components/EnableNotifications";
+import PublicSiteLayout from "@/components/layout/PublicSiteLayout";
 
 export default function Home() {
   return (
+  <PublicSiteLayout>
     <>
       <Hero />
 
@@ -22,5 +24,6 @@ export default function Home() {
       <Universities />
       <StudentAccommodation />
     </>
-  );
+  </PublicSiteLayout>
+);
 }
