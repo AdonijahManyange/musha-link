@@ -6,13 +6,14 @@ import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
 import ProfileMenu from "./ProfileMenu";
 import NotificationBell from "./NotificationBell";
+import ThemeToggle from "./ThemeToggle";
 
 export default async function Navbar() {
   const user = await getCurrentUser();
   const isLoggedIn = !!user;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white transition-colors duration-200 dark:border-slate-700 dark:bg-slate-900">
       <nav className="mx-auto flex w-full items-center justify-between px-4 py-3 md:h-28">
 
         {/* ======================================================
@@ -35,7 +36,7 @@ export default async function Navbar() {
             DESKTOP NAVIGATION
             ====================================================== */}
 
-        <div className="hidden items-center gap-8 font-medium text-slate-700 md:flex">
+        <div className="hidden items-center gap-8 font-medium text-slate-700 dark:text-slate-200 md:flex">
           <NavLinks />
         </div>
 
@@ -45,13 +46,16 @@ export default async function Navbar() {
 
         <div className="flex items-center gap-3">
 
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {!isLoggedIn ? (
             <>
               {/* Login */}
 
               <Link
                 href="/auth/login"
-                className="hidden rounded-lg px-4 py-2 text-slate-700 transition hover:bg-slate-100 md:block"
+                className="hidden rounded-lg px-4 py-2 text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 md:block"
               >
                 Login
               </Link>

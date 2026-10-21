@@ -18,7 +18,7 @@ export default async function FeaturedListings() {
     orderBy: {
       createdAt: "desc",
     },
-    take: 3,
+    take: 9,
   });
 
   const spotlightListings = listings.map((listing) => {
@@ -60,7 +60,7 @@ export default async function FeaturedListings() {
   return (
     <section
       id="spotlight"
-      className="bg-slate-50 py-24"
+      className="bg-slate-50 py-24 transition-colors duration-200 dark:bg-slate-950"
     >
       <div className="mx-auto max-w-7xl px-6">
 
@@ -69,84 +69,88 @@ export default async function FeaturedListings() {
         ===================================================== */}
 
         <div className="mb-8 text-center md:mb-14">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-blue/10 bg-white px-3 py-1.5 text-xs font-semibold text-brand-blue shadow-sm md:mb-4 md:px-4 md:py-2 md:text-sm">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-blue/10 bg-white px-3 py-1.5 text-xs font-semibold text-brand-blue shadow-sm transition-colors duration-200 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-300 md:mb-4 md:px-4 md:py-2 md:text-sm">
             <span className="text-base">✦</span>
             Spotlight
           </div>
 
-         <h2 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+         <h2 className="text-3xl font-bold tracking-tight text-slate-900 transition-colors duration-200 dark:text-white md:text-4xl">
             Spotlight Listings
           </h2>
 
-          <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 md:mt-4 md:text-lg">
+          <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600 transition-colors duration-200 dark:text-slate-300 md:mt-4 md:text-lg">
             Premium student accommodation, hand-picked
             for your next home.
           </p>
         </div>
 
-        {/* =====================================================
-            MOBILE SPOTLIGHT CAROUSEL
-            Desktop remains unchanged.
-        ===================================================== */}
+                {/* =====================================================
+                    CINEMATIC SPOTLIGHT MARQUEE
+                    Automatic movement on desktop and mobile
+                ===================================================== */}
 
-        <div className="md:hidden">
-          <div
-            className="
-              -mx-6
-              flex
-              gap-5
-              overflow-x-auto
-              px-6
-              pb-4
-              snap-x
-              snap-mandatory
-              overscroll-x-contain
-              scrollbar-hide
-            "
-          >
-            {spotlightListings.map((listing) => (
-              <div
-                key={listing.id}
-                className="
-                  w-[82%]
-                  min-w-[82%]
-                  shrink-0
-                  snap-start
-                "
-              >
-                <ListingCard
-                  listing={listing}
-                  variant="spotlight"
-                  source="browse"
-                />
-              </div>
-            ))}
-          </div>
+                <div
+                  className="
+                    group/marquee
+                    relative
+                    -mx-6
+                    overflow-hidden
+                    px-6
+                    pb-4
+                  "
+                >
+                  <div className="spotlight-track">
+                    {/* First set of listings */}
+                    {spotlightListings.map((listing) => (
+                      <div
+                        key={listing.id}
+                        className="
+                          w-[72vw]
+                          max-w-[300px]
+                          shrink-0
+                          sm:w-[300px]
+                          md:w-[340px]
+                          lg:w-[360px]
+                        "
+                      >
+                        <ListingCard
+                          listing={listing}
+                          variant="spotlight"
+                          source="browse"
+                        />
+                      </div>
+                    ))}
 
-          {/* Swipe hint */}
-          {spotlightListings.length > 1 && (
-            <div className="mt-4 flex items-center justify-center gap-2 text-xs font-medium text-slate-400">
-              <span>Swipe to explore</span>
-              <span aria-hidden="true">→</span>
-            </div>
-          )}
-        </div>
+                    {/* Duplicate set for a continuous loop */}
+                    {spotlightListings.map((listing) => (
+                      <div
+                        key={listing.id}
+                        className="
+                          w-[72vw]
+                          max-w-[300px]
+                          shrink-0
+                          sm:w-[300px]
+                          md:w-[340px]
+                          lg:w-[360px]
+                        "
+                      >
+                        <ListingCard
+                          listing={listing}
+                          variant="spotlight"
+                          source="browse"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-        {/* =====================================================
-            DESKTOP SPOTLIGHT LISTINGS
-            DO NOT CHANGE DESKTOP UI
-        ===================================================== */}
-
-        <div className="hidden gap-8 md:grid md:grid-cols-2 lg:grid-cols-3">
-          {spotlightListings.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              variant="spotlight"
-              source="browse"
-            />
-          ))}
-        </div>
+                {/* Swipe hint for mobile */}
+                {spotlightListings.length > 1 && (
+                  <div className="mt-4 flex items-center justify-center gap-2 text-xs font-medium text-slate-400 dark:text-slate-500 md:hidden">
+                    <span>Swipe to explore</span>
+                    <span aria-hidden="true">→</span>
+                  </div>
+                )}
 
       </div>
     </section>

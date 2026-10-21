@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* =========================================
+   MUSHALINK BRAND COLORS
+========================================= */
+
 @theme {
   --color-brand-blue: #1C3769;
   --color-brand-blue-dark: #254B8C;
@@ -8,31 +12,154 @@
   --color-brand-green-dark: #5B8B2F;
 }
 
+/* =========================================
+   TAILWIND DARK MODE
+   Activated by .dark on the HTML element
+========================================= */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================================
+   LIGHT THEME
+========================================= */
+
 :root {
+  color-scheme: light;
+
   --background: #ffffff;
   --foreground: #171717;
+
+  --surface: #ffffff;
+  --surface-secondary: #f8fafc;
+  --surface-tertiary: #f1f5f9;
+
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --input-background: #ffffff;
+  --input-border: #cbd5e1;
 }
+
+/* =========================================
+   DARK THEME
+========================================= */
+
+html.dark {
+  color-scheme: dark;
+
+  --background: #020617;
+  --foreground: #f1f5f9;
+
+  --surface: #0f172a;
+  --surface-secondary: #1e293b;
+  --surface-tertiary: #334155;
+
+  --border: #334155;
+  --border-strong: #475569;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --input-background: #1e293b;
+  --input-border: #475569;
+}
+
+/* =========================================
+   THEME-AWARE TAILWIND UTILITIES
+========================================= */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-input-background: var(--input-background);
+  --color-input-border: var(--input-border);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================
+   GLOBAL DOCUMENT STYLES
+========================================= */
+
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+  background: var(--background);
 }
 
 body {
+  min-height: 100%;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
 }
 
-html {
-  scroll-behavior: smooth;
+/* =========================================
+   CINEMATIC SPOTLIGHT MARQUEE
+========================================= */
+
+.spotlight-track {
+  display: flex;
+  width: max-content;
+  gap: 2rem;
+  animation: spotlight-marquee 70s linear infinite;
+  will-change: transform;
+}
+
+@keyframes spotlight-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.spotlight-track:hover,
+.spotlight-track:focus-within {
+  animation-play-state: paused;
+}
+
+/* =========================================
+   ACCESSIBILITY
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .spotlight-track {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
 }

@@ -25,22 +25,18 @@ export default function ListingCard({
         group
         flex h-full flex-col overflow-hidden
         rounded-3xl
-        bg-white
+        bg-white text-slate-900
         transition-all duration-300
+        dark:bg-slate-800 dark:text-slate-100
         ${
           isSpotlight
-            ? "border border-brand-blue/20 shadow-[0_12px_40px_rgba(30,58,138,0.10)] hover:-translate-y-2 hover:border-brand-blue/30 hover:shadow-[0_20px_50px_rgba(30,58,138,0.16)]"
-            : "border border-slate-200 shadow-sm hover:-translate-y-1 hover:shadow-xl"
+            ? "border border-brand-blue/20 shadow-[0_12px_40px_rgba(30,58,138,0.10)] hover:-translate-y-2 hover:border-brand-blue/30 hover:shadow-[0_20px_50px_rgba(30,58,138,0.16)] dark:border-slate-700 dark:shadow-black/20 dark:hover:border-blue-400/40 dark:hover:shadow-black/30"
+            : "border border-slate-200 shadow-sm hover:-translate-y-1 hover:shadow-xl dark:border-slate-700 dark:shadow-black/20 dark:hover:shadow-black/30"
         }
       `}
     >
-
-      {/* =====================================================
-          IMAGE
-      ===================================================== */}
-
+      {/* IMAGE */}
       <div className="relative overflow-hidden">
-
         <Link href={listingUrl}>
           <Image
             src={listing.images[0]}
@@ -51,19 +47,12 @@ export default function ListingCard({
               w-full object-cover
               transition-transform duration-500
               group-hover:scale-[1.04]
-              ${
-                isSpotlight
-                  ? "h-64"
-                  : "h-40 md:h-56"
-              }
+              ${isSpotlight ? "h-44 sm:h-52 md:h-60 lg:h-64" : "h-40 md:h-56"}
             `}
           />
         </Link>
 
-        {/* =================================================
-            SPOTLIGHT BADGE
-        ================================================= */}
-
+        {/* SPOTLIGHT BADGE */}
         {isSpotlight && (
           <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full border border-white/20 bg-brand-blue px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white shadow-lg">
             <span className="text-sm">✦</span>
@@ -71,10 +60,7 @@ export default function ListingCard({
           </div>
         )}
 
-        {/* =================================================
-            VERIFIED BADGE
-        ================================================= */}
-
+        {/* VERIFIED BADGE */}
         {listing.verified && (
           <div
             className={`
@@ -99,44 +85,30 @@ export default function ListingCard({
           </div>
         )}
 
-        {/* =================================================
-            FAVORITE
-        ================================================= */}
-
+        {/* FAVORITE */}
         <div className="absolute right-3 top-3 md:right-4 md:top-4">
           <FavoriteButton listingId={listing.id} />
         </div>
-
       </div>
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
-
+      {/* CONTENT */}
       <div
         className={`
           flex flex-1 flex-col
-          ${
-            isSpotlight
-              ? "p-7"
-              : "p-4 md:p-6"
-          }
+          ${isSpotlight ? "p-4 sm:p-5 md:p-6 lg:p-7" : "p-4 md:p-6"}
         `}
       >
-
-        {/* =================================================
-            TITLE
-        ================================================= */}
-
+        {/* TITLE */}
         <Link href={listingUrl}>
           <h3
             className={`
               font-bold text-slate-900
               transition-colors
               group-hover:text-brand-blue
+              dark:text-slate-100 dark:group-hover:text-blue-400
               ${
                 isSpotlight
-                  ? "text-[23px] tracking-tight"
+                  ? "text-lg tracking-tight sm:text-xl md:text-[22px] lg:text-[23px]"
                   : "text-lg md:text-2xl"
               }
             `}
@@ -145,13 +117,10 @@ export default function ListingCard({
           </h3>
         </Link>
 
-        {/* =================================================
-            UNIVERSITY
-        ================================================= */}
-
+        {/* UNIVERSITY */}
         <p
           className={`
-            font-medium text-brand-blue
+            font-medium text-brand-blue dark:text-blue-400
             ${
               isSpotlight
                 ? "mt-2"
@@ -162,83 +131,60 @@ export default function ListingCard({
           {listing.university}
         </p>
 
-        {/* =================================================
-            LOCATION
-        ================================================= */}
-
+        {/* LOCATION */}
         <p
-          className={
-            isSpotlight
-              ? "text-slate-500"
-              : "text-sm text-slate-500 md:text-base"
-          }
+          className={`
+            text-slate-500 dark:text-slate-400
+            ${isSpotlight ? "" : "text-sm md:text-base"}
+          `}
         >
           {listing.suburb}, {listing.city}
         </p>
 
-        {/* =================================================
-            AMENITIES
-        ================================================= */}
-
+        {/* AMENITIES */}
         {listing.amenities?.length > 0 && (
           <div
             className={`
               flex flex-wrap gap-2
-              ${
-                isSpotlight
-                  ? "mt-5"
-                  : "mt-3 md:mt-5"
-              }
+              ${isSpotlight ? "mt-5" : "mt-3 md:mt-5"}
             `}
           >
-            {listing.amenities
-              .slice(0, 3)
-              .map((amenity) => (
-                <span
-                  key={amenity}
-                  className={`
-                    flex items-center gap-1
-                    rounded-full
-                    px-3 py-1
-                    text-xs
-                    font-medium
-                    ${
-                      isSpotlight
-                        ? "border border-slate-200 bg-slate-50 text-slate-600"
-                        : "bg-slate-100 text-green-600"
-                    }
-                  `}
-                >
-                  {getAmenityIcon(amenity)}
-                  {amenity}
-                </span>
-              ))}
+            {listing.amenities.slice(0, 3).map((amenity) => (
+              <span
+                key={amenity}
+                className={`
+                  flex items-center gap-1
+                  rounded-full px-3 py-1
+                  text-xs font-medium
+                  ${
+                    isSpotlight
+                      ? "border border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+                      : "bg-slate-100 text-green-600 dark:bg-slate-700 dark:text-green-400"
+                  }
+                `}
+              >
+                {getAmenityIcon(amenity)}
+                {amenity}
+              </span>
+            ))}
           </div>
         )}
 
-        {/* =================================================
-            PRICE + BUTTON
-        ================================================= */}
-
+        {/* PRICE + BUTTON */}
         <div
           className={`
             mt-auto
             flex items-end justify-between gap-3
-            ${
-              isSpotlight
-                ? "pt-8"
-                : "pt-4 md:pt-6"
-            }
+            ${isSpotlight ? "pt-5 sm:pt-6 md:pt-7 lg:pt-8" : "pt-4 md:pt-6"}
           `}
         >
-
           <div>
             <p
               className={`
-                font-bold text-brand-blue
+                font-bold text-brand-blue dark:text-blue-400
                 ${
                   isSpotlight
-                    ? "text-[34px] tracking-tight"
+                    ? "text-2xl tracking-tight sm:text-3xl md:text-[32px] lg:text-[34px]"
                     : "text-2xl md:text-4xl"
                 }
               `}
@@ -246,7 +192,7 @@ export default function ListingCard({
               US${listing.price}
             </p>
 
-            <p className="text-xs text-slate-500 md:text-sm">
+            <p className="text-xs text-slate-500 dark:text-slate-400 md:text-sm">
               per month
             </p>
           </div>
@@ -255,8 +201,7 @@ export default function ListingCard({
             href={listingUrl}
             className={`
               rounded-xl
-              font-semibold
-              text-white
+              font-semibold text-white
               transition-all
               ${
                 isSpotlight
@@ -267,9 +212,7 @@ export default function ListingCard({
           >
             View Details
           </Link>
-
         </div>
-
       </div>
     </div>
   );

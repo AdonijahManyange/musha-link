@@ -17,10 +17,25 @@ export default function UniversityCard({
   href,
 }: UniversityCardProps) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-
+    <div
+      className="
+        flex h-full flex-col rounded-2xl
+        border border-slate-200 bg-white p-5 shadow-sm
+        transition-all duration-200
+        hover:-translate-y-1 hover:shadow-md
+        dark:border-slate-700 dark:bg-slate-800
+        dark:shadow-black/20 dark:hover:shadow-black/30
+      "
+    >
       {/* Logo */}
-      <div className="flex h-28 items-center justify-center rounded-xl bg-slate-50 p-4">
+      <div
+        className="
+          flex h-28 items-center justify-center
+          rounded-xl bg-slate-50 p-4
+          transition-colors duration-200
+          dark:bg-slate-700
+        "
+      >
         <Image
           src={logo}
           alt={`${name} logo`}
@@ -32,29 +47,57 @@ export default function UniversityCard({
 
       {/* Content */}
       <div className="flex flex-1 flex-col pt-5">
-
-        <h3 className="text-lg font-bold leading-6 text-slate-900">
+        {/* University Name */}
+        <h3
+          className="
+            text-lg font-bold leading-6 text-slate-900
+            transition-colors duration-200
+            dark:text-white
+          "
+        >
           {name}
         </h3>
 
-        <p className="mt-3 text-sm font-medium text-brand-blue">
+        {/* City */}
+        <p
+          className="
+            mt-3 text-sm font-medium text-brand-blue
+            dark:text-blue-400
+          "
+        >
           {city}
         </p>
 
-        <p className="mt-3 text-sm leading-6 text-slate-600">
+        {/* Description */}
+        <p
+          className="
+            mt-3 text-sm leading-6 text-slate-600
+            transition-colors duration-200
+            dark:text-slate-300
+          "
+        >
           {description}
         </p>
 
         {/* CTA */}
-        <div className="mt-auto border-t border-slate-100 pt-4">
+        <div
+          className="
+            mt-auto border-t border-slate-100 pt-4
+            dark:border-slate-700
+          "
+        >
           <Link
             href={href}
-            className="text-sm font-semibold text-slate-700 transition hover:text-brand-blue"
+            className="
+              text-sm font-semibold text-slate-700
+              transition-colors duration-200
+              hover:text-brand-blue
+              dark:text-slate-200 dark:hover:text-blue-400
+            "
           >
             View accommodation →
           </Link>
         </div>
-
       </div>
     </div>
   );

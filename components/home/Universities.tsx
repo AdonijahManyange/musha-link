@@ -38,21 +38,21 @@ export default async function Universities() {
   return (
     <section
       id="universities"
-      className="bg-slate-50 py-24"
+      className="bg-slate-50 py-24 transition-colors duration-200 dark:bg-slate-950"
     >
       <div className="mx-auto max-w-6xl px-6">
 
         {/* Section Header */}
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-blue">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand-blue dark:text-blue-400">
             Find Your University
           </p>
 
-          <h2 className="mt-2 text-4xl font-bold text-slate-900">
+          <h2 className="mt-2 text-4xl font-bold text-slate-900 transition-colors duration-200 dark:text-white">
             Browse by University
           </h2>
 
-          <p className="mt-4 text-lg text-slate-600">
+          <p className="mt-4 text-lg text-slate-600 transition-colors duration-200 dark:text-slate-300">
             Find student accommodation close to Zimbabwe's leading universities.
           </p>
         </div>
@@ -62,11 +62,11 @@ export default async function Universities() {
 
           {/* Mobile Swipe Hint */}
           <div className="mb-4 flex items-center justify-between md:hidden">
-            <p className="text-sm font-medium text-slate-500">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
               Swipe to explore universities
             </p>
 
-            <span className="text-sm text-slate-400">
+            <span className="text-sm text-slate-400 dark:text-slate-500">
               ← →
             </span>
           </div>
@@ -137,7 +137,7 @@ export default async function Universities() {
         <div className="mt-10 flex justify-center">
           <a
             href="/browse"
-            className="rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+            className="rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-700 transition-colors duration-200 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
           >
             Browse All Listings
           </a>
