@@ -16,22 +16,19 @@ export default function ListingCard({
   variant = "default",
 }: ListingCardProps) {
   const listingUrl = `/listings/${listing.id}?from=${source}`;
-
   const isSpotlight = variant === "spotlight";
 
   return (
     <div
       className={`
-        group
-        flex h-full flex-col overflow-hidden
-        rounded-3xl
-        bg-white text-slate-900
+        group flex h-full flex-col overflow-hidden
+        rounded-3xl border border-border
+        bg-surface text-text-primary
         transition-all duration-300
-        dark:bg-slate-800 dark:text-slate-100
         ${
           isSpotlight
-            ? "border border-brand-blue/20 shadow-[0_12px_40px_rgba(30,58,138,0.10)] hover:-translate-y-2 hover:border-brand-blue/30 hover:shadow-[0_20px_50px_rgba(30,58,138,0.16)] dark:border-slate-700 dark:shadow-black/20 dark:hover:border-blue-400/40 dark:hover:shadow-black/30"
-            : "border border-slate-200 shadow-sm hover:-translate-y-1 hover:shadow-xl dark:border-slate-700 dark:shadow-black/20 dark:hover:shadow-black/30"
+            ? "border-brand-blue/20 shadow-[0_12px_40px_rgba(30,58,138,0.10)] hover:-translate-y-2 hover:border-brand-blue/30 hover:shadow-[0_20px_50px_rgba(30,58,138,0.16)]"
+            : "shadow-sm hover:-translate-y-1 hover:shadow-xl"
         }
       `}
     >
@@ -47,7 +44,11 @@ export default function ListingCard({
               w-full object-cover
               transition-transform duration-500
               group-hover:scale-[1.04]
-              ${isSpotlight ? "h-44 sm:h-52 md:h-60 lg:h-64" : "h-40 md:h-56"}
+              ${
+                isSpotlight
+                  ? "h-44 sm:h-52 md:h-60 lg:h-64"
+                  : "h-40 md:h-56"
+              }
             `}
           />
         </Link>
@@ -70,15 +71,9 @@ export default function ListingCard({
                   ? "left-4 top-14"
                   : "left-3 top-3 md:left-4 md:top-4"
               }
-              rounded-full
-              bg-green-600
-              px-3 py-1
-              text-[11px]
-              font-bold
-              uppercase
-              tracking-wide
-              text-white
-              shadow-sm
+              rounded-full bg-green-600 px-3 py-1
+              text-[11px] font-bold uppercase tracking-wide
+              text-white shadow-sm
             `}
           >
             ✓ Verified
@@ -102,10 +97,9 @@ export default function ListingCard({
         <Link href={listingUrl}>
           <h3
             className={`
-              font-bold text-slate-900
+              font-bold text-text-primary
               transition-colors
               group-hover:text-brand-blue
-              dark:text-slate-100 dark:group-hover:text-blue-400
               ${
                 isSpotlight
                   ? "text-lg tracking-tight sm:text-xl md:text-[22px] lg:text-[23px]"
@@ -134,7 +128,7 @@ export default function ListingCard({
         {/* LOCATION */}
         <p
           className={`
-            text-slate-500 dark:text-slate-400
+            text-text-muted
             ${isSpotlight ? "" : "text-sm md:text-base"}
           `}
         >
@@ -158,8 +152,8 @@ export default function ListingCard({
                   text-xs font-medium
                   ${
                     isSpotlight
-                      ? "border border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
-                      : "bg-slate-100 text-green-600 dark:bg-slate-700 dark:text-green-400"
+                      ? "border border-border bg-surface-secondary text-text-secondary"
+                      : "bg-surface-tertiary text-brand-green-dark"
                   }
                 `}
               >
@@ -173,15 +167,14 @@ export default function ListingCard({
         {/* PRICE + BUTTON */}
         <div
           className={`
-            mt-auto
-            flex items-end justify-between gap-3
+            mt-auto flex items-end justify-between gap-3
             ${isSpotlight ? "pt-5 sm:pt-6 md:pt-7 lg:pt-8" : "pt-4 md:pt-6"}
           `}
         >
           <div>
             <p
               className={`
-                font-bold text-brand-blue dark:text-blue-400
+                font-bold text-brand-blue dark:text-white
                 ${
                   isSpotlight
                     ? "text-2xl tracking-tight sm:text-3xl md:text-[32px] lg:text-[34px]"
@@ -192,7 +185,7 @@ export default function ListingCard({
               US${listing.price}
             </p>
 
-            <p className="text-xs text-slate-500 dark:text-slate-400 md:text-sm">
+            <p className="text-xs text-text-muted md:text-sm">
               per month
             </p>
           </div>
@@ -200,8 +193,7 @@ export default function ListingCard({
           <Link
             href={listingUrl}
             className={`
-              rounded-xl
-              font-semibold text-white
+              rounded-xl font-semibold text-white
               transition-all
               ${
                 isSpotlight

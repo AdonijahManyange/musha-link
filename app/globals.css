@@ -163,3 +163,92 @@ body {
     will-change: auto;
   }
 }
+
+
+/* =========================================
+   GLOBAL DARK-MODE COMPATIBILITY LAYER
+   Automatically adapts common light surfaces
+   and text colors when html.dark is active.
+========================================= */
+
+html.dark body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Common page and card backgrounds */
+html.dark .bg-white {
+  background-color: var(--surface) !important;
+}
+
+html.dark .bg-slate-50 {
+  background-color: var(--background) !important;
+}
+
+html.dark .bg-slate-100 {
+  background-color: var(--surface-secondary) !important;
+}
+
+/* Common text colors */
+html.dark .text-slate-900,
+html.dark .text-slate-950 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .text-slate-700 {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500 {
+  color: var(--text-muted) !important;
+}
+
+/* Common borders */
+html.dark .border-slate-100,
+html.dark .border-slate-200 {
+  border-color: var(--border) !important;
+}
+
+html.dark .border-slate-300 {
+  border-color: var(--border-strong) !important;
+}
+
+/* Form controls */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark textarea,
+html.dark select {
+  background-color: var(--input-background);
+  border-color: var(--input-border);
+  color: var(--text-primary);
+}
+
+/* Placeholder text */
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+/* Native dropdown options */
+html.dark select option {
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+/* Smooth transitions for common surfaces */
+body,
+header,
+main,
+section,
+article,
+footer,
+nav,
+input,
+textarea,
+select {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}

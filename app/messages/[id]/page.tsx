@@ -71,11 +71,9 @@ type Conversation = {
   listingId: string;
   createdAt: string;
   updatedAt: string;
-
   listing: Listing;
   student: Student;
   landlord: Landlord;
-
   messages: Message[];
 };
 
@@ -83,41 +81,25 @@ type Conversation = {
 // HELPERS
 // ============================================================
 
-function formatMessageTime(
-  dateString: string
-) {
-  const date = new Date(dateString);
-
-  return date.toLocaleTimeString([], {
+function formatMessageTime(dateString: string) {
+  return new Date(dateString).toLocaleTimeString([], {
     hour: "numeric",
     minute: "2-digit",
   });
 }
 
-function formatMessageDate(
-  dateString: string
-) {
+function formatMessageDate(dateString: string) {
   const date = new Date(dateString);
-
   const now = new Date();
 
-  if (
-    date.toDateString() ===
-    now.toDateString()
-  ) {
+  if (date.toDateString() === now.toDateString()) {
     return "Today";
   }
 
   const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
 
-  yesterday.setDate(
-    yesterday.getDate() - 1
-  );
-
-  if (
-    date.toDateString() ===
-    yesterday.toDateString()
-  ) {
+  if (date.toDateString() === yesterday.toDateString()) {
     return "Yesterday";
   }
 
@@ -126,48 +108,22 @@ function formatMessageDate(
     month: "long",
     day: "numeric",
     year:
-      date.getFullYear() !==
-      now.getFullYear()
+      date.getFullYear() !== now.getFullYear()
         ? "numeric"
         : undefined,
   });
 }
 
-// ============================================================
-// GET PERSON PHOTO
-// ============================================================
-
-function getPersonPhoto(
-  person: Student | Landlord
-) {
-  // Student
+function getPersonPhoto(person: Student | Landlord) {
   if ("studentProfile" in person) {
-    return (
-      person.studentProfile
-        ?.profilePhotoUrl ?? null
-    );
+    return person.studentProfile?.profilePhotoUrl ?? null;
   }
 
-  // Landlord
-  return (
-    person.landlordProfile
-      ?.profilePhotoUrl ?? null
-  );
+  return person.landlordProfile?.profilePhotoUrl ?? null;
 }
 
-// ============================================================
-// GET PERSON INITIAL
-// ============================================================
-
-function getPersonInitial(
-  person: Student | Landlord
-) {
-  const name =
-    person.name ?? person.email;
-
-  return (
-    name.charAt(0).toUpperCase()
-  );
+function getPersonInitial(person: Student | Landlord) {
+  return (person.name ?? person.email).charAt(0).toUpperCase();
 }
 
 // ============================================================
@@ -179,9 +135,7 @@ export default function ConversationPage() {
   const router = useRouter();
 
   const conversationId =
-    typeof params.id === "string"
-      ? params.id
-      : null;
+    typeof params.id === "string" ? params.id : null;
 
   const [conversation, setConversation] =
     useState<Conversation | null>(null);
@@ -189,23 +143,12 @@ export default function ConversationPage() {
   const [currentUserId, setCurrentUserId] =
     useState<string | null>(null);
 
-  const [message, setMessage] =
-    useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [sending, setSending] =
-    useState(false);
-
-  const [error, setError] =
-    useState<string | null>(null);
-
-  const messagesEndRef =
-    useRef<HTMLDivElement | null>(null);
-
-  const messagesContainerRef =
-  useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
   // ==========================================================
   // LOAD CURRENT USER
@@ -214,23 +157,16 @@ export default function ConversationPage() {
   useEffect(() => {
     async function loadUser() {
       try {
-        const response = await fetch(
-          "/api/auth/session",
-          {
-            credentials: "include",
-            cache: "no-store",
-          }
-        );
+        const response = await fetch("/api/auth/session", {
+          credentials: "include",
+          cache: "no-store",
+        });
 
         if (!response.ok) {
-          throw new Error(
-            "Unable to load your session."
-          );
+          throw new Error("Unable to load your session.");
         }
 
-        const data =
-          await response.json();
-
+        const data = await response.json();
         const user = data?.user;
 
         if (!user?.id) {
@@ -240,15 +176,8 @@ export default function ConversationPage() {
 
         setCurrentUserId(user.id);
       } catch (error) {
-        console.error(
-          "Failed to load session:",
-          error
-        );
-
-        setError(
-          "Unable to load your account."
-        );
-
+        console.error("Failed to load session:", error);
+        setError("Unable to load your account.");
         setLoading(false);
       }
     }
@@ -261,10 +190,7 @@ export default function ConversationPage() {
   // ==========================================================
 
   useEffect(() => {
-    if (
-      !conversationId ||
-      !currentUserId
-    ) {
+    if (!conversationId || !currentUserId) {
       return;
     }
 
@@ -282,24 +208,17 @@ export default function ConversationPage() {
           }
         );
 
-        const data =
-          await response.json();
+        const data = await response.json();
 
         if (!response.ok) {
           throw new Error(
-            data?.error ??
-              "Unable to load conversation."
+            data?.error ?? "Unable to load conversation."
           );
         }
 
-        setConversation(
-          data?.conversation ?? null
-        );
+        setConversation(data?.conversation ?? null);
       } catch (error) {
-        console.error(
-          "Failed to load conversation:",
-          error
-        );
+        console.error("Failed to load conversation:", error);
 
         setError(
           error instanceof Error
@@ -312,28 +231,19 @@ export default function ConversationPage() {
     }
 
     loadConversation();
-  }, [
-    conversationId,
-    currentUserId,
-  ]);
+  }, [conversationId, currentUserId]);
 
   // ==========================================================
-  // SCROLL TO BOTTOM
+  // SCROLL TO THE NEWEST MESSAGE
   // ==========================================================
 
   useEffect(() => {
-    if (!conversation) {
+    const container = messagesContainerRef.current;
+
+    if (!conversation || !container) {
       return;
     }
 
-    const container =
-      messagesContainerRef.current;
-
-    if (!container) {
-      return;
-    }
-
-    // Always open the conversation at the newest message.
     requestAnimationFrame(() => {
       container.scrollTo({
         top: container.scrollHeight,
@@ -351,11 +261,7 @@ export default function ConversationPage() {
   ) {
     event.preventDefault();
 
-    if (
-      !conversationId ||
-      !message.trim() ||
-      sending
-    ) {
+    if (!conversationId || !message.trim() || sending) {
       return;
     }
 
@@ -369,32 +275,25 @@ export default function ConversationPage() {
         `/api/messages/conversations/${conversationId}`,
         {
           method: "POST",
-
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
-
           credentials: "include",
-
-          body: JSON.stringify({
-            message: content,
-          }),
+          body: JSON.stringify({ message: content }),
         }
       );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data?.error ??
-            "Unable to send message."
+          data?.error ?? "Unable to send message."
         );
       }
 
-      const createdMessage =
-        data?.message as Message | undefined;
+      const createdMessage = data?.message as
+        | Message
+        | undefined;
 
       if (createdMessage) {
         setConversation((current) => {
@@ -404,24 +303,15 @@ export default function ConversationPage() {
 
           return {
             ...current,
-
-            messages: [
-              ...current.messages,
-              createdMessage,
-            ],
-
-            updatedAt:
-              createdMessage.createdAt,
+            messages: [...current.messages, createdMessage],
+            updatedAt: createdMessage.createdAt,
           };
         });
       }
 
       setMessage("");
     } catch (error) {
-      console.error(
-        "Failed to send message:",
-        error
-      );
+      console.error("Failed to send message:", error);
 
       setError(
         error instanceof Error
@@ -434,49 +324,47 @@ export default function ConversationPage() {
   }
 
   // ==========================================================
-  // LOADING
+  // LOADING STATE
   // ==========================================================
 
   if (loading) {
     return (
-      <main className="min-h-dvh bg-gray-50">
-        <div className="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4">
-          <div className="text-center">
-            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-black" />
+      <main className="flex min-h-dvh items-center justify-center bg-background px-4">
+        <div className="text-center">
+          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-border border-t-brand-blue" />
 
-            <p className="mt-4 text-sm text-gray-500">
-              Loading conversation...
-            </p>
-          </div>
+          <p className="mt-4 text-sm text-text-muted">
+            Loading conversation...
+          </p>
         </div>
       </main>
     );
   }
 
   // ==========================================================
-  // ERROR
+  // ERROR STATE
   // ==========================================================
 
   if (error && !conversation) {
     return (
-      <main className="min-h-dvh bg-gray-50">
-        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-          <div className="rounded-2xl border border-red-200 bg-white p-8 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+      <main className="min-h-dvh bg-background px-4 py-16">
+        <div className="mx-auto max-w-3xl">
+          <div className="rounded-2xl border border-border bg-surface p-8 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-xl font-bold text-red-600 dark:bg-red-950 dark:text-red-300">
               !
             </div>
 
-            <h1 className="mt-4 text-xl font-semibold text-gray-900">
+            <h1 className="mt-4 text-xl font-semibold text-text-primary">
               Unable to load conversation
             </h1>
 
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-text-secondary">
               {error}
             </p>
 
             <Link
               href="/messages"
-              className="mt-6 inline-flex rounded-xl bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800"
+              className="mt-6 inline-flex rounded-xl bg-brand-blue px-5 py-3 text-sm font-medium text-white transition hover:bg-brand-blue-dark"
             >
               Back to Messages
             </Link>
@@ -486,57 +374,44 @@ export default function ConversationPage() {
     );
   }
 
-  if (
-    !conversation ||
-    !currentUserId
-  ) {
+  if (!conversation || !currentUserId) {
     return null;
   }
 
   // ==========================================================
-  // DETERMINE PEOPLE
+  // DETERMINE CONVERSATION PARTICIPANTS
   // ==========================================================
 
-  const isStudent =
-    conversation.studentId ===
-    currentUserId;
+  const isStudent = conversation.studentId === currentUserId;
 
   const otherPerson = isStudent
     ? conversation.landlord
     : conversation.student;
 
   const otherPersonName =
-    otherPerson.name ??
-    otherPerson.email;
+    otherPerson.name ?? otherPerson.email;
 
-  const otherPersonPhoto =
-    getPersonPhoto(otherPerson);
+  const otherPersonPhoto = getPersonPhoto(otherPerson);
 
   const listingPhoto =
-    conversation.listing.photos[0]?.url ??
-    null;
+    conversation.listing.photos[0]?.url ?? null;
 
   // ==========================================================
-  // RENDER
+  // RENDER CONVERSATION
   // ==========================================================
 
   return (
-    <main className="h-[calc(100dvh-90px)] overflow-hidden bg-gray-50">
-      <div className="mx-auto flex h-[calc(100dvh-90px)] max-w-6xl flex-col px-0 sm:px-4 sm:py-4">
-        <div className="flex min-h-0 flex-1 flex-col bg-white sm:rounded-2xl sm:border sm:border-gray-200 sm:shadow-sm">
+    <main className="h-[calc(100dvh-90px)] overflow-hidden bg-background">
+      <div className="mx-auto flex h-full max-w-6xl flex-col px-0 sm:px-4 sm:py-4">
+        <div className="flex min-h-0 flex-1 flex-col bg-surface sm:rounded-2xl sm:border sm:border-border sm:shadow-sm">
 
-          {/* ==================================================
-              HEADER
-          ================================================== */}
+          {/* HEADER */}
 
-          <header className="flex shrink-0 items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:px-5">
-
-            {/* Back */}
-
+          <header className="flex shrink-0 items-center gap-3 border-b border-border bg-surface px-4 py-3 sm:px-5">
             <Link
               href="/messages"
               aria-label="Back to messages"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-text-secondary transition hover:bg-surface-secondary hover:text-text-primary"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -553,7 +428,7 @@ export default function ConversationPage() {
               </svg>
             </Link>
 
-            {/* Profile */}
+            {/* Other person's profile photo */}
 
             <div className="shrink-0">
               {otherPersonPhoto ? (
@@ -563,31 +438,29 @@ export default function ConversationPage() {
                   className="h-10 w-10 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-900 text-sm font-semibold text-white">
-                  {getPersonInitial(
-                    otherPerson
-                  )}
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue text-sm font-semibold text-white">
+                  {getPersonInitial(otherPerson)}
                 </div>
               )}
             </div>
 
-            {/* Person + listing */}
+            {/* Person and listing name */}
 
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-sm font-semibold text-gray-900">
+              <h1 className="truncate text-sm font-semibold text-text-primary">
                 {otherPersonName}
               </h1>
 
-              <p className="truncate text-xs text-gray-500">
+              <p className="truncate text-xs text-text-muted">
                 {conversation.listing.title}
               </p>
             </div>
 
-            {/* Listing */}
+            {/* Listing shortcut */}
 
             <Link
               href={`/listings/${conversation.listing.id}`}
-              className="hidden shrink-0 items-center gap-2 rounded-xl border border-gray-200 px-2 py-1.5 transition hover:bg-gray-50 sm:flex"
+              className="hidden shrink-0 items-center gap-2 rounded-xl border border-border px-2 py-1.5 transition hover:border-border-strong hover:bg-surface-secondary sm:flex"
             >
               {listingPhoto && (
                 <img
@@ -598,11 +471,11 @@ export default function ConversationPage() {
               )}
 
               <div className="max-w-40">
-                <p className="truncate text-xs font-medium text-gray-800">
+                <p className="truncate text-xs font-medium text-text-primary">
                   View listing
                 </p>
 
-                <p className="truncate text-[11px] text-gray-400">
+                <p className="truncate text-[11px] text-text-muted">
                   {conversation.listing.city},{" "}
                   {conversation.listing.province}
                 </p>
@@ -610,40 +483,27 @@ export default function ConversationPage() {
             </Link>
           </header>
 
-        
-
-          {/* ==================================================
-              MESSAGES
-          ================================================== */}
+          {/* MESSAGES */}
 
           <div
             ref={messagesContainerRef}
-            className="min-h-0 flex-1 overflow-y-auto bg-white px-4 py-6 sm:px-6"
+            className="min-h-0 flex-1 overflow-y-auto bg-background px-4 py-6 sm:px-6"
           >
             <div className="mx-auto max-w-3xl">
-
-              {/* =================================================
-                  MESSAGE LIST
-              ================================================= */}
-
-              {conversation.messages.length ===
-              0 ? (
+              {conversation.messages.length === 0 ? (
                 <div className="py-12 text-center">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-text-secondary">
                     No messages yet.
                   </p>
 
-                  <p className="mt-1 text-xs text-gray-400">
-                    Send a message to start the
-                    conversation.
+                  <p className="mt-1 text-xs text-text-muted">
+                    Send a message to start the conversation.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-5">
-
                   {conversation.messages.map((item, index) => {
-                    const mine =
-                      item.senderId === currentUserId;
+                    const mine = item.senderId === currentUserId;
 
                     const previous =
                       conversation.messages[index - 1];
@@ -651,71 +511,28 @@ export default function ConversationPage() {
                     const next =
                       conversation.messages[index + 1];
 
-                    // ----------------------------------------------------------
-                    // DATE SEPARATOR
-                    // ----------------------------------------------------------
-
+                    // Add a date separator when the day changes.
                     const showDate =
                       !previous ||
                       new Date(item.createdAt).toDateString() !==
                         new Date(previous.createdAt).toDateString();
 
-                    // ----------------------------------------------------------
-                    // MESSAGE GROUPING
-                    // ----------------------------------------------------------
-
                     const previousIsSameSender =
-                      previous &&
-                      previous.senderId === item.senderId;
+                      previous?.senderId === item.senderId;
 
                     const nextIsSameSender =
-                      next &&
-                      next.senderId === item.senderId;
+                      next?.senderId === item.senderId;
 
-                    // Show the avatar only on the LAST message
-                    // in a consecutive group from the same sender.
+                    // Display avatar and time on the last message in a group.
                     const showAvatar = !nextIsSameSender;
-
-                    // Give grouped messages tighter spacing.
                     const isFirstInGroup = !previousIsSameSender;
 
-                    // ----------------------------------------------------------
-                    // DETERMINE PROFILE PHOTO
-                    // ----------------------------------------------------------
-
+                    // Determine the sender's photo and display name.
                     let senderPhoto: string | null = null;
                     let senderName = "";
 
                     if (mine) {
-                      // Current user
                       if (isStudent) {
-                        senderPhoto =
-                          conversation.student.studentProfile
-                            ?.profilePhotoUrl ?? null;
-                      } else {
-                        senderPhoto =
-                          conversation.landlord.landlordProfile
-                            ?.profilePhotoUrl ?? null;
-                      }
-
-                      senderName =
-                        (isStudent
-                          ? conversation.student.name
-                          : conversation.landlord.name) ??
-                        (isStudent
-                          ? conversation.student.email
-                          : conversation.landlord.email);
-                    } else {
-                      // Other person
-                      if (isStudent) {
-                        senderPhoto =
-                          conversation.landlord.landlordProfile
-                            ?.profilePhotoUrl ?? null;
-
-                        senderName =
-                          conversation.landlord.name ??
-                          conversation.landlord.email;
-                      } else {
                         senderPhoto =
                           conversation.student.studentProfile
                             ?.profilePhotoUrl ?? null;
@@ -723,97 +540,90 @@ export default function ConversationPage() {
                         senderName =
                           conversation.student.name ??
                           conversation.student.email;
+                      } else {
+                        senderPhoto =
+                          conversation.landlord.landlordProfile
+                            ?.profilePhotoUrl ?? null;
+
+                        senderName =
+                          conversation.landlord.name ??
+                          conversation.landlord.email;
                       }
+                    } else if (isStudent) {
+                      senderPhoto =
+                        conversation.landlord.landlordProfile
+                          ?.profilePhotoUrl ?? null;
+
+                      senderName =
+                        conversation.landlord.name ??
+                        conversation.landlord.email;
+                    } else {
+                      senderPhoto =
+                        conversation.student.studentProfile
+                          ?.profilePhotoUrl ?? null;
+
+                      senderName =
+                        conversation.student.name ??
+                        conversation.student.email;
                     }
 
                     return (
                       <div key={item.id}>
-                        {/* ------------------------------------------------------
-                            DATE SEPARATOR
-                        ------------------------------------------------------ */}
+                        {/* DATE SEPARATOR */}
 
                         {showDate && (
                           <div className="my-6 flex items-center gap-3">
-                            <div className="h-px flex-1 bg-gray-100" />
+                            <div className="h-px flex-1 bg-border" />
 
-                            <span className="text-[11px] font-medium text-gray-400">
+                            <span className="text-[11px] font-medium text-text-muted">
                               {formatMessageDate(item.createdAt)}
                             </span>
 
-                            <div className="h-px flex-1 bg-gray-100" />
+                            <div className="h-px flex-1 bg-border" />
                           </div>
                         )}
 
-                        {/* ------------------------------------------------------
-                            MESSAGE
-                        ------------------------------------------------------ */}
+                        {/* MESSAGE ROW */}
 
                         <div
                           className={`flex ${
-                            mine
-                              ? "justify-end"
-                              : "justify-start"
-                          } ${
-                            isFirstInGroup
-                              ? "mt-3"
-                              : "mt-1"
-                          }`}
+                            mine ? "justify-end" : "justify-start"
+                          } ${isFirstInGroup ? "mt-3" : "mt-1"}`}
                         >
                           <div
                             className={`flex max-w-[82%] items-end gap-2 sm:max-w-[70%] ${
-                              mine
-                                ? "flex-row-reverse"
-                                : "flex-row"
+                              mine ? "flex-row-reverse" : "flex-row"
                             }`}
                           >
-                            {/* --------------------------------------------------
-                                AVATAR
-
-                                Only rendered on the LAST message of a group.
-                            -------------------------------------------------- */}
+                            {/* SENDER AVATAR */}
 
                             <div className="w-8 shrink-0">
-                              {showAvatar ? (
-                                senderPhoto ? (
+                              {showAvatar &&
+                                (senderPhoto ? (
                                   <img
                                     src={senderPhoto}
                                     alt={senderName}
                                     className="h-8 w-8 rounded-full object-cover"
                                   />
                                 ) : (
-                                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-900 text-[11px] font-semibold text-white">
-                                    {senderName
-                                      .charAt(0)
-                                      .toUpperCase()}
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-blue text-[11px] font-semibold text-white">
+                                    {senderName.charAt(0).toUpperCase()}
                                   </div>
-                                )
-                              ) : null}
+                                ))}
                             </div>
 
-                            {/* --------------------------------------------------
-                                BUBBLE + TIME
-                            -------------------------------------------------- */}
+                            {/* MESSAGE BUBBLE AND STATUS */}
 
                             <div
-                              className={`flex flex-col ${
-                                mine
-                                  ? "items-end"
-                                  : "items-start"
+                              className={`flex min-w-0 flex-col ${
+                                mine ? "items-end" : "items-start"
                               }`}
                             >
                               <div
                                 className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
                                   mine
-                                    ? `bg-black text-white ${
-                                        nextIsSameSender
-                                          ? "rounded-br-md"
-                                          : "rounded-br-md"
-                                      }`
-                                    : `bg-gray-100 text-gray-900 ${
-                                        nextIsSameSender
-                                          ? "rounded-bl-md"
-                                          : "rounded-bl-md"
-                                      }`
+                                    ? "rounded-br-md bg-brand-blue text-white"
+                                    : "rounded-bl-md bg-surface-secondary text-text-primary"
                                 }`}
                               >
                                 <p className="whitespace-pre-wrap break-words">
@@ -821,38 +631,25 @@ export default function ConversationPage() {
                                 </p>
                               </div>
 
-                              {/* ----------------------------------------------
-                                  TIME / READ STATUS
-
-                                  Only show these normally on the last message
-                                  in a group.
-                              ---------------------------------------------- */}
-
                               {showAvatar && (
                                 <div
                                   className={`mt-1 flex items-center gap-1 px-1 ${
-                                    mine
-                                      ? "justify-end"
-                                      : "justify-start"
+                                    mine ? "justify-end" : "justify-start"
                                   }`}
                                 >
-                                  <span className="text-[10px] text-gray-400">
-                                    {formatMessageTime(
-                                      item.createdAt
-                                    )}
+                                  <span className="text-[10px] text-text-muted">
+                                    {formatMessageTime(item.createdAt)}
                                   </span>
 
                                   {mine && (
                                     <span
                                       className={`text-[10px] ${
                                         item.read
-                                          ? "text-blue-500"
-                                          : "text-gray-400"
+                                          ? "text-brand-green"
+                                          : "text-text-muted"
                                       }`}
                                     >
-                                      {item.read
-                                        ? "Read"
-                                        : "Sent"}
+                                      {item.read ? "Read" : "Sent"}
                                     </span>
                                   )}
                                 </div>
@@ -863,70 +660,55 @@ export default function ConversationPage() {
                       </div>
                     );
                   })}
-
-                  <div
-                    ref={messagesEndRef}
-                    className="h-2"
-                  />
                 </div>
               )}
             </div>
           </div>
 
-          {/* ==================================================
-              ERROR BANNER
-          ================================================== */}
+          {/* SEND ERROR */}
 
           {error && (
-            <div className="shrink-0 border-t border-red-100 bg-red-50 px-4 py-2.5 text-center text-xs text-red-700">
+            <div
+              role="alert"
+              className="shrink-0 border-t border-red-200 bg-red-50 px-4 py-2.5 text-center text-xs text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
+            >
               {error}
             </div>
           )}
 
-          {/* ==================================================
-              MESSAGE INPUT
-          ================================================== */}
+          {/* MESSAGE INPUT */}
 
           <form
             onSubmit={handleSendMessage}
-            className="shrink-0 border-t border-gray-200 bg-white px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:p-4"
+            className="shrink-0 border-t border-border bg-surface px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:p-4"
           >
             <div className="mx-auto flex max-w-3xl items-end gap-2">
-
               <textarea
                 value={message}
-                onChange={(event) =>
-                  setMessage(
-                    event.target.value
-                  )
-                }
+                onChange={(event) => setMessage(event.target.value)}
                 onKeyDown={(event) => {
                   if (
                     event.key === "Enter" &&
                     !event.shiftKey
                   ) {
                     event.preventDefault();
-
                     event.currentTarget.form?.requestSubmit();
                   }
                 }}
                 placeholder="Write a message..."
                 rows={1}
                 disabled={sending}
-                className="max-h-32 min-h-11 flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
+                className="min-h-11 max-h-32 flex-1 resize-none rounded-2xl border border-input-border bg-input-background px-4 py-3 text-base text-text-primary outline-none transition placeholder:text-text-muted focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
               />
 
               <button
                 type="submit"
-                disabled={
-                  sending ||
-                  !message.trim()
-                }
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                disabled={sending || !message.trim()}
                 aria-label="Send message"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-blue text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:bg-surface-tertiary disabled:text-text-muted"
               >
                 {sending ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-white" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                 ) : (
                   <svg
                     viewBox="0 0 24 24"
@@ -953,9 +735,8 @@ export default function ConversationPage() {
               </button>
             </div>
 
-            <p className="mx-auto mt-2 max-w-3xl px-1 text-[10px] text-gray-400">
-              Press Enter to send · Shift + Enter
-              for a new line
+            <p className="mx-auto mt-2 max-w-3xl px-1 text-[10px] text-text-muted">
+              Press Enter to send · Shift + Enter for a new line
             </p>
           </form>
         </div>

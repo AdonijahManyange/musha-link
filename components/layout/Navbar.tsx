@@ -15,52 +15,52 @@ export default async function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white transition-colors duration-200 dark:border-slate-700 dark:bg-slate-900">
       <nav className="mx-auto flex w-full items-center justify-between px-4 py-3 md:h-28">
-
-        {/* ======================================================
-            LOGO
-            ====================================================== */}
-
-        <div>
-          <Link href="/#top">
+        {/* LOGO */}
+        <div className="shrink-0">
+          <Link
+            href="/#top"
+            aria-label="MushaLink home"
+            className="block"
+          >
+            {/* Light-mode logo */}
             <Image
               src="/images/MushaLink Logo.png"
               alt="MushaLink"
               width={220}
               height={70}
-              className="h-10 w-auto md:h-14"
+              priority
+              className="h-10 w-auto md:h-14 dark:hidden"
+            />
+
+            {/* Dark-mode logo */}
+            <Image
+              src="/images/MushaLink-Logo-Dark.png"
+              alt="MushaLink"
+              width={220}
+              height={70}
+              priority
+              className="hidden h-10 w-auto md:h-14 dark:block"
             />
           </Link>
         </div>
 
-        {/* ======================================================
-            DESKTOP NAVIGATION
-            ====================================================== */}
-
+        {/* DESKTOP NAVIGATION */}
         <div className="hidden items-center gap-8 font-medium text-slate-700 dark:text-slate-200 md:flex">
           <NavLinks />
         </div>
 
-        {/* ======================================================
-            DESKTOP BUTTONS
-            ====================================================== */}
-
+        {/* ACTIONS */}
         <div className="flex items-center gap-3">
-
-          {/* Theme Toggle */}
           <ThemeToggle />
 
           {!isLoggedIn ? (
             <>
-              {/* Login */}
-
               <Link
                 href="/auth/login"
                 className="hidden rounded-lg px-4 py-2 text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 md:block"
               >
                 Login
               </Link>
-
-              {/* Sign Up */}
 
               <Link
                 href="/auth/signup"
@@ -71,8 +71,6 @@ export default async function Navbar() {
             </>
           ) : (
             <>
-              {/* Dashboard */}
-
               <Link
                 href="/dashboard"
                 className="hidden rounded-lg bg-brand-blue px-5 py-2 font-medium text-white transition hover:bg-brand-blue-dark md:block"
@@ -80,21 +78,8 @@ export default async function Navbar() {
                 Dashboard
               </Link>
 
-              {/* ==================================================
-                  MESSAGES
-                  ================================================== */}
-
               <MessagesButton />
-
-              {/* ==================================================
-                  NOTIFICATIONS
-                  ================================================== */}
-
               <NotificationBell />
-
-              {/* ==================================================
-                  PROFILE MENU
-                  ================================================== */}
 
               <div className="hidden md:block">
                 <ProfileMenu
@@ -114,10 +99,7 @@ export default async function Navbar() {
             </>
           )}
 
-          {/* ======================================================
-              MOBILE NAVIGATION
-              ====================================================== */}
-
+          {/* MOBILE NAVIGATION */}
           <MobileMenu
             isLoggedIn={isLoggedIn}
             name={user?.name ?? null}

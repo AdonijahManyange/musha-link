@@ -202,8 +202,8 @@ export default function BrowseFilters({
     <section
       className={
         variant === "hero"
-          ? "w-full rounded-3xl border border-white/60 bg-white/95 p-3 shadow-2xl backdrop-blur-sm sm:p-4"
-          : "w-full rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+          ? "w-full rounded-3xl border border-white/60 bg-white/95 p-3 shadow-2xl backdrop-blur-sm transition-colors duration-200 dark:border-slate-700 dark:bg-slate-900 sm:p-4"
+          : "w-full rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition-colors duration-200 dark:border-slate-700 dark:bg-slate-900 sm:p-5"
       }
     >
 

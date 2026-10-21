@@ -570,7 +570,7 @@ export default function EditListingPage() {
         ================================================== */}
 
         <div className="mt-8">
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-blue">
+          <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">
             Landlord Dashboard
           </p>
 

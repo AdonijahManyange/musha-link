@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 
 import {
   CalendarDays,
@@ -15,6 +16,8 @@ import {
   RefreshCw,
   AlertCircle,
   MessageSquare,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 
 // ============================================================
@@ -67,23 +70,28 @@ const STATUS_STYLES: Record<
 > = {
   PENDING: {
     label: "Pending",
-    className: "bg-amber-100 text-amber-800",
+    className:
+      "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
   },
   ACCEPTED: {
     label: "Accepted",
-    className: "bg-green-100 text-green-800",
+    className:
+      "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300",
   },
   DECLINED: {
     label: "Declined",
-    className: "bg-red-100 text-red-800",
+    className:
+      "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
   },
   CANCELLED: {
     label: "Cancelled",
-    className: "bg-slate-100 text-slate-700",
+    className:
+      "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
   },
   COMPLETED: {
     label: "Completed",
-    className: "bg-blue-100 text-blue-800",
+    className:
+      "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300",
   },
 };
 
@@ -114,7 +122,7 @@ export default function ViewingRequestsPage() {
     string | null
   >(null);
 
-  // Store each request's optional message separately.
+  // Keep each request's optional response separate.
   const [responses, setResponses] = useState<Record<string, string>>(
     {}
   );
@@ -139,6 +147,7 @@ export default function ViewingRequestsPage() {
       const response = await fetch("/api/viewing-requests/landlord", {
         method: "GET",
         cache: "no-store",
+        credentials: "include",
       });
 
       const data = await response.json().catch(() => null);
@@ -230,6 +239,7 @@ export default function ViewingRequestsPage() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
             status,
             landlordResponse,
@@ -252,15 +262,14 @@ export default function ViewingRequestsPage() {
             : "Viewing request declined successfully.")
       );
 
-      // Clear the message field after a successful response.
+      // Clear the response field after a successful update.
       setResponses((previous) => {
         const next = { ...previous };
         delete next[requestId];
         return next;
       });
 
-      // Refresh the data without replacing the whole page
-      // with the initial loading screen.
+      // Refresh the list without returning to the loading screen.
       await loadRequests(true);
     } catch (err) {
       console.error("Failed to respond to viewing request:", err);
@@ -291,23 +300,24 @@ export default function ViewingRequestsPage() {
       month: "short",
       day: "numeric",
       year: "numeric",
+      timeZone: "Africa/Harare",
     }).format(date);
   }
 
   function formatTime(dateString: string) {
-  const date = new Date(dateString);
+    const date = new Date(dateString);
 
-  if (Number.isNaN(date.getTime())) {
-    return "Time unavailable";
+    if (Number.isNaN(date.getTime())) {
+      return "Time unavailable";
+    }
+
+    return date.toLocaleTimeString("en-GB", {
+      timeZone: "Africa/Harare",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
   }
-
-  return date.toLocaleTimeString("en-GB", {
-    timeZone: "Africa/Harare",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
 
   function formatRoomType(value: string) {
     return value
@@ -346,20 +356,36 @@ export default function ViewingRequestsPage() {
   // ==========================================================
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-background px-4 py-8 text-text-primary transition-colors duration-200 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        {/* Page Header */}
-        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+        {/* ======================================================
+            PAGE HEADER
+        ====================================================== */}
+
+        <div className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-blue-700">
+            {/* Actual clickable link back to the landlord dashboard */}
+            <Link
+              href="/dashboard/landlord"
+              className="group mb-5 inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-text-muted transition-colors duration-200 hover:text-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            >
+              <ArrowLeft
+                size={17}
+                className="transition-transform duration-200 group-hover:-translate-x-1"
+              />
+              <span>Back to Landlord Dashboard</span>
+            </Link>
+
+            <p className="text-sm font-semibold uppercase tracking-wider text-blue-500">
               Landlord Dashboard
             </p>
 
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
               Viewing Requests
             </h1>
 
-            <p className="mt-2 max-w-2xl text-slate-600">
+            <p className="mt-2 max-w-2xl text-text-secondary">
               Review students&apos; requests to visit your properties
               and keep track of upcoming viewings.
             </p>
@@ -369,7 +395,7 @@ export default function ViewingRequestsPage() {
             type="button"
             onClick={() => void loadRequests(true)}
             disabled={isLoading || isRefreshing}
-            className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
+            className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-border bg-surface px-4 py-3 text-sm font-semibold text-text-primary shadow-sm transition duration-200 hover:border-blue-500 hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
           >
             <RefreshCw
               size={17}
@@ -381,7 +407,10 @@ export default function ViewingRequestsPage() {
           </button>
         </div>
 
-        {/* Summary Cards */}
+        {/* ======================================================
+            SUMMARY CARDS
+        ====================================================== */}
+
         <section
           aria-label="Viewing request summary"
           className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3"
@@ -391,7 +420,7 @@ export default function ViewingRequestsPage() {
             value={pendingCount}
             description="Awaiting your response"
             icon={<Clock3 size={22} />}
-            iconClassName="bg-amber-100 text-amber-700"
+            iconClassName="bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
           />
 
           <SummaryCard
@@ -399,7 +428,7 @@ export default function ViewingRequestsPage() {
             value={acceptedCount}
             description="Viewings to arrange"
             icon={<CheckCircle2 size={22} />}
-            iconClassName="bg-green-100 text-green-700"
+            iconClassName="bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300"
           />
 
           <SummaryCard
@@ -407,25 +436,31 @@ export default function ViewingRequestsPage() {
             value={completedCount}
             description="Successfully completed"
             icon={<CalendarDays size={22} />}
-            iconClassName="bg-blue-100 text-blue-700"
+            iconClassName="bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
           />
         </section>
 
-        {/* Success Message */}
+        {/* ======================================================
+            SUCCESS MESSAGE
+        ====================================================== */}
+
         {notice && (
           <div
             role="status"
-            className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800"
+            className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300"
           >
             {notice}
           </div>
         )}
 
-        {/* Error Message */}
+        {/* ======================================================
+            ERROR MESSAGE
+        ====================================================== */}
+
         {error && (
           <div
             role="alert"
-            className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+            className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
           >
             <AlertCircle size={20} className="shrink-0" />
 
@@ -434,14 +469,17 @@ export default function ViewingRequestsPage() {
             <button
               type="button"
               onClick={() => void loadRequests(true)}
-              className="font-semibold underline"
+              className="font-semibold underline underline-offset-2 hover:no-underline"
             >
               Retry
             </button>
           </div>
         )}
 
-        {/* Status Filters */}
+        {/* ======================================================
+            STATUS FILTERS
+        ====================================================== */}
+
         <div className="mb-6 overflow-x-auto">
           <div className="flex min-w-max gap-2">
             {FILTERS.map((item) => {
@@ -452,10 +490,10 @@ export default function ViewingRequestsPage() {
                   key={item.value}
                   type="button"
                   onClick={() => setFilter(item.value)}
-                  className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                  className={`rounded-full px-4 py-2.5 text-sm font-semibold transition duration-200 ${
                     isActive
-                      ? "bg-blue-900 text-white shadow-sm"
-                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                      ? "bg-brand-blue text-white shadow-sm hover:bg-brand-blue-dark"
+                      : "border border-border bg-surface text-text-secondary hover:border-blue-500 hover:bg-surface-secondary hover:text-text-primary"
                   }`}
                 >
                   {item.label}
@@ -466,7 +504,7 @@ export default function ViewingRequestsPage() {
                         className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
                           isActive
                             ? "bg-white/20 text-white"
-                            : "bg-amber-100 text-amber-800"
+                            : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
                         }`}
                       >
                         {pendingCount}
@@ -478,31 +516,34 @@ export default function ViewingRequestsPage() {
           </div>
         </div>
 
-        {/* Request List */}
+        {/* ======================================================
+            REQUEST LIST
+        ====================================================== */}
+
         {isLoading ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
+          <div className="rounded-2xl border border-border bg-surface p-12 text-center">
             <RefreshCw
               size={28}
-              className="mx-auto animate-spin text-blue-800"
+              className="mx-auto animate-spin text-blue-500"
             />
 
-            <p className="mt-4 font-medium text-slate-700">
+            <p className="mt-4 font-medium text-text-secondary">
               Loading viewing requests...
             </p>
           </div>
         ) : filteredRequests.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+          <div className="rounded-2xl border border-border bg-surface px-6 py-16 text-center shadow-sm">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-secondary text-text-muted">
               <CalendarDays size={30} />
             </div>
 
-            <h2 className="mt-5 text-xl font-bold text-slate-900">
+            <h2 className="mt-5 text-xl font-bold text-text-primary">
               {filter === "ALL"
                 ? "No viewing requests yet"
                 : `No ${filter.toLowerCase()} requests`}
             </h2>
 
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-text-secondary">
               {filter === "ALL"
                 ? "When students request to visit one of your properties, their requests will appear here."
                 : "There are currently no requests in this category."}
@@ -512,9 +553,10 @@ export default function ViewingRequestsPage() {
               <button
                 type="button"
                 onClick={() => setFilter("ALL")}
-                className="mt-5 rounded-xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-brand-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark"
               >
                 View All Requests
+                <ArrowRight size={16} />
               </button>
             )}
           </div>
@@ -533,10 +575,10 @@ export default function ViewingRequestsPage() {
                 <article
                   key={request.id}
                   id={`viewing-request-${request.id}`}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
+                  className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-500/50 hover:shadow-lg"
                 >
                   {/* Request Header */}
-                  <div className="flex flex-col justify-between gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-start sm:px-6">
+                  <div className="flex flex-col justify-between gap-3 border-b border-border p-5 sm:flex-row sm:items-start sm:px-6">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span
@@ -545,16 +587,16 @@ export default function ViewingRequestsPage() {
                           {status.label}
                         </span>
 
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-text-muted">
                           Submitted {formatDate(request.createdAt)}
                         </span>
                       </div>
 
-                      <h2 className="mt-3 text-xl font-bold text-slate-900">
+                      <h2 className="mt-3 text-xl font-bold text-text-primary">
                         {request.listing.title}
                       </h2>
 
-                      <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
+                      <p className="mt-1 flex items-center gap-1.5 text-sm text-text-muted">
                         <MapPin size={15} className="shrink-0" />
 
                         {[
@@ -568,15 +610,15 @@ export default function ViewingRequestsPage() {
                     </div>
 
                     <div className="sm:text-right">
-                      <p className="text-lg font-bold text-slate-900">
+                      <p className="text-lg font-bold text-text-primary">
                         {formatRent(request.listing.monthlyRent)}
                       </p>
 
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-text-muted">
                         Monthly rent
                       </p>
 
-                      <p className="mt-1 text-sm text-slate-600">
+                      <p className="mt-1 text-sm text-text-secondary">
                         {formatRoomType(request.listing.roomType)}
                       </p>
                     </div>
@@ -586,15 +628,15 @@ export default function ViewingRequestsPage() {
                   <div className="grid gap-6 p-5 sm:grid-cols-2 sm:p-6">
                     {/* Student Information */}
                     <section>
-                      <h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-900">
+                      <h3 className="mb-4 flex items-center gap-2 font-semibold text-text-primary">
                         <UserRound
                           size={18}
-                          className="text-blue-800"
+                          className="text-blue-500"
                         />
                         Student Information
                       </h3>
 
-                      <p className="text-lg font-semibold text-slate-900">
+                      <p className="text-lg font-semibold text-text-primary">
                         {request.studentName || "Student"}
                       </p>
 
@@ -602,13 +644,13 @@ export default function ViewingRequestsPage() {
                         {request.studentPhone ? (
                           <a
                             href={`tel:${request.studentPhone}`}
-                            className="flex items-center gap-2 break-all text-sm text-slate-600 transition hover:text-blue-800"
+                            className="flex items-center gap-2 break-all text-sm text-text-secondary transition hover:text-blue-500"
                           >
                             <Phone size={16} className="shrink-0" />
                             {request.studentPhone}
                           </a>
                         ) : (
-                          <p className="text-sm text-slate-500">
+                          <p className="text-sm text-text-muted">
                             No phone number provided.
                           </p>
                         )}
@@ -616,13 +658,13 @@ export default function ViewingRequestsPage() {
                         {request.studentEmail ? (
                           <a
                             href={`mailto:${request.studentEmail}`}
-                            className="flex items-center gap-2 break-all text-sm text-slate-600 transition hover:text-blue-800"
+                            className="flex items-center gap-2 break-all text-sm text-text-secondary transition hover:text-blue-500"
                           >
                             <Mail size={16} className="shrink-0" />
                             {request.studentEmail}
                           </a>
                         ) : (
-                          <p className="text-sm text-slate-500">
+                          <p className="text-sm text-text-muted">
                             No email address available.
                           </p>
                         )}
@@ -631,27 +673,27 @@ export default function ViewingRequestsPage() {
 
                     {/* Preferred Viewing */}
                     <section>
-                      <h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-900">
+                      <h3 className="mb-4 flex items-center gap-2 font-semibold text-text-primary">
                         <CalendarDays
                           size={18}
-                          className="text-blue-800"
+                          className="text-blue-500"
                         />
                         Preferred Viewing
                       </h3>
 
                       <div className="space-y-3">
-                        <p className="flex items-center gap-2 text-sm text-slate-700">
+                        <p className="flex items-center gap-2 text-sm text-text-secondary">
                           <CalendarDays
                             size={16}
-                            className="shrink-0 text-slate-400"
+                            className="shrink-0 text-text-muted"
                           />
                           {formatDate(request.requestedAt)}
                         </p>
 
-                        <p className="flex items-center gap-2 text-sm text-slate-700">
+                        <p className="flex items-center gap-2 text-sm text-text-secondary">
                           <Clock
                             size={16}
-                            className="shrink-0 text-slate-400"
+                            className="shrink-0 text-text-muted"
                           />
                           {formatTime(request.requestedAt)}
                         </p>
@@ -661,13 +703,13 @@ export default function ViewingRequestsPage() {
 
                   {/* Student Note */}
                   {request.note && (
-                    <div className="mx-5 mb-5 rounded-xl bg-slate-50 p-4 sm:mx-6">
-                      <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-800">
+                    <div className="mx-5 mb-5 rounded-xl border border-border bg-surface-secondary p-4 sm:mx-6">
+                      <h3 className="flex items-center gap-2 text-sm font-semibold text-text-primary">
                         <MessageSquare size={16} />
                         Student&apos;s Note
                       </h3>
 
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-text-secondary">
                         {request.note}
                       </p>
                     </div>
@@ -675,28 +717,28 @@ export default function ViewingRequestsPage() {
 
                   {/* Landlord Response */}
                   {request.landlordResponse && (
-                    <div className="mx-5 mb-5 rounded-xl border border-blue-100 bg-blue-50 p-4 sm:mx-6">
-                      <h3 className="text-sm font-semibold text-blue-900">
+                    <div className="mx-5 mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-500/30 dark:bg-blue-500/10 sm:mx-6">
+                      <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300">
                         Your Response
                       </h3>
 
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-blue-800">
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-blue-800 dark:text-blue-200">
                         {request.landlordResponse}
                       </p>
                     </div>
                   )}
 
                   {/* Actions */}
-                  <div className="border-t border-slate-100 bg-slate-50 px-5 py-4 sm:px-6">
+                  <div className="border-t border-border bg-surface-secondary px-5 py-4 sm:px-6">
                     {request.status === "PENDING" ? (
                       <div className="space-y-4">
                         <div>
                           <label
                             htmlFor={`landlord-response-${request.id}`}
-                            className="mb-2 block text-sm font-semibold text-slate-800"
+                            className="mb-2 block text-sm font-semibold text-text-primary"
                           >
                             Your response{" "}
-                            <span className="font-normal text-slate-500">
+                            <span className="font-normal text-text-muted">
                               (optional)
                             </span>
                           </label>
@@ -714,17 +756,17 @@ export default function ViewingRequestsPage() {
                             rows={3}
                             disabled={isAnyRequestUpdating}
                             placeholder="For example: The property is available. Please contact me before arriving..."
-                            className="w-full resize-y rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                            className="w-full resize-y rounded-xl border border-input-border bg-input-background px-3 py-3 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                           />
 
-                          <p className="mt-1 text-right text-xs text-slate-500">
+                          <p className="mt-1 text-right text-xs text-text-muted">
                             {(responses[request.id] ?? "").length}/1000
                             characters
                           </p>
                         </div>
 
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <p className="text-sm text-slate-600">
+                          <p className="text-sm text-text-secondary">
                             This request is awaiting your response.
                           </p>
 
@@ -761,7 +803,7 @@ export default function ViewingRequestsPage() {
                                 )
                               }
                               disabled={isAnyRequestUpdating}
-                              className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-surface px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:text-red-300 dark:hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               {isUpdating ? (
                                 <RefreshCw
@@ -772,15 +814,13 @@ export default function ViewingRequestsPage() {
                                 <XCircle size={16} />
                               )}
 
-                              {isUpdating
-                                ? "Processing..."
-                                : "Decline"}
+                              {isUpdating ? "Processing..." : "Decline"}
                             </button>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-text-secondary">
                         {request.status === "ACCEPTED"
                           ? "This viewing request has been accepted."
                           : request.status === "DECLINED"
@@ -819,18 +859,18 @@ function SummaryCard({
   iconClassName: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="group rounded-2xl border border-border bg-surface p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-lg">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-sm font-medium text-text-muted">
             {label}
           </p>
 
-          <p className="mt-2 text-3xl font-bold text-slate-900">
+          <p className="mt-2 text-3xl font-bold text-text-primary">
             {value}
           </p>
 
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-text-muted">
             {description}
           </p>
         </div>

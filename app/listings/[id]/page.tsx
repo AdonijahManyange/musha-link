@@ -6,7 +6,6 @@ import {
   Home,
   Users,
   GraduationCap,
-  CalendarDays,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import ListingGallery from "@/components/ListingGallery";
@@ -21,6 +20,35 @@ type ListingPageProps = {
     from?: string;
   }>;
 };
+
+// ============================================================
+// SHARED STYLES
+// ============================================================
+
+const cardClass =
+  "rounded-xl border border-slate-200 bg-white transition-colors dark:border-slate-700 dark:bg-slate-900";
+
+const headingClass =
+  "text-xl font-bold text-slate-900 dark:text-white";
+
+const labelClass =
+  "text-xs text-slate-500 dark:text-slate-400";
+
+const valueClass =
+  "mt-1 font-semibold text-slate-900 dark:text-slate-100";
+
+const mutedTextClass =
+  "text-sm text-slate-600 dark:text-slate-300";
+
+const iconContainerClass =
+  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800";
+
+const iconClass =
+  "text-blue-600 dark:text-blue-400";
+
+// ============================================================
+// PAGE
+// ============================================================
 
 export default async function PublicListingPage({
   params,
@@ -48,9 +76,7 @@ export default async function PublicListingPage({
   // ============================================================
 
   const listing = await prisma.listing.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
 
     include: {
       university: true,
@@ -99,7 +125,6 @@ export default async function PublicListingPage({
     notFound();
   }
 
-  // Only published and active listings are publicly visible.
   if (
     listing.status !== "PUBLISHED" ||
     !listing.isActive
@@ -107,69 +132,59 @@ export default async function PublicListingPage({
     notFound();
   }
 
+  // ============================================================
+  // RENDER
+  // ============================================================
+
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
 
-        {/* ====================================================
-            BACK LINK
-        ==================================================== */}
+        {/* BACK LINK */}
 
         <div className="mb-6">
           <Link
             href={backHref}
-            className="text-sm font-medium text-slate-600 transition hover:text-brand-blue"
+            className="text-sm font-medium text-slate-600 transition hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-400"
           >
             ← {backLabel}
           </Link>
         </div>
 
-        {/* ====================================================
-            PHOTO GALLERY
-        ==================================================== */}
+        {/* PHOTO GALLERY */}
 
         <ListingGallery
           photos={listing.photos}
           title={listing.title}
         />
 
-        {/* ====================================================
-            MAIN LISTING AREA
-        ==================================================== */}
+        {/* MAIN LISTING AREA */}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_300px]">
 
-          {/* ==================================================
-              LEFT CONTENT
-          ================================================== */}
+          {/* LEFT CONTENT */}
 
-          <div>
+          <div className="min-w-0">
 
-            {/* Verified Listing */}
+            {/* VERIFIED LISTING */}
 
-            <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
-              <ShieldCheck
-                size={16}
-                strokeWidth={2.5}
-              />
-
-              <span>
-                Verified Listing
-              </span>
+            <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <ShieldCheck size={16} strokeWidth={2.5} />
+              <span>Verified Listing</span>
             </div>
 
-            {/* Title */}
+            {/* TITLE */}
 
-            <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
+            <h1 className="mt-3 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
               {listing.title}
             </h1>
 
-            {/* University */}
+            {/* UNIVERSITY */}
 
-            <div className="mt-2 flex items-center gap-2 text-slate-700">
+            <div className="mt-2 flex items-center gap-2 text-slate-700 dark:text-slate-200">
               <GraduationCap
                 size={18}
-                className="text-brand-blue"
+                className={iconClass}
               />
 
               <span className="font-medium">
@@ -177,9 +192,7 @@ export default async function PublicListingPage({
               </span>
             </div>
 
-            {/* ==================================================
-                UTILITIES & SERVICES
-            ================================================== */}
+            {/* UTILITIES & SERVICES */}
 
             {(
               listing.internetProvider ||
@@ -188,25 +201,24 @@ export default async function PublicListingPage({
               listing.solarBackupCapacity
             ) && (
               <section className="mt-8">
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className={headingClass}>
                   Utilities & Services
                 </h2>
 
-                <p className="mt-2 text-sm text-slate-500">
-                  Utilities, internet, and backup power available at this property.
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  Utilities, internet, and backup power available at this
+                  property.
                 </p>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
 
-                  {/* Internet Provider */}
-
                   {listing.internetProvider && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                      <p className="text-xs text-slate-400">
+                    <div className={`${cardClass} p-4`}>
+                      <p className={labelClass}>
                         Internet Provider
                       </p>
 
-                      <p className="mt-1 font-semibold text-slate-900">
+                      <p className={valueClass}>
                         {getInternetProviderLabel(
                           listing.internetProvider
                         )}
@@ -214,15 +226,13 @@ export default async function PublicListingPage({
                     </div>
                   )}
 
-                  {/* Water Source */}
-
                   {listing.waterSource && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                      <p className="text-xs text-slate-400">
+                    <div className={`${cardClass} p-4`}>
+                      <p className={labelClass}>
                         Water Source
                       </p>
 
-                      <p className="mt-1 font-semibold text-slate-900">
+                      <p className={valueClass}>
                         {getWaterSourceLabel(
                           listing.waterSource
                         )}
@@ -230,15 +240,13 @@ export default async function PublicListingPage({
                     </div>
                   )}
 
-                  {/* Drinkable Water */}
-
                   {listing.waterDrinkable !== null && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                      <p className="text-xs text-slate-400">
+                    <div className={`${cardClass} p-4`}>
+                      <p className={labelClass}>
                         Drinkable Water
                       </p>
 
-                      <p className="mt-1 font-semibold text-slate-900">
+                      <p className={valueClass}>
                         {listing.waterDrinkable
                           ? "Yes"
                           : "No"}
@@ -246,22 +254,20 @@ export default async function PublicListingPage({
                     </div>
                   )}
 
-                  {/* Solar Backup */}
-
                   {listing.solarBackupCapacity && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-4">
-                      <p className="text-xs text-slate-400">
+                    <div className={`${cardClass} p-4`}>
+                      <p className="text-xs text-amber-700 dark:text-amber-400">
                         ☀️ Solar Backup
                       </p>
 
-                      <p className="mt-1 font-semibold text-slate-900">
+                      <p className={valueClass}>
                         {getSolarBackupLabel(
                           listing.solarBackupCapacity
                         )}
                       </p>
 
                       {listing.solarBackupCapacity !== "NONE" && (
-                        <p className="mt-2 text-sm leading-5 text-slate-500">
+                        <p className="mt-2 text-sm leading-5 text-slate-600 dark:text-slate-300">
                           {getSolarBackupDescription(
                             listing.solarBackupCapacity
                           )}
@@ -274,12 +280,13 @@ export default async function PublicListingPage({
               </section>
             )}
 
-            {/* ==================================================
-                SHORT LOCATION
-            ================================================== */}
+            {/* SHORT LOCATION */}
 
-            <div className="mt-1 flex items-center gap-2 text-sm text-slate-500">
-              <MapPin size={16} />
+            <div className="mt-3 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+              <MapPin
+                size={16}
+                className="shrink-0 text-blue-600 dark:text-blue-400"
+              />
 
               <span>
                 {listing.suburb
@@ -288,47 +295,40 @@ export default async function PublicListingPage({
               </span>
             </div>
 
-            {/* ==================================================
-                ABOUT
-            ================================================== */}
+            {/* ABOUT */}
 
             <section className="mt-8">
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className={headingClass}>
                 About this Property
               </h2>
 
-              <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-600 sm:text-base">
+              <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
                 {listing.description}
               </p>
             </section>
 
-            {/* ==================================================
-                PROPERTY DETAILS
-            ================================================== */}
+            {/* PROPERTY DETAILS */}
 
             <section className="mt-8">
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className={headingClass}>
                 Property Details
               </h2>
 
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
 
-                {/* Property Type */}
+                {/* PROPERTY TYPE */}
 
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                    <Home
-                      size={19}
-                      className="text-brand-blue"
-                    />
+                <div className={`${cardClass} flex items-center gap-3 p-4`}>
+                  <div className={iconContainerClass}>
+                    <Home size={19} className={iconClass} />
                   </div>
 
-                  <div>
-                    <p className="text-xs text-slate-400">
+                  <div className="min-w-0">
+                    <p className={labelClass}>
                       Property Type
                     </p>
 
-                    <p className="mt-1 font-semibold text-slate-900">
+                    <p className={valueClass}>
                       {formatPropertyType(
                         listing.propertyType
                       )}
@@ -336,22 +336,19 @@ export default async function PublicListingPage({
                   </div>
                 </div>
 
-                {/* Room Type */}
+                {/* ROOM TYPE */}
 
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                    <Home
-                      size={19}
-                      className="text-brand-blue"
-                    />
+                <div className={`${cardClass} flex items-center gap-3 p-4`}>
+                  <div className={iconContainerClass}>
+                    <Home size={19} className={iconClass} />
                   </div>
 
-                  <div>
-                    <p className="text-xs text-slate-400">
+                  <div className="min-w-0">
+                    <p className={labelClass}>
                       Room Type
                     </p>
 
-                    <p className="mt-1 font-semibold text-slate-900">
+                    <p className={valueClass}>
                       {formatRoomType(
                         listing.roomType
                       )}
@@ -359,22 +356,19 @@ export default async function PublicListingPage({
                   </div>
                 </div>
 
-                {/* Gender Preference */}
+                {/* GENDER PREFERENCE */}
 
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                    <Users
-                      size={19}
-                      className="text-brand-blue"
-                    />
+                <div className={`${cardClass} flex items-center gap-3 p-4`}>
+                  <div className={iconContainerClass}>
+                    <Users size={19} className={iconClass} />
                   </div>
 
-                  <div>
-                    <p className="text-xs text-slate-400">
+                  <div className="min-w-0">
+                    <p className={labelClass}>
                       Gender Preference
                     </p>
 
-                    <p className="mt-1 font-semibold text-slate-900">
+                    <p className={valueClass}>
                       {formatGenderPreference(
                         listing.genderPreference
                       )}
@@ -382,22 +376,19 @@ export default async function PublicListingPage({
                   </div>
                 </div>
 
-                {/* University */}
+                {/* UNIVERSITY */}
 
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                    <GraduationCap
-                      size={19}
-                      className="text-brand-blue"
-                    />
+                <div className={`${cardClass} flex items-center gap-3 p-4`}>
+                  <div className={iconContainerClass}>
+                    <GraduationCap size={19} className={iconClass} />
                   </div>
 
-                  <div>
-                    <p className="text-xs text-slate-400">
+                  <div className="min-w-0">
+                    <p className={labelClass}>
                       University
                     </p>
 
-                    <p className="mt-1 font-semibold text-slate-900">
+                    <p className={valueClass}>
                       {listing.university.name}
                     </p>
                   </div>
@@ -406,35 +397,32 @@ export default async function PublicListingPage({
               </div>
             </section>
 
-            {/* ==================================================
-                AMENITIES
-            ================================================== */}
+            {/* AMENITIES */}
 
             {listing.amenities.length > 0 && (
               <section className="mt-8">
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className={headingClass}>
                   Amenities & Facilities
                 </h2>
 
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                   Everything available at this property.
                 </p>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {listing.amenities.map((amenity) => {
-                    const details =
-                      getAmenityDetails(amenity);
+                    const details = getAmenityDetails(amenity);
 
                     return (
                       <div
                         key={amenity}
-                        className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4"
+                        className={`${cardClass} flex items-center gap-3 p-4`}
                       >
                         <span className="text-xl leading-none">
                           {details.emoji}
                         </span>
 
-                        <span className="text-sm font-medium text-slate-700">
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
                           {details.label}
                         </span>
                       </div>
@@ -444,41 +432,33 @@ export default async function PublicListingPage({
               </section>
             )}
 
-            {/* ==================================================
-                LOCATION
-            ================================================== */}
+            {/* LOCATION */}
 
             <section className="mt-8">
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className={headingClass}>
                 Location
               </h2>
 
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
+              <div className={`${cardClass} mt-4 rounded-2xl p-5`}>
                 <div className="flex gap-3">
                   <MapPin
                     size={20}
-                    className="mt-0.5 shrink-0 text-brand-blue"
+                    className="mt-0.5 shrink-0 text-blue-600 dark:text-blue-400"
                   />
 
                   <div>
-                    {/* Suburb + City + Province */}
-
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-slate-900 dark:text-slate-100">
                       {listing.suburb
                         ? `${listing.suburb}, ${listing.city}, ${listing.province}`
                         : `${listing.city}, ${listing.province}`}
                     </p>
 
-                    {/* Country */}
-
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       {listing.country}
                     </p>
 
-                    {/* Distance */}
-
                     {listing.distanceToUniversityKm !== null && (
-                      <p className="mt-3 text-sm text-slate-500">
+                      <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
                         {listing.distanceToUniversityKm.toFixed(1)} km from{" "}
                         {listing.university.name}
                       </p>
@@ -490,38 +470,32 @@ export default async function PublicListingPage({
 
           </div>
 
-          {/* ==================================================
-              RIGHT SIDEBAR
-          ================================================== */}
+          {/* RIGHT SIDEBAR */}
 
           <aside>
-            <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-900">
 
-              {/* =================================================
-                  PRICE
-              ================================================= */}
+              {/* PRICE */}
 
               <div>
-                <p className="text-3xl font-bold text-brand-blue sm:text-4xl">
+                <p className="text-3xl font-bold text-blue-700 dark:text-blue-400 sm:text-4xl">
                   US${listing.monthlyRent}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   per month
                 </p>
 
-                {/* Cost Breakdown */}
+                {/* COST BREAKDOWN */}
 
-                <div className="mt-5 space-y-3 border-t border-slate-200 pt-5">
-
-                  {/* Security Deposit */}
+                <div className="mt-5 space-y-3 border-t border-slate-200 pt-5 dark:border-slate-700">
 
                   <div className="flex items-start justify-between gap-4">
-                    <span className="text-sm text-slate-600">
+                    <span className="text-sm text-slate-600 dark:text-slate-300">
                       Security Deposit
                     </span>
 
-                    <span className="text-right text-sm font-medium text-slate-900">
+                    <span className="text-right text-sm font-medium text-slate-900 dark:text-slate-100">
                       {listing.depositRequired
                         ? listing.depositAmount
                           ? `US$${listing.depositAmount}`
@@ -530,43 +504,37 @@ export default async function PublicListingPage({
                     </span>
                   </div>
 
-                  {/* Additional Fees */}
-
                   {listing.additionalFees && (
                     <div>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-slate-600 dark:text-slate-300">
                         Additional Fees
                       </p>
 
-                      <p className="mt-1 text-sm leading-5 text-slate-900">
+                      <p className="mt-1 text-sm leading-5 text-slate-900 dark:text-slate-100">
                         {listing.additionalFees}
                       </p>
                     </div>
                   )}
 
-                  {/* Utilities */}
-
                   {listing.utilitiesIncluded && (
                     <div>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-slate-600 dark:text-slate-300">
                         Utilities
                       </p>
 
-                      <p className="mt-1 text-sm leading-5 text-slate-900">
+                      <p className="mt-1 text-sm leading-5 text-slate-900 dark:text-slate-100">
                         {listing.utilitiesIncluded}
                       </p>
                     </div>
                   )}
 
-                  {/* Internet Charges */}
-
                   {listing.internetCharges && (
                     <div>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-slate-600 dark:text-slate-300">
                         Internet
                       </p>
 
-                      <p className="mt-1 text-sm leading-5 text-slate-900">
+                      <p className="mt-1 text-sm leading-5 text-slate-900 dark:text-slate-100">
                         {listing.internetCharges}
                       </p>
                     </div>
@@ -575,15 +543,10 @@ export default async function PublicListingPage({
                 </div>
               </div>
 
-              {/* =================================================
-                  ACTION BUTTONS
-              ================================================= */}
+              {/* ACTION BUTTONS */}
 
               <div className="mt-6 space-y-3">
-
-                <ContactLandlordButton
-                  listingId={listing.id}
-                />
+                <ContactLandlordButton listingId={listing.id} />
 
                 <DatabaseListingActions
                   listingId={listing.id}
@@ -594,111 +557,80 @@ export default async function PublicListingPage({
                     email: "",
                   }}
                 />
-
               </div>
 
-              {/* Divider */}
+              {/* STATUS */}
 
-              <div className="my-5 border-t border-slate-200" />
+              <div className="my-5 border-t border-slate-200 dark:border-slate-700" />
 
-              {/* =================================================
-                  STATUS
-              ================================================= */}
-
-              <div className="mt-5">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Status
                 </p>
 
-                <div className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
+                <div className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
                   <ShieldCheck size={15} />
-
-                  <span>
-                    Verified Listing
-                  </span>
+                  <span>Verified Listing</span>
                 </div>
               </div>
 
-              {/* =================================================
-                  LANDLORD
-              ================================================= */}
+              {/* LANDLORD */}
 
-              <div className="mt-6 border-t border-slate-200 pt-6">
-
-                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+              <div className="mt-6 border-t border-slate-200 pt-6 dark:border-slate-700">
+                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
                   Listed by
                 </p>
 
                 <div className="mt-3 flex items-center gap-3">
-
-                  {/* Profile Photo */}
-
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-2 ring-white shadow-sm">
-
+                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-100 shadow-sm ring-2 ring-white dark:bg-slate-800 dark:ring-slate-700">
                     {listing.landlord.landlordProfile?.profilePhotoUrl ? (
                       <img
                         src={
-                          listing.landlord.landlordProfile
-                            .profilePhotoUrl
+                          listing.landlord.landlordProfile.profilePhotoUrl
                         }
-                        alt={
-                          listing.landlord.name ||
-                          "Landlord"
-                        }
+                        alt={listing.landlord.name || "Landlord"}
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-lg font-bold text-brand-blue">
+                      <div className="flex h-full w-full items-center justify-center text-lg font-bold text-blue-700 dark:text-blue-400">
                         {(listing.landlord.name || "L")
                           .charAt(0)
                           .toUpperCase()}
                       </div>
                     )}
-
                   </div>
 
-                  {/* Landlord Name */}
-
                   <div className="min-w-0">
-
                     <div className="flex items-center gap-1.5">
-
-                      <p className="truncate font-semibold text-slate-900">
-                        {listing.landlord.name ||
-                          "Landlord"}
+                      <p className="truncate font-semibold text-slate-900 dark:text-white">
+                        {listing.landlord.name || "Landlord"}
                       </p>
 
                       {listing.landlord.verified && (
                         <span
                           title="Verified landlord"
-                          className="shrink-0 text-emerald-600"
+                          className="shrink-0 text-emerald-600 dark:text-emerald-400"
                         >
                           ✓
                         </span>
                       )}
-
                     </div>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {listing.landlord._count.listings}{" "}
                       {listing.landlord._count.listings === 1
                         ? "active listing"
                         : "active listings"}
                     </p>
-
                   </div>
-
                 </div>
-
-                {/* View Landlord Profile */}
 
                 <Link
                   href={`/landlords/${listing.landlord.id}`}
-                  className="mt-4 flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-brand-blue hover:bg-slate-50 hover:text-brand-blue"
+                  className="mt-4 flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-500 hover:bg-slate-50 hover:text-blue-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-blue-500 dark:hover:bg-slate-800 dark:hover:text-blue-400"
                 >
                   View Landlord Profile
                 </Link>
-
               </div>
 
             </div>
@@ -710,13 +642,11 @@ export default async function PublicListingPage({
   );
 }
 
-/* ============================================================
-   HELPERS
-============================================================ */
+// ============================================================
+// HELPERS
+// ============================================================
 
-function formatPropertyType(
-  propertyType: string
-) {
+function formatPropertyType(propertyType: string) {
   const labels: Record<string, string> = {
     HOUSE: "House",
     FLAT: "Flat",
@@ -727,46 +657,30 @@ function formatPropertyType(
     OTHER: "Other",
   };
 
-  return (
-    labels[propertyType] ||
-    propertyType
-  );
+  return labels[propertyType] || propertyType;
 }
 
-function formatRoomType(
-  roomType: string
-) {
+function formatRoomType(roomType: string) {
   const labels: Record<string, string> = {
     PRIVATE: "Private Room",
     SHARED: "Shared Room",
-    ENTIRE_PROPERTY:
-      "Entire Property",
+    ENTIRE_PROPERTY: "Entire Property",
   };
 
-  return (
-    labels[roomType] ||
-    roomType
-  );
+  return labels[roomType] || roomType;
 }
 
-function formatGenderPreference(
-  preference: string
-) {
+function formatGenderPreference(preference: string) {
   const labels: Record<string, string> = {
     ANY: "Any Gender",
     MALE: "Male",
     FEMALE: "Female",
   };
 
-  return (
-    labels[preference] ||
-    preference
-  );
+  return labels[preference] || preference;
 }
 
-function getInternetProviderLabel(
-  provider: string
-) {
+function getInternetProviderLabel(provider: string) {
   const providers: Record<string, string> = {
     LIQUID_HOME: "Liquid Home",
     TELONE: "TelOne",
@@ -786,45 +700,31 @@ function getInternetProviderLabel(
   return providers[provider] || provider;
 }
 
-function getWaterSourceLabel(
-  source: string
-) {
+function getWaterSourceLabel(source: string) {
   const sources: Record<string, string> = {
-    BOREHOLE_FRESH_WATER:
-      "Borehole Fresh Water",
-    TAP_FRESH_WATER:
-      "Tap Fresh Water",
-    BOREHOLE_AND_TAP:
-      "Borehole + Tap",
-    NO_RELIABLE_SUPPLY:
-      "No Reliable Water Supply",
+    BOREHOLE_FRESH_WATER: "Borehole Fresh Water",
+    TAP_FRESH_WATER: "Tap Fresh Water",
+    BOREHOLE_AND_TAP: "Borehole + Tap",
+    NO_RELIABLE_SUPPLY: "No Reliable Water Supply",
     OTHER: "Other",
   };
 
   return sources[source] || source;
 }
 
-function getSolarBackupLabel(
-  capacity: string
-) {
+function getSolarBackupLabel(capacity: string) {
   const capacities: Record<string, string> = {
     NONE: "No Solar Backup",
-    BASIC_500VA_2KVA:
-      "Basic Backup — 500VA–2kVA",
-    STANDARD_3_4KVA:
-      "Standard Backup — 3–4kVA",
-    HIGH_CAPACITY_5_6KVA:
-      "High-Capacity Backup — 5–6kVA",
-    PREMIUM_7KVA_PLUS:
-      "Premium Backup — 7+ kVA",
+    BASIC_500VA_2KVA: "Basic Backup — 500VA–2kVA",
+    STANDARD_3_4KVA: "Standard Backup — 3–4kVA",
+    HIGH_CAPACITY_5_6KVA: "High-Capacity Backup — 5–6kVA",
+    PREMIUM_7KVA_PLUS: "Premium Backup — 7+ kVA",
   };
 
   return capacities[capacity] || capacity;
 }
 
-function getSolarBackupDescription(
-  capacity: string
-) {
+function getSolarBackupDescription(capacity: string) {
   const descriptions: Record<string, string> = {
     BASIC_500VA_2KVA:
       "Typically supports lights, Wi-Fi / router, laptops, phones & chargers, and TV.",
@@ -842,105 +742,26 @@ function getSolarBackupDescription(
   return descriptions[capacity] || "";
 }
 
-function getAmenityDetails(
-  amenity: string
-) {
-  const amenities: Record<
-    string,
-    {
-      label: string;
-      emoji: string;
-    }
-  > = {
-    WIFI: {
-      label: "Wi-Fi",
-      emoji: "📶",
-    },
-
-    SOLAR_POWER: {
-      label: "Solar Power",
-      emoji: "☀️",
-    },
-
-    BOREHOLE: {
-      label: "Borehole",
-      emoji: "🚰",
-    },
-
-    ELECTRICITY: {
-      label: "Electricity",
-      emoji: "⚡",
-    },
-
-    BACKUP_GENERATOR: {
-      label: "Backup Generator",
-      emoji: "🔋",
-    },
-
-    WATER: {
-      label: "Water",
-      emoji: "💧",
-    },
-
-    SECURITY: {
-      label: "Security",
-      emoji: "🛡️",
-    },
-
-    PARKING: {
-      label: "Parking",
-      emoji: "🚗",
-    },
-
-    FURNISHED: {
-      label: "Furnished",
-      emoji: "🛏️",
-    },
-
-    LAUNDRY: {
-      label: "Laundry",
-      emoji: "🧺",
-    },
-
-    KITCHEN: {
-      label: "Kitchen",
-      emoji: "🍳",
-    },
-
-    STUDY_AREA: {
-      label: "Study Area",
-      emoji: "📚",
-    },
-
-    GARDEN: {
-      label: "Garden",
-      emoji: "🌳",
-    },
-
-    SWIMMING_POOL: {
-      label: "Swimming Pool",
-      emoji: "🏊",
-    },
-
-    SMART_TV: {
-      label: "Smart TV",
-      emoji: "📺",
-    },
-
-    NETFLIX: {
-      label: "Netflix",
-      emoji: "🎬",
-    },
-
-    PRIME_VIDEO: {
-      label: "Prime Video",
-      emoji: "▶️",
-    },
-
-    DSTV: {
-      label: "DSTV",
-      emoji: "📺",
-    },
+function getAmenityDetails(amenity: string) {
+  const amenities: Record<string, { label: string; emoji: string }> = {
+    WIFI: { label: "Wi-Fi", emoji: "📶" },
+    SOLAR_POWER: { label: "Solar Power", emoji: "☀️" },
+    BOREHOLE: { label: "Borehole", emoji: "🚰" },
+    ELECTRICITY: { label: "Electricity", emoji: "⚡" },
+    BACKUP_GENERATOR: { label: "Backup Generator", emoji: "🔋" },
+    WATER: { label: "Water", emoji: "💧" },
+    SECURITY: { label: "Security", emoji: "🛡️" },
+    PARKING: { label: "Parking", emoji: "🚗" },
+    FURNISHED: { label: "Furnished", emoji: "🛏️" },
+    LAUNDRY: { label: "Laundry", emoji: "🧺" },
+    KITCHEN: { label: "Kitchen", emoji: "🍳" },
+    STUDY_AREA: { label: "Study Area", emoji: "📚" },
+    GARDEN: { label: "Garden", emoji: "🌳" },
+    SWIMMING_POOL: { label: "Swimming Pool", emoji: "🏊" },
+    SMART_TV: { label: "Smart TV", emoji: "📺" },
+    NETFLIX: { label: "Netflix", emoji: "🎬" },
+    PRIME_VIDEO: { label: "Prime Video", emoji: "▶️" },
+    DSTV: { label: "DSTV", emoji: "📺" },
   };
 
   return (
