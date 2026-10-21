@@ -55,13 +55,25 @@ export default function Footer() {
             </h2>
 
             <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                {/* Contact Support */}
+                {/* Call Support */}
                 <li>
                 <a
                     href="tel:+14697458913"
                     className="hover:text-brand-blue"
                 >
-                    Contact Support: +1 (469) 745-8913
+                    Call Support: +1 (469) 745-8913
+                </a>
+                </li>
+
+                {/* WhatsApp Support */}
+                <li>
+                <a
+                    href="https://wa.me/14697458913"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-brand-blue"
+                >
+                    WhatsApp Support
                 </a>
                 </li>
 

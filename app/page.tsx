@@ -6,6 +6,7 @@ import Universities from "@/components/home/Universities";
 import StudentAccommodation from "@/components/home/StudentAccommodation";
 import EnableNotifications from "@/components/EnableNotifications";
 import PublicSiteLayout from "@/components/layout/PublicSiteLayout";
+import Partners from "@/components/home/Partners";
 
 export default function Home() {
   return (
@@ -23,6 +24,7 @@ export default function Home() {
       <LandlordCTA />
       <Universities />
       <StudentAccommodation />
+      <Partners />
     </>
   </PublicSiteLayout>
 );
