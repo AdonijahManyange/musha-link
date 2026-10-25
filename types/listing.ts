@@ -19,4 +19,5 @@ export type Listing = {
   featured: boolean;
   verified: boolean;
   landlord: Landlord;
+  distanceToUniversityKm?: number | null;
 };

@@ -29,8 +29,8 @@ type DatabaseListing = {
   suburb: string;
   city: string;
   province: string;
-  latitude: number;
-  longitude: number;
+  mapLatitude: number | null;
+  mapLongitude: number | null;
   monthlyRent: number;
   propertyType: string;
   roomType: string;
@@ -89,9 +89,7 @@ export default function BrowseContent() {
         const response = await fetch(
           `/api/listings?status=PUBLISHED${
             university
-              ? `&university=${encodeURIComponent(
-                  university
-                )}`
+              ? `&university=${encodeURIComponent(university)}`
               : ""
           }`,
           {
@@ -103,21 +101,29 @@ export default function BrowseContent() {
 
         if (!response.ok) {
           throw new Error(
-            data.error ||
-              "Failed to load listings."
+            data.error || "Failed to load listings."
           );
         }
 
-        setListings(data);
-      } catch (err) {
-        console.error(
-          "Failed to load browse listings:",
-          err
+        // Debug listing coordinates to investigate missing map markers.
+                // Debug approximate public coordinates used by map pins.
+        console.table(
+          data.map((listing: DatabaseListing) => ({
+            title: listing.title,
+            mapLatitude: listing.mapLatitude,
+            mapLongitude: listing.mapLongitude,
+            latitudeType: typeof listing.mapLatitude,
+            longitudeType: typeof listing.mapLongitude,
+          }))
         );
 
-        setError(
-          "Unable to load accommodation listings."
-        );
+        // Update the listings only after a successful response.
+        setListings(data);
+      } catch (err) {
+        console.error("Failed to load browse listings:", err);
+
+        setError("Unable to load accommodation listings.");
+        setListings([]);
       } finally {
         setLoading(false);
       }
@@ -273,6 +279,8 @@ export default function BrowseContent() {
           ),
 
         price: listing.monthlyRent,
+
+        distanceToUniversityKm: listing.distanceToUniversityKm,
 
         images: coverPhoto
           ? [coverPhoto.url]
@@ -519,16 +527,15 @@ export default function BrowseContent() {
                   (listing) => ({
                     id: listing.id,
                     title: listing.title,
-                    latitude:
-                      listing.latitude,
-                    longitude:
-                      listing.longitude,
-                    monthlyRent:
-                      listing.monthlyRent,
-                    suburb:
-                      listing.suburb,
-                    city:
-                      listing.city,
+
+                    // Use approximate public coordinates,
+                    // never the exact property coordinates.
+                    latitude: listing.mapLatitude,
+                    longitude: listing.mapLongitude,
+
+                    monthlyRent: listing.monthlyRent,
+                    suburb: listing.suburb,
+                    city: listing.city,
                   })
                 )}
               />

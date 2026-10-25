@@ -144,6 +144,8 @@ model Listing {
   description            String
   latitude               Float?
   longitude              Float?
+  mapLatitude  Float?
+  mapLongitude Float?
   universityId           String
   distanceToUniversityKm Float?
   monthlyRent            Int

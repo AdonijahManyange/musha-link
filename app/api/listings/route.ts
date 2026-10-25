@@ -84,6 +84,86 @@ async function geocodeAddress(
 }
 
 // ============================================================
+// PUBLIC MAP COORDINATES
+// ============================================================
+
+// Locate the general street area for public map pins.
+// The house number is never included in the public query.
+async function geocodePublicArea(
+  address: string,
+  suburb: string | null,
+  city: string,
+  province: string,
+  country: string
+) {
+  // Remove leading house/building numbers from the address.
+  // Example: "473 Sargent Size Road" -> "Sargent Size Road".
+  const streetName = address
+    .trim()
+    .replace(/^\d+[A-Za-z]?\s+/, "");
+
+  const queries = [
+    [streetName, suburb, city, province, country],
+    [suburb, city, province, country],
+    [city, province, country],
+  ];
+
+  for (const parts of queries) {
+    const query = parts
+      .filter(Boolean)
+      .join(", ");
+
+    const params = new URLSearchParams({
+      q: query,
+      format: "jsonv2",
+      limit: "1",
+    });
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+        {
+          headers: {
+            "User-Agent": "MushaLink/1.0 (contact@mushalink.com)",
+          },
+          cache: "no-store",
+        }
+      );
+
+      if (!response.ok) {
+        continue;
+      }
+
+      const results = await response.json();
+
+      if (!Array.isArray(results) || results.length === 0) {
+        continue;
+      }
+
+      const mapLatitude = Number(results[0].lat);
+      const mapLongitude = Number(results[0].lon);
+
+      if (
+        !Number.isFinite(mapLatitude) ||
+        !Number.isFinite(mapLongitude)
+      ) {
+        continue;
+      }
+
+      return {
+        mapLatitude,
+        mapLongitude,
+      };
+    } catch {
+      // Try the next, less-specific query.
+      continue;
+    }
+  }
+
+  return null;
+}
+
+// ============================================================
 // DISTANCE CALCULATOR
 // ============================================================
 
@@ -268,9 +348,10 @@ export async function GET(request: Request) {
 
           description: true,
 
-          // Exact coordinates remain private.
-          latitude: false,
-          longitude: false,
+          // Public map coordinates are approximate.
+          // Never expose the exact property coordinates.
+          mapLatitude: true,
+          mapLongitude: true,
 
           distanceToUniversityKm: true,
 
@@ -783,6 +864,26 @@ export async function POST(request: Request) {
     }
 
     // ==========================================================
+    // PUBLIC MAP COORDINATES
+    // ==========================================================
+
+    // Geocode only the general area, never the exact street address.
+    // These coordinates are separate from the private property coordinates.
+    const publicCoordinates = await geocodePublicArea(
+      cleanAddress,
+      cleanSuburb || null,
+      cleanCity,
+      cleanProvince,
+      cleanCountry
+    );
+
+    console.log("Public map geocoding:", {
+      city: cleanCity,
+      suburb: cleanSuburb,
+      coordinates: publicCoordinates,
+    });
+
+    // ==========================================================
     // DISTANCE TO UNIVERSITY
     // ==========================================================
 
@@ -1139,11 +1240,14 @@ export async function POST(request: Request) {
           // LOCATION
           // ----------------------------------------------------
 
-          latitude:
-            coordinates.latitude,
+          // Exact coordinates remain private and are used for
+          // accurate distance calculations.
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
 
-          longitude:
-            coordinates.longitude,
+          // Approximate coordinates are used for public map pins.
+          mapLatitude: publicCoordinates?.mapLatitude ?? null,
+          mapLongitude: publicCoordinates?.mapLongitude ?? null,
 
           distanceToUniversityKm,
 

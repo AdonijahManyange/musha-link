@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Listing } from "@/types/listing";
 import { getAmenityIcon } from "@/lib/amenityIcons";
 import FavoriteButton from "@/components/shared/FavoriteButton";
+import { MapPin } from "lucide-react";
 
 type ListingCardProps = {
   listing: Listing;
@@ -18,6 +19,20 @@ export default function ListingCard({
   const listingUrl = `/listings/${listing.id}?from=${source}`;
   const isSpotlight = variant === "spotlight";
 
+  // Display the distance only when the API provides a valid value.
+  const distance = listing.distanceToUniversityKm;
+
+  const hasDistance =
+    typeof distance === "number" &&
+    Number.isFinite(distance) &&
+    distance >= 0;
+
+  const formattedDistance = hasDistance
+    ? `${distance.toLocaleString(undefined, {
+        maximumFractionDigits: 1,
+      })} km from ${listing.university}`
+    : null;
+
   return (
     <div
       className={`
@@ -32,11 +47,14 @@ export default function ListingCard({
         }
       `}
     >
-      {/* IMAGE */}
+      {/* PROPERTY IMAGE */}
       <div className="relative overflow-hidden">
         <Link href={listingUrl}>
           <Image
-            src={listing.images[0]}
+            src={
+              listing.images?.[0] ||
+              "/images/listings/room2.png"
+            }
             alt={listing.title}
             width={600}
             height={400}
@@ -80,20 +98,20 @@ export default function ListingCard({
           </div>
         )}
 
-        {/* FAVORITE */}
+        {/* FAVORITE BUTTON */}
         <div className="absolute right-3 top-3 md:right-4 md:top-4">
           <FavoriteButton listingId={listing.id} />
         </div>
       </div>
 
-      {/* CONTENT */}
+      {/* CARD CONTENT */}
       <div
         className={`
           flex flex-1 flex-col
           ${isSpotlight ? "p-4 sm:p-5 md:p-6 lg:p-7" : "p-4 md:p-6"}
         `}
       >
-        {/* TITLE */}
+        {/* PROPERTY TITLE */}
         <Link href={listingUrl}>
           <h3
             className={`
@@ -135,6 +153,38 @@ export default function ListingCard({
           {listing.suburb}, {listing.city}
         </p>
 
+        {/* DISTANCE TO UNIVERSITY */}
+        {formattedDistance && (
+          <p
+            className={`
+              mt-1.5 flex items-center gap-1.5
+              text-xs font-medium text-text-muted
+              sm:text-sm
+            `}
+            aria-label={`Approximately ${formattedDistance}`}
+            title="Approximate distance to the associated university"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="shrink-0 text-brand-blue"
+            >
+              <circle cx="12" cy="10" r="3" />
+              <path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z" />
+            </svg>
+
+            <span>{formattedDistance}</span>
+          </p>
+        )}
+
         {/* AMENITIES */}
         {listing.amenities?.length > 0 && (
           <div
@@ -165,46 +215,49 @@ export default function ListingCard({
         )}
 
         {/* PRICE + BUTTON */}
-        <div
-          className={`
-            mt-auto flex items-end justify-between gap-3
-            ${isSpotlight ? "pt-5 sm:pt-6 md:pt-7 lg:pt-8" : "pt-4 md:pt-6"}
-          `}
-        >
-          <div>
-            <p
+          <div
+            className={`
+              mt-auto flex flex-wrap items-end justify-between gap-x-3 gap-y-4
+              ${isSpotlight ? "pt-5 sm:pt-6 md:pt-7 lg:pt-8" : "pt-5 md:pt-6"}
+            `}
+          >
+            {/* Monthly rent */}
+            <div className="min-w-0 flex-1">
+              <p
+                className={`
+                  whitespace-nowrap font-bold leading-tight text-brand-blue dark:text-white
+                  ${
+                    isSpotlight
+                      ? "text-2xl tracking-tight sm:text-3xl md:text-[32px] lg:text-[34px]"
+                      : "text-xl sm:text-2xl md:text-3xl"
+                  }
+                `}
+              >
+                US${listing.price}
+              </p>
+
+              <p className="mt-1 text-xs text-text-muted md:text-sm">
+                per month
+              </p>
+            </div>
+
+            {/* View details */}
+            <Link
+              href={listingUrl}
               className={`
-                font-bold text-brand-blue dark:text-white
+                inline-flex shrink-0 items-center justify-center
+                whitespace-nowrap rounded-xl font-semibold text-white
+                transition-all
                 ${
                   isSpotlight
-                    ? "text-2xl tracking-tight sm:text-3xl md:text-[32px] lg:text-[34px]"
-                    : "text-2xl md:text-4xl"
+                    ? "bg-brand-blue px-5 py-3.5 text-sm shadow-md hover:-translate-y-0.5 hover:bg-brand-blue-dark hover:shadow-lg sm:px-6"
+                    : "bg-brand-blue px-3 py-3 text-xs hover:bg-brand-blue-dark sm:px-4 sm:text-sm md:px-5"
                 }
               `}
             >
-              US${listing.price}
-            </p>
-
-            <p className="text-xs text-text-muted md:text-sm">
-              per month
-            </p>
+              View Details
+            </Link>
           </div>
-
-          <Link
-            href={listingUrl}
-            className={`
-              rounded-xl font-semibold text-white
-              transition-all
-              ${
-                isSpotlight
-                  ? "bg-brand-blue px-6 py-3.5 text-sm shadow-md hover:-translate-y-0.5 hover:bg-brand-blue-dark hover:shadow-lg"
-                  : "bg-brand-blue px-4 py-2.5 text-xs hover:bg-brand-blue-dark md:px-6 md:py-3 md:text-sm"
-              }
-            `}
-          >
-            View Details
-          </Link>
-        </div>
       </div>
     </div>
   );

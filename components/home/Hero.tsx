@@ -12,7 +12,7 @@ export default function Hero() {
       
       {/* Background Image */}
       <Image
-        src="/images/Background-image.jpg"
+        src="/images/students-in-house.jpeg"
         alt="Students moving into accommodation"
         fill
         priority
