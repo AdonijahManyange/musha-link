@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Clock,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 export default async function LandlordDashboard() {
@@ -220,6 +221,36 @@ export default async function LandlordDashboard() {
                 Complete Verification
               </Link>
             )}
+          </div>
+
+          {/* ================================================== */}
+          {/* LISTING BOOST */}
+          {/* ================================================== */}
+
+          <div className={cardClass}>
+            <div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-brand-blue dark:bg-blue-950/40 dark:text-blue-300">
+                <Sparkles size={22} />
+              </div>
+
+              <h2 className={`${headingClass} mt-4`}>
+                Listing Boost
+              </h2>
+
+              <p className={descriptionClass}>
+                Improve your property listings with personalized recommendations,
+                quality scores, and practical tips to help students make informed
+                accommodation decisions.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard/landlord/listing-boost"
+              className={primaryButtonClass}
+            >
+              Improve My Listings
+              <ArrowRight size={17} />
+            </Link>
           </div>
 
           {/* ================================================== */}

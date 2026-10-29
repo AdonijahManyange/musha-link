@@ -22,29 +22,18 @@ const nextConfig: NextConfig = {
         source: "/:path*",
 
         headers: [
-          // Prevent browsers from interpreting files as a
-          // different MIME type than the server declares.
           {
             key: "X-Content-Type-Options",
             value: "nosniff",
           },
-
-          // Reduce the amount of referrer information sent
-          // to external websites.
           {
             key: "Referrer-Policy",
             value: "strict-origin-when-cross-origin",
           },
-
-          // Prevent other websites from embedding MushaLink
-          // in a frame, helping protect against clickjacking.
           {
             key: "X-Frame-Options",
             value: "DENY",
           },
-
-          // Restrict browser features that MushaLink doesn't
-          // currently need.
           {
             key: "Permissions-Policy",
             value:

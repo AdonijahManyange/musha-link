@@ -92,6 +92,8 @@ model LandlordVerification {
   rejectionReason   String?
   reviewedAt        DateTime?
   submittedAt       DateTime?
+  adminNotifiedAt DateTime?
+  adminNotificationClaimedAt DateTime?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   diditSessionId    String?

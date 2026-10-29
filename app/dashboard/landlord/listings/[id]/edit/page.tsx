@@ -337,6 +337,34 @@ export default function EditListingPage() {
   }, [listingId]);
 
   // ============================================================
+  // SCROLL TO THE REQUESTED SECTION
+  // ============================================================
+
+  useEffect(() => {
+    // Wait until the listing has loaded and the form is rendered.
+    if (loading) return;
+
+    // Read the section requested by the URL hash.
+    const sectionId = window.location.hash.slice(1);
+
+    if (!sectionId) return;
+
+    // Allow React to finish rendering before scrolling.
+    const timeoutId = window.setTimeout(() => {
+      const target = document.getElementById(sectionId);
+
+      if (target) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 150);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [loading]);
+
+  // ============================================================
   // HANDLE INPUT
   // ============================================================
 
@@ -606,7 +634,9 @@ export default function EditListingPage() {
               PROPERTY INFORMATION
           ================================================== */}
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section 
+          id="property-information"
+          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
             <h2 className="text-lg font-semibold text-slate-900">
               Property Information
@@ -616,7 +646,7 @@ export default function EditListingPage() {
 
               {/* Title */}
 
-              <div>
+              <div id="title" className="scroll-mt-24">
                 <label className="text-sm font-medium text-slate-700">
                   Property Title
                 </label>
@@ -1381,7 +1411,9 @@ export default function EditListingPage() {
               UNIVERSITY
           ================================================== */}
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section 
+          id="university"
+          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
             <h2 className="text-lg font-semibold text-slate-900">
               University
@@ -1477,7 +1509,10 @@ export default function EditListingPage() {
               DESCRIPTION
           ================================================== */}
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section 
+            id="description"
+            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          >
 
             <h2 className="text-lg font-semibold text-slate-900">
               Description
