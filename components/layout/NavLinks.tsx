@@ -37,8 +37,8 @@ const links = [
     icon: GraduationCap,
   },
   {
-    href: "/about",
-    label: "About",
+    href: "/pricing",
+    label: "Pricing & Plans",
     icon: Info,
   },
 ];

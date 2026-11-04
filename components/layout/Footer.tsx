@@ -105,6 +105,15 @@ export default function Footer() {
 
               <li>
                 <Link
+                  href="/security"
+                  className="transition-colors hover:text-brand-blue dark:hover:text-blue-400"
+                >
+                  Security & Privacy
+                </Link>
+              </li>
+
+              <li>
+                <Link
                   href="/terms"
                   className="transition-colors hover:text-brand-blue dark:hover:text-blue-400"
                 >
