@@ -189,6 +189,43 @@ html.dark .bg-slate-100 {
   background-color: var(--surface-secondary) !important;
 }
 
+/* University cards keep a light surface in either theme for logo contrast. */
+.university-card-surface {
+  background-color: #ffffff !important;
+}
+
+html.dark .university-card-surface {
+  background-color: #f1f5f9 !important;
+}
+
+.university-logo-stage {
+  background-color: #f8fafc !important;
+}
+
+html.dark .university-logo-stage {
+  background-color: #e2e8f0 !important;
+}
+
+.university-logo-plaque {
+  background-color: #ffffff !important;
+}
+
+.university-card-title {
+  color: #0f172a !important;
+}
+
+.university-card-city {
+  color: #1e3a8a !important;
+}
+
+.university-card-description {
+  color: #475569 !important;
+}
+
+.university-card-link {
+  color: #1e293b !important;
+}
+
 /* Common text colors */
 html.dark .text-slate-900,
 html.dark .text-slate-950 {

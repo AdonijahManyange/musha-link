@@ -7,12 +7,14 @@ import StudentAccommodation from "@/components/home/StudentAccommodation";
 import EnableNotifications from "@/components/EnableNotifications";
 import PublicSiteLayout from "@/components/layout/PublicSiteLayout";
 import Partners from "@/components/home/Partners";
+import LimitedTimePromotion from "@/components/LimitedTimePromotion";
 
 export default function Home() {
   return (
   <PublicSiteLayout>
     <>
       <Hero />
+      <LimitedTimePromotion />
 
       {/* Temporary notification test */}
       <div className="flex justify-center bg-slate-50 px-4 py-4">

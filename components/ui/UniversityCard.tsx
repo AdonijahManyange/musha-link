@@ -19,21 +19,18 @@ export default function UniversityCard({
   return (
     <div
       className="
-        flex h-full flex-col rounded-2xl
-        border border-slate-200 bg-white p-5 shadow-sm
+        university-card-surface flex h-full flex-col rounded-2xl
+        border border-slate-200 p-5 shadow-sm
         transition-all duration-200
         hover:-translate-y-1 hover:shadow-md
-        dark:border-slate-700 dark:bg-slate-800
-        dark:shadow-black/20 dark:hover:shadow-black/30
+        dark:border-slate-300 dark:shadow-black/20 dark:hover:shadow-black/30
       "
     >
       {/* Logo */}
       <div
         className="
-          flex h-28 items-center justify-center
-          rounded-xl bg-slate-50 p-4
+          university-logo-plaque flex h-28 items-center justify-center rounded-xl border border-slate-200 p-4
           transition-colors duration-200
-          dark:bg-slate-700
         "
       >
         <Image
@@ -50,9 +47,8 @@ export default function UniversityCard({
         {/* University Name */}
         <h3
           className="
-            text-lg font-bold leading-6 text-slate-900
+            university-card-title text-lg font-bold leading-6
             transition-colors duration-200
-            dark:text-white
           "
         >
           {name}
@@ -61,8 +57,7 @@ export default function UniversityCard({
         {/* City */}
         <p
           className="
-            mt-3 text-sm font-medium text-brand-blue
-            dark:text-blue-400
+            university-card-city mt-3 text-sm font-medium text-brand-blue
           "
         >
           {city}
@@ -71,9 +66,8 @@ export default function UniversityCard({
         {/* Description */}
         <p
           className="
-            mt-3 text-sm leading-6 text-slate-600
+            university-card-description mt-3 text-sm leading-6
             transition-colors duration-200
-            dark:text-slate-300
           "
         >
           {description}
@@ -83,16 +77,15 @@ export default function UniversityCard({
         <div
           className="
             mt-auto border-t border-slate-100 pt-4
-            dark:border-slate-700
+            dark:border-slate-300
           "
         >
           <Link
             href={href}
             className="
-              text-sm font-semibold text-slate-700
+              university-card-link text-sm font-semibold
               transition-colors duration-200
               hover:text-brand-blue
-              dark:text-slate-200 dark:hover:text-blue-400
             "
           >
             View accommodation →

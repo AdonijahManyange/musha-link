@@ -114,18 +114,20 @@ export default function UniversitiesPage() {
               {universities.map((university) => (
                 <article
                   key={university.id}
-                  className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg"
+                  className="university-card-surface group overflow-hidden rounded-2xl border border-slate-200 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-300"
                 >
                   {/* University Logo */}
-                  <div className="flex h-40 items-center justify-center bg-slate-50 p-6 sm:h-48 sm:p-8">
+                  <div className="university-logo-stage flex h-40 items-center justify-center p-6 sm:h-48 sm:p-8">
                     {university.logo ? (
-                      <Image
-                        src={university.logo}
-                        alt={`${university.name} logo`}
-                        width={140}
-                        height={140}
-                        className="h-28 w-28 object-contain sm:h-32 sm:w-32"
-                      />
+                      <div className="university-logo-plaque flex h-32 w-32 items-center justify-center rounded-xl border border-slate-200 p-3 shadow-sm sm:h-36 sm:w-36">
+                        <Image
+                          src={university.logo}
+                          alt={`${university.name} logo`}
+                          width={140}
+                          height={140}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
                     ) : (
                       <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-50 text-5xl">
                         🎓
@@ -135,11 +137,11 @@ export default function UniversitiesPage() {
 
                   {/* Content */}
                   <div className="p-5 sm:p-6">
-                    <p className="text-sm font-medium text-blue-900">
+                    <p className="university-card-city text-sm font-medium text-blue-900">
                       {university.city}
                     </p>
 
-                    <h2 className="mt-2 min-h-[56px] text-lg font-semibold leading-6 text-slate-900 sm:text-xl sm:leading-7">
+                    <h2 className="university-card-title mt-2 min-h-[56px] text-lg font-semibold leading-6 sm:text-xl sm:leading-7">
                       {university.name}
                     </h2>
 

@@ -117,7 +117,7 @@ export default function ListingCard({
             className={`
               font-bold text-text-primary
               transition-colors
-              group-hover:text-brand-blue
+              group-hover:text-brand-blue dark:group-hover:text-blue-300
               ${
                 isSpotlight
                   ? "text-lg tracking-tight sm:text-xl md:text-[22px] lg:text-[23px]"
@@ -228,7 +228,7 @@ export default function ListingCard({
                   whitespace-nowrap font-bold leading-tight text-brand-blue dark:text-white
                   ${
                     isSpotlight
-                      ? "text-2xl tracking-tight sm:text-3xl md:text-[32px] lg:text-[34px]"
+                      ? "text-2xl tracking-tight sm:text-3xl md:text-[30px]"
                       : "text-xl sm:text-2xl md:text-3xl"
                   }
                 `}
@@ -250,7 +250,7 @@ export default function ListingCard({
                 transition-all
                 ${
                   isSpotlight
-                    ? "bg-brand-blue px-5 py-3.5 text-sm shadow-md hover:-translate-y-0.5 hover:bg-brand-blue-dark hover:shadow-lg sm:px-6"
+                    ? "bg-brand-blue px-4 py-3 text-xs shadow-md hover:-translate-y-0.5 hover:bg-brand-blue-dark hover:shadow-lg sm:px-5 sm:text-sm"
                     : "bg-brand-blue px-3 py-3 text-xs hover:bg-brand-blue-dark sm:px-4 sm:text-sm md:px-5"
                 }
               `}

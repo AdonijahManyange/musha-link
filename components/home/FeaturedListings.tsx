@@ -97,6 +97,7 @@ export default async function FeaturedListings() {
                     overflow-hidden
                     px-6
                     pb-4
+                    [mask-image:linear-gradient(to_right,transparent_0%,black_4%,black_96%,transparent_100%)]
                   "
                 >
                   <div className="spotlight-track">
@@ -105,10 +106,11 @@ export default async function FeaturedListings() {
                       <div
                         key={listing.id}
                         className="
-                          w-[72vw]
+                          w-[85vw]
                           max-w-[300px]
                           shrink-0
-                          sm:w-[300px]
+                          sm:w-[320px]
+                          sm:max-w-none
                           md:w-[340px]
                           lg:w-[360px]
                         "
@@ -126,10 +128,11 @@ export default async function FeaturedListings() {
                       <div
                         key={listing.id}
                         className="
-                          w-[72vw]
+                          w-[85vw]
                           max-w-[300px]
                           shrink-0
-                          sm:w-[300px]
+                          sm:w-[320px]
+                          sm:max-w-none
                           md:w-[340px]
                           lg:w-[360px]
                         "

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
+import DeleteAccountButton from "./DeleteAccountButton";
 
 export default async function AccountSettingsPage() {
   const user = await getCurrentUser();
@@ -245,19 +246,8 @@ export default async function AccountSettingsPage() {
           </p>
 
           <div className="mt-6">
-            <button
-              type="button"
-              disabled
-              className="cursor-not-allowed rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-400"
-            >
-              Delete Account
-            </button>
+            <DeleteAccountButton />
           </div>
-
-          <p className="mt-3 text-xs text-slate-500">
-            Account deletion will be available here once the deletion
-            workflow has been implemented.
-          </p>
         </section>
 
       </div>
