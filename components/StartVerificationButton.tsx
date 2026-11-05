@@ -5,6 +5,8 @@ import { useState } from "react";
 export default function StartVerificationButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const fallbackError =
+    "Identity verification is temporarily unavailable. Please try again later. If the problem continues, contact support.";
 
   async function startVerification() {
     // Open the window immediately while we're still inside
@@ -13,6 +15,8 @@ export default function StartVerificationButton() {
       "about:blank",
       "_blank"
     );
+
+    let userFacingError = fallbackError;
 
     try {
       setLoading(true);
@@ -28,15 +32,12 @@ export default function StartVerificationButton() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || "Unable to start verification."
-        );
+        userFacingError = data.error || fallbackError;
+        throw new Error("Unable to start verification.");
       }
 
       if (!data.url) {
-        throw new Error(
-          "Didit did not return a verification URL."
-        );
+        throw new Error("Invalid verification URL.");
       }
 
       // Send the newly opened window to Didit.
@@ -54,11 +55,7 @@ export default function StartVerificationButton() {
         verificationWindow.close();
       }
 
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to start verification."
-      );
+      setError(userFacingError);
 
       setLoading(false);
     }

@@ -23,56 +23,39 @@ export async function POST() {
       );
     }
 
-    // ------------------------------------------------------------
-// CREATE / RESET LANDLORD VERIFICATION
-// ------------------------------------------------------------
+    // Create the provider session before marking verification as pending.
+    const session = await createDiditVerificationSession(user.id);
 
-const verification = await prisma.landlordVerification.upsert({
-  where: {
-    landlordId: user.id,
-  },
-  update: {
-    status: "PENDING",
-    rejectionReason: null,
-    reviewedAt: null,
-    submittedAt: new Date(),
-  },
-  create: {
-    landlordId: user.id,
-    status: "PENDING",
-    submittedAt: new Date(),
-  },
-});
+    if (!session.url || !session.session_id) {
+      console.error("Didit returned an invalid verification session.");
 
-// ------------------------------------------------------------
-// CREATE DIDIT VERIFICATION SESSION
-// ------------------------------------------------------------
+      return NextResponse.json(
+        {
+          error:
+            "Identity verification is temporarily unavailable. Please try again later.",
+        },
+        { status: 503 }
+      );
+    }
 
-const session = await createDiditVerificationSession(user.id);
-
-if (!session.url || !session.session_id) {
-  console.error("Unexpected Didit response:", session);
-
-  return NextResponse.json(
-    {
-      error: "Didit did not return a valid verification session.",
-    },
-    { status: 502 }
-  );
-}
-
-// ------------------------------------------------------------
-// SAVE DIDIT SESSION ID
-// ------------------------------------------------------------
-
-await prisma.landlordVerification.update({
-  where: {
-    id: verification.id,
-  },
-  data: {
-    diditSessionId: session.session_id,
-  },
-});
+    await prisma.landlordVerification.upsert({
+      where: {
+        landlordId: user.id,
+      },
+      update: {
+        status: "PENDING",
+        rejectionReason: null,
+        reviewedAt: null,
+        submittedAt: new Date(),
+        diditSessionId: session.session_id,
+      },
+      create: {
+        landlordId: user.id,
+        status: "PENDING",
+        submittedAt: new Date(),
+        diditSessionId: session.session_id,
+      },
+    });
 
     // ------------------------------------------------------------
     // RETURN DIDIT SESSION
@@ -88,11 +71,9 @@ await prisma.landlordVerification.update({
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Unable to start verification.",
+          "Identity verification is temporarily unavailable. Please try again later. If the problem continues, contact support.",
       },
-      { status: 500 }
+      { status: 503 }
     );
   }
 }

@@ -44,12 +44,13 @@ export async function createDiditVerificationSession(
   const data = await response.json();
 
   if (!response.ok) {
-    console.error("Didit API error:", data);
+    console.error("Didit API session creation failed:", {
+      status: response.status,
+      data,
+    });
 
     throw new Error(
-      data.detail ||
-        data.message ||
-        "Didit verification session could not be created."
+      "Identity verification session could not be created."
     );
   }
 
