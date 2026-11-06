@@ -56,7 +56,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     try {
       await sendNotificationEmail({
         to: verification.user.email,
-        name: verification.user.name,
         subject: approved ? "Your student status is verified" : "Action needed for student verification",
         title: approved ? "Student status verified" : "Student card needs attention",
         message: approved ? "Your student status has been verified on MushaLink." : `Your student card could not be approved. ${rejectionReason}`,
