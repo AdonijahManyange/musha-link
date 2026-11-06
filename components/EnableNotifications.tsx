@@ -108,12 +108,15 @@ export default function EnableNotifications() {
         // Get VAPID public key
         // --------------------------------------------------------
 
-        const vapidPublicKey =
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        const keyResponse = await fetch("/api/push/vapid-public-key", {
+          cache: "no-store",
+        });
+        const keyData = await keyResponse.json().catch(() => null);
+        const vapidPublicKey = keyData?.publicKey;
 
-        if (!vapidPublicKey) {
+        if (!keyResponse.ok || typeof vapidPublicKey !== "string" || !vapidPublicKey) {
           throw new Error(
-            "VAPID public key is not configured."
+            keyData?.error ?? "Push notifications are not configured on this server."
           );
         }
 
