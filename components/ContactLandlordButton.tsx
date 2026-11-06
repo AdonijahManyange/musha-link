@@ -5,19 +5,52 @@ import { useRouter } from "next/navigation";
 
 type ContactLandlordButtonProps = {
   listingId: string;
+  buttonText?: string;
 };
 
 export default function ContactLandlordButton({
   listingId,
+  buttonText = "Contact Landlord",
 }: ContactLandlordButtonProps) {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [verificationChecked, setVerificationChecked] = useState(false);
+  const [studentVerified, setStudentVerified] = useState(false);
   const [error, setError] = useState<string | null>(
     null
   );
+
+  async function openContactModal() {
+    setOpen(true);
+    setMessage("");
+    setError(null);
+    setVerificationChecked(false);
+    setStudentVerified(false);
+
+    try {
+      const response = await fetch("/api/student/verification", {
+        cache: "no-store",
+        credentials: "include",
+      });
+      const data = await response.json().catch(() => null);
+      const verified = response.ok && data?.verification?.status === "APPROVED";
+      setStudentVerified(verified);
+      if (!verified) {
+        setError(
+          response.status === 401
+            ? "Sign in and verify your student status before contacting landlords."
+            : "Verify your student status before contacting landlords."
+        );
+      }
+    } catch {
+      setError("Verify your student status before contacting landlords.");
+    } finally {
+      setVerificationChecked(true);
+    }
+  }
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -52,6 +85,10 @@ export default function ContactLandlordButton({
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 403 && data?.error?.includes("Verify your student status")) {
+          setStudentVerified(false);
+          setMessage("");
+        }
         throw new Error(
           data?.error ??
             "Unable to start the conversation."
@@ -92,13 +129,10 @@ export default function ContactLandlordButton({
 
       <button
         type="button"
-        onClick={() => {
-          setOpen(true);
-          setError(null);
-        }}
+        onClick={openContactModal}
         className="w-full rounded-xl bg-brand-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark"
       >
-        Contact Landlord
+        {buttonText}
       </button>
 
       {/* Modal */}
@@ -158,13 +192,14 @@ export default function ContactLandlordButton({
                 }
                 placeholder="Hi, I'm interested in this property. Is it still available?"
                 rows={5}
-                disabled={sending}
-                autoFocus
-                className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-blue focus:bg-white focus:ring-2 focus:ring-brand-blue/10 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={sending || !verificationChecked || !studentVerified}
+                autoFocus={studentVerified}
+                aria-describedby={!studentVerified ? "contact-verification-message" : undefined}
+                className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-blue focus:bg-white focus:ring-2 focus:ring-brand-blue/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-70"
               />
 
               {error && (
-                <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div id="contact-verification-message" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {error}
                 </div>
               )}
@@ -185,6 +220,8 @@ export default function ContactLandlordButton({
                   type="submit"
                   disabled={
                     sending ||
+                    !verificationChecked ||
+                    !studentVerified ||
                     !message.trim()
                   }
                   className="flex-1 rounded-xl bg-brand-blue px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-50"

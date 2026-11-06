@@ -20,6 +20,10 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Student verification
+
+Student verification supports one-time codes sent to approved school email domains and private student-card submissions for manual review. Student sign-up collects a university, then lets the student provide a school email or choose card review. Configure `STUDENT_UNIVERSITY_EMAIL_DOMAINS` in each environment as a JSON object keyed by the exact university names in the database, with each value an array of allowed domains (for example, `{"Africa University":["africau.edu"],"National University of Science and Technology (NUST)":["students.nust.ac.zw"]}`). Only domains configured for the student's selected university can receive a verification code. If a university has no configured domain, students can submit a card for review. Card uploads use the private `verification-documents` Supabase Storage bucket and are removed after an administrator records a decision.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

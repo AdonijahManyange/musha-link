@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { isStudentVerified } from "@/lib/student-verification";
 
 // ============================================================
 // POST — Create or get conversation
@@ -33,6 +34,13 @@ export async function POST(request: Request) {
           error:
             "Only students can start conversations.",
         },
+        { status: 403 }
+      );
+    }
+
+    if (!(await isStudentVerified(user.id))) {
+      return NextResponse.json(
+        { error: "Verify your student status before contacting landlords." },
         { status: 403 }
       );
     }
@@ -294,6 +302,7 @@ export async function GET() {
                     profilePhotoUrl: true,
                   },
                 },
+
               },
             },
 
@@ -373,6 +382,7 @@ export async function GET() {
                     profilePhotoUrl: true,
                   },
                 },
+
               },
             },
 

@@ -626,7 +626,7 @@ export default async function PublicListingPage({
                 </div>
 
                 <Link
-                  href={`/landlords/${listing.landlord.id}`}
+                  href={`/landlords/${listing.landlord.id}?fromListing=${listing.id}`}
                   className="mt-4 flex w-full items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-500 hover:bg-slate-50 hover:text-blue-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-blue-500 dark:hover:bg-slate-800 dark:hover:text-blue-400"
                 >
                   View Landlord Profile

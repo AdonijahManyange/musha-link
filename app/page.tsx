@@ -16,9 +16,19 @@ export default function Home() {
       <Hero />
       <LimitedTimePromotion />
 
-      {/* Temporary notification test */}
-      <div className="flex justify-center bg-slate-50 px-4 py-4">
-        <EnableNotifications />
+      {/* Browser notification opt-in */}
+      <div className="bg-slate-50 px-4 py-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm sm:flex-row sm:text-left">
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">
+              Stay up to date
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Enable browser notifications for new messages and viewing request updates.
+            </p>
+          </div>
+          <EnableNotifications />
+        </div>
       </div>
 
       <TrustSection />

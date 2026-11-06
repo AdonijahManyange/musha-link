@@ -41,6 +41,13 @@ export async function GET() {
         studentName: true,
         studentPhone: true,
         studentEmail: true,
+        student: {
+          select: {
+            studentVerification: {
+              select: { status: true, method: true },
+            },
+          },
+        },
         requestedAt: true,
         note: true,
         status: true,
@@ -64,7 +71,12 @@ export async function GET() {
 
     return NextResponse.json(
       {
-        viewingRequests,
+        viewingRequests: viewingRequests.map((request) => ({
+          ...request,
+          studentVerified: request.student?.studentVerification?.status === "APPROVED",
+          studentVerificationMethod: request.student?.studentVerification?.method ?? null,
+          student: undefined,
+        })),
         total: viewingRequests.length,
       },
       {

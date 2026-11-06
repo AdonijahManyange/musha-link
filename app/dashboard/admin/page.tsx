@@ -12,6 +12,14 @@ export default async function AdminDashboard() {
       },
     });
 
+  const pendingStudentCardCount =
+    await prisma.studentVerification.count({
+      where: {
+        status: "PENDING",
+        method: "STUDENT_CARD",
+      },
+    });
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-10">
@@ -90,6 +98,30 @@ export default async function AdminDashboard() {
                 <span className="text-sm font-semibold text-brand-blue">
                   Review requests →
                 </span>
+              </div>
+            </Link>
+
+            {/* Student card reviews */}
+            <Link
+              href="/dashboard/admin/student-verifications"
+              className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-offset-2"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-xl text-emerald-700">
+                  🎓
+                </div>
+                <span className="text-xl text-slate-300 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand-blue">→</span>
+              </div>
+              <div className="mt-6">
+                <h3 className="text-lg font-bold text-slate-900">Student Card Reviews</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Review student cards submitted by students without school email.</p>
+              </div>
+              <div className="mt-6 flex items-end justify-between border-t border-slate-100 pt-5">
+                <div>
+                  <p className="text-3xl font-bold text-slate-900">{pendingStudentCardCount}</p>
+                  <p className="mt-1 text-xs text-slate-500">awaiting review</p>
+                </div>
+                <span className="text-sm font-semibold text-brand-blue">Review cards →</span>
               </div>
             </Link>
 

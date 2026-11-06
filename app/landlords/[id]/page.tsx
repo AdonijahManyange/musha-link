@@ -9,17 +9,22 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import ContactLandlordButton from "@/components/ContactLandlordButton";
 
 type LandlordPageProps = {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    fromListing?: string;
+  }>;
 };
 
 export default async function LandlordProfilePage({
   params,
+  searchParams,
 }: LandlordPageProps) {
-  const { id } = await params;
+  const [{ id }, { fromListing }] = await Promise.all([params, searchParams]);
 
   const landlord = await prisma.user.findUnique({
     where: {
@@ -96,6 +101,10 @@ export default async function LandlordProfilePage({
   }
 
   const profile = landlord.landlordProfile;
+  const contactListingId = landlord.listings[0]?.id;
+  const backListingId = landlord.listings.some((listing) => listing.id === fromListing)
+    ? fromListing
+    : contactListingId;
 
   const landlordName =
     landlord.name?.trim() || "Landlord";
@@ -149,11 +158,11 @@ export default async function LandlordProfilePage({
 
         <div className="mb-6">
           <Link
-            href="/browse"
+            href={backListingId ? `/listings/${backListingId}` : "/browse"}
             className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-brand-blue"
           >
             <ArrowLeft size={16} />
-            Back to Listings
+            {backListingId ? "Back to listing" : "Back to Listings"}
           </Link>
         </div>
 
@@ -239,20 +248,13 @@ export default async function LandlordProfilePage({
                     </span>
                   </div>
 
+                  {profile?.bio?.trim() && (
+                    <p className="mt-3 max-w-2xl whitespace-pre-line text-sm leading-6 text-slate-600">
+                      {profile.bio.trim()}
+                    </p>
+                  )}
+
                 </div>
-
-              </div>
-
-              {/* Contact */}
-
-              <div className="sm:pb-2">
-
-                <a
-                  href={`mailto:${landlord.email}`}
-                  className="flex w-full items-center justify-center rounded-xl bg-brand-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark sm:w-auto"
-                >
-                  Contact Landlord
-                </a>
 
               </div>
 
@@ -271,23 +273,6 @@ export default async function LandlordProfilePage({
           =================================================== */}
 
           <div>
-
-            {/* =================================================
-                ABOUT
-            ================================================= */}
-
-            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-
-              <h2 className="text-xl font-bold text-slate-900">
-                About the Landlord
-              </h2>
-
-              <p className="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600">
-                {profile?.bio ||
-                  `${landlordName} is a landlord on Musha helping students find accommodation near their university.`}
-              </p>
-
-            </section>
 
             {/* =================================================
                 PROPERTIES
@@ -370,7 +355,7 @@ export default async function LandlordProfilePage({
 
                             <div className="absolute bottom-3 left-3 rounded-lg bg-white px-3 py-1.5 shadow-sm">
 
-                              <span className="text-sm font-bold text-brand-blue">
+                              <span className="text-sm font-bold text-white">
                                 US$
                                 {
                                   listing.monthlyRent
@@ -587,16 +572,14 @@ export default async function LandlordProfilePage({
                   CONTACT
               ================================================= */}
 
-              <a
-                href={`mailto:${landlord.email}`}
-                className="flex w-full items-center justify-center rounded-xl bg-brand-blue px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-blue-dark"
-              >
-                Contact {landlordName}
-              </a>
+              {contactListingId ? (
+                <ContactLandlordButton listingId={contactListingId} buttonText={`Contact ${landlordName}`} />
+              ) : (
+                <p className="text-sm text-text-muted">This landlord has no active properties to message about right now.</p>
+              )}
 
               <p className="mt-3 text-center text-xs leading-5 text-slate-400">
-                Contact information is provided
-                through Musha.
+                Your message stays within MushaLink.
               </p>
 
             </div>

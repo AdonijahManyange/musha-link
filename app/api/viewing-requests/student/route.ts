@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { isStudentVerified } from "@/lib/student-verification";
 
 // ============================================================
 // GET — Retrieve the authenticated student's viewing requests
@@ -27,6 +28,13 @@ export async function GET() {
         {
           error: "Only student accounts can view student requests.",
         },
+        { status: 403 }
+      );
+    }
+
+    if (!(await isStudentVerified(user.id))) {
+      return NextResponse.json(
+        { error: "Verify your student status to view your requests." },
         { status: 403 }
       );
     }

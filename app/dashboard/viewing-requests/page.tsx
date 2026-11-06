@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import StudentVerificationBadge from "@/components/StudentVerificationBadge";
 
 import {
   CalendarDays,
@@ -37,6 +38,8 @@ type ViewingRequest = {
   studentName: string;
   studentPhone: string;
   studentEmail: string;
+  studentVerified: boolean;
+  studentVerificationMethod: "SCHOOL_EMAIL" | "STUDENT_CARD" | null;
   requestedAt: string;
   note: string | null;
   status: ViewingStatus;
@@ -639,6 +642,10 @@ export default function ViewingRequestsPage() {
                       <p className="text-lg font-semibold text-text-primary">
                         {request.studentName || "Student"}
                       </p>
+
+                      {request.studentVerified && (
+                        <StudentVerificationBadge method={request.studentVerificationMethod} className="mt-2 px-3 py-1 text-xs" />
+                      )}
 
                       <div className="mt-3 space-y-3">
                         {request.studentPhone ? (

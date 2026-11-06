@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { sendNotificationEmail } from "@/lib/email";
 import { sendPushNotification } from "@/lib/push-notifications";
+import { isStudentVerified } from "@/lib/student-verification";
 
 type RouteContext = {
   params: Promise<{
@@ -86,6 +87,13 @@ export async function GET(
             studentProfile: {
               select: {
                 profilePhotoUrl: true,
+              },
+            },
+
+            studentVerification: {
+              select: {
+                status: true,
+                method: true,
               },
             },
           },
@@ -264,6 +272,16 @@ export async function POST(
             "Conversation not found or you do not have access to it.",
         },
         { status: 404 }
+      );
+    }
+
+    if (
+      user.id === conversation.studentId &&
+      !(await isStudentVerified(user.id))
+    ) {
+      return NextResponse.json(
+        { error: "Verify your student status before sending messages." },
+        { status: 403 }
       );
     }
 

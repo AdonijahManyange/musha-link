@@ -139,6 +139,9 @@ export const { handlers, auth } = NextAuth({
         cookieStore.get(
           "musha_signup_role"
         )?.value;
+      const signupUniversityId = cookieStore.get("musha_signup_university")?.value;
+      const signupSchoolEmail = cookieStore.get("musha_signup_school_email")?.value;
+      const signupVerificationMethod = cookieStore.get("musha_signup_verification_method")?.value;
 
       /*
        * IMPORTANT:
@@ -162,6 +165,10 @@ export const { handlers, auth } = NextAuth({
         return "/auth/signup";
       }
 
+      if (signupRole === "STUDENT" && (!signupUniversityId || (signupVerificationMethod !== "STUDENT_CARD" && !signupSchoolEmail))) {
+        return "/auth/signup";
+      }
+
       // --------------------------------------------------------
       // Create the new account using the selected role
       // --------------------------------------------------------
@@ -178,6 +185,22 @@ export const { handlers, auth } = NextAuth({
               : "STUDENT",
 
           verified: false,
+          ...(signupRole === "STUDENT" ? {
+            studentProfile: { create: { universityId: signupUniversityId } },
+            studentVerification: { create: { method: signupVerificationMethod === "STUDENT_CARD" ? "STUDENT_CARD" : "SCHOOL_EMAIL", schoolEmail: signupSchoolEmail || null } },
+          } : {}),
+          notifications: {
+            create: {
+              type: "SYSTEM",
+              title: signupRole === "STUDENT" ? "Verify your student status" : "Complete landlord verification",
+              message: signupRole === "STUDENT"
+                ? "Verify your student status to contact landlords and request property viewings."
+                : "Complete landlord verification to publish listings and connect with students.",
+              link: signupRole === "STUDENT"
+                ? "/dashboard/student/verification"
+                : "/dashboard/landlord/verification",
+            },
+          },
         },
       });
 

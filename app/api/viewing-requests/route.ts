@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { sendNotificationEmail } from "@/lib/email";
+import { isStudentVerified } from "@/lib/student-verification";
 
 // ============================================================
 // GET — Retrieve the authenticated student's contact details
@@ -30,6 +31,13 @@ export async function GET() {
         {
           error: "Only students can request property viewings.",
         },
+        { status: 403 }
+      );
+    }
+
+    if (!(await isStudentVerified(user.id))) {
+      return NextResponse.json(
+        { error: "Verify your student status before requesting a viewing." },
         { status: 403 }
       );
     }
@@ -111,6 +119,13 @@ export async function POST(request: Request) {
         {
           error: "Only students can request property viewings.",
         },
+        { status: 403 }
+      );
+    }
+
+    if (!(await isStudentVerified(user.id))) {
+      return NextResponse.json(
+        { error: "Verify your student status before requesting a viewing." },
         { status: 403 }
       );
     }

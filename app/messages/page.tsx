@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import StudentVerificationBadge from "@/components/StudentVerificationBadge";
 
 // ============================================================
 // TYPES
@@ -36,6 +37,10 @@ type Person = {
 
 type Student = Person & {
   studentProfile: StudentProfile | null;
+  studentVerification: {
+    status: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
+    method: "SCHOOL_EMAIL" | "STUDENT_CARD" | null;
+  } | null;
 };
 
 type LandlordProfile = {
@@ -406,6 +411,9 @@ export default function MessagesPage() {
 
             const latestMessage = conversation.latestMessage;
             const hasUnread = conversation.unreadCount > 0;
+            const verifiedStudent =
+              conversation.landlordId === currentUserId &&
+              conversation.student.studentVerification?.status === "APPROVED";
 
             return (
               <Link
@@ -460,15 +468,20 @@ export default function MessagesPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <h2
-                        className={`truncate text-sm ${
-                          hasUnread
-                            ? "font-bold text-text-primary"
-                            : "font-semibold text-text-primary"
-                        }`}
-                      >
-                        {otherPerson}
-                      </h2>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <h2
+                          className={`min-w-0 truncate text-sm ${
+                            hasUnread
+                              ? "font-bold text-text-primary"
+                              : "font-semibold text-text-primary"
+                          }`}
+                        >
+                          {otherPerson}
+                        </h2>
+                        {verifiedStudent && (
+                          <StudentVerificationBadge method={conversation.student.studentVerification?.method} compact />
+                        )}
+                      </div>
 
                       <p className="mt-1 truncate text-xs text-text-secondary">
                         {conversation.listing.title}

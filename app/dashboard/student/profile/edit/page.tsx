@@ -605,8 +605,8 @@ export default function StudentProfileEditPage() {
                   onChange={(event) =>
                     setCity(event.target.value)
                   }
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
-                  placeholder="e.g. Mutare"
+                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500"
+                  placeholder="Enter city, e.g. Mutare"
                 />
               </div>
 
@@ -627,8 +627,8 @@ export default function StudentProfileEditPage() {
                   onChange={(event) =>
                     setProvince(event.target.value)
                   }
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
-                  placeholder="e.g. Manicaland"
+                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500"
+                  placeholder="Enter province, e.g. Manicaland"
                 />
               </div>
 
@@ -649,8 +649,8 @@ export default function StudentProfileEditPage() {
                   onChange={(event) =>
                     setCountry(event.target.value)
                   }
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
-                  placeholder="e.g. Zimbabwe"
+                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500"
+                  placeholder="Enter country, e.g. Zimbabwe"
                 />
               </div>
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { isStudentVerified } from "@/lib/student-verification";
 
 // ============================================================
 // GET — Get current user's conversations
@@ -68,6 +69,13 @@ export async function GET() {
               studentProfile: {
                 select: {
                   profilePhotoUrl: true,
+                },
+              },
+
+              studentVerification: {
+                select: {
+                  status: true,
+                  method: true,
                 },
               },
             },
@@ -196,6 +204,13 @@ export async function POST(
           error:
             "Only students can start a conversation with a landlord.",
         },
+        { status: 403 }
+      );
+    }
+
+    if (!(await isStudentVerified(user.id))) {
+      return NextResponse.json(
+        { error: "Verify your student status before contacting landlords." },
         { status: 403 }
       );
     }

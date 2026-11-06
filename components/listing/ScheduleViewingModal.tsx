@@ -50,6 +50,7 @@ export default function ScheduleViewingModal({
   // Loading and submission states
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [canRequestViewing, setCanRequestViewing] = useState(false);
 
   // Feedback messages
   const [successMessage, setSuccessMessage] = useState("");
@@ -65,6 +66,7 @@ export default function ScheduleViewingModal({
 
     async function loadStudentProfile() {
       setIsLoadingProfile(true);
+      setCanRequestViewing(false);
       setErrorMessage("");
 
       try {
@@ -79,12 +81,6 @@ export default function ScheduleViewingModal({
           if (response.status === 401) {
             throw new Error(
               "Please sign in to your student account before requesting a viewing."
-            );
-          }
-
-          if (response.status === 403) {
-            throw new Error(
-              "Only students can request property viewings."
             );
           }
 
@@ -104,6 +100,7 @@ export default function ScheduleViewingModal({
 
           setName(profile.name || "");
           setPhoneNumber(profile.phone || "");
+          setCanRequestViewing(true);
         }
       } catch (error) {
         if (!isCancelled) {
@@ -114,6 +111,9 @@ export default function ScheduleViewingModal({
               ? error.message
               : "Unable to load your contact information."
           );
+          setName("");
+          setPhoneNumber("");
+          setCanRequestViewing(false);
         }
       } finally {
         if (!isCancelled) {
@@ -171,6 +171,10 @@ export default function ScheduleViewingModal({
       setErrorMessage(
         "Please wait while your profile information loads."
       );
+      return;
+    }
+
+    if (!canRequestViewing) {
       return;
     }
 
@@ -266,15 +270,17 @@ export default function ScheduleViewingModal({
           setErrorMessage(
             "Please sign in to your student account before requesting a viewing."
           );
-        } else if (response.status === 403) {
-          setErrorMessage(
-            "Only student accounts can request property viewings."
-          );
         } else {
           setErrorMessage(
             data?.error ||
               "We couldn't submit your viewing request. Please try again."
           );
+        }
+
+        if (response.status === 403) {
+          setCanRequestViewing(false);
+          setName("");
+          setPhoneNumber("");
         }
 
         return;
@@ -448,7 +454,7 @@ export default function ScheduleViewingModal({
                   }
                   maxLength={100}
                   required
-                  disabled={isLoadingProfile || isSubmitting}
+                  disabled={isLoadingProfile || isSubmitting || !canRequestViewing}
                   className="w-full rounded-xl border border-slate-300 p-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:cursor-wait disabled:bg-slate-100"
                 />
               </div>
@@ -475,7 +481,7 @@ export default function ScheduleViewingModal({
                   }
                   maxLength={40}
                   required
-                  disabled={isLoadingProfile || isSubmitting}
+                  disabled={isLoadingProfile || isSubmitting || !canRequestViewing}
                   className="w-full rounded-xl border border-slate-300 p-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:cursor-wait disabled:bg-slate-100"
                 />
 
@@ -503,7 +509,7 @@ export default function ScheduleViewingModal({
                     value={date}
                     onChange={(event) => setDate(event.currentTarget.value)}
                     required
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !canRequestViewing}
                     className="w-full min-w-0 rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:bg-slate-100"
                   />
 
@@ -527,7 +533,7 @@ export default function ScheduleViewingModal({
                     value={time}
                     onChange={(event) => setTime(event.currentTarget.value)}
                     required
-                    disabled={isSubmitting}
+                  disabled={isSubmitting || !canRequestViewing}
                     className="w-full min-w-0 rounded-xl border border-slate-300 bg-white p-3 text-slate-900 outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:bg-slate-100"
                   >
                     <option value="">Select a time</option>
@@ -586,7 +592,7 @@ export default function ScheduleViewingModal({
                     setNote(event.currentTarget.value)
                   }
                   maxLength={1000}
-                  disabled={isSubmitting}
+                    disabled={isSubmitting || !canRequestViewing}
                   className="w-full resize-y rounded-xl border border-slate-300 p-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 disabled:bg-slate-100"
                 />
 
@@ -604,7 +610,7 @@ export default function ScheduleViewingModal({
             <button
               type="submit"
               form="viewing-request-form"
-              disabled={isSubmitting || isLoadingProfile}
+              disabled={isSubmitting || isLoadingProfile || !canRequestViewing}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-blue py-4 text-lg font-semibold text-white transition hover:bg-brand-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? (

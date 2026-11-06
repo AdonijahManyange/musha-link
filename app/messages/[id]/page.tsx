@@ -8,6 +8,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import StudentVerificationBadge from "@/components/StudentVerificationBadge";
 
 // ============================================================
 // TYPES
@@ -42,6 +43,10 @@ type StudentProfile = {
 
 type Student = Person & {
   studentProfile: StudentProfile | null;
+  studentVerification: {
+    status: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
+    method: "SCHOOL_EMAIL" | "STUDENT_CARD" | null;
+  } | null;
 };
 
 type LandlordProfile = {
@@ -447,9 +452,14 @@ export default function ConversationPage() {
             {/* Person and listing name */}
 
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-sm font-semibold text-text-primary">
-                {otherPersonName}
-              </h1>
+              <div className="flex min-w-0 items-center gap-2">
+                <h1 className="min-w-0 truncate text-sm font-semibold text-text-primary">
+                  {otherPersonName}
+                </h1>
+                {!isStudent && conversation.student.studentVerification?.status === "APPROVED" && (
+                  <StudentVerificationBadge method={conversation.student.studentVerification.method} compact />
+                )}
+              </div>
 
               <p className="truncate text-xs text-text-muted">
                 {conversation.listing.title}
