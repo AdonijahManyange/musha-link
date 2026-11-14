@@ -321,6 +321,11 @@ export async function GET(request: Request) {
     // ==========================================================
 
     if (status === "PUBLISHED") {
+      const user = await getCurrentUser();
+      if (!user) {
+        return NextResponse.json({ error: "Create an account or log in to view listings." }, { status: 401 });
+      }
+
       const listings = await prisma.listing.findMany({
         where: {
           status: "PUBLISHED",

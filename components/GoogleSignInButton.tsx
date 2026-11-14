@@ -3,10 +3,18 @@
 import { signIn } from "next-auth/react";
 
 export default function GoogleSignInButton() {
+  function handleGoogleSignIn() {
+    const requested = new URLSearchParams(window.location.search).get("callbackUrl");
+    const callbackUrl = requested?.startsWith("/") && !requested.startsWith("//")
+      ? requested
+      : "/dashboard/student";
+    void signIn("google", { callbackUrl });
+  }
+
   return (
     <button
       type="button"
-      onClick={() => signIn("google", { callbackUrl: "/dashboard/student" })}
+      onClick={handleGoogleSignIn}
       className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white py-4 font-semibold text-slate-700 transition hover:bg-slate-50"
     >
       <svg

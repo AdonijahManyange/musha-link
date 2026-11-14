@@ -56,7 +56,6 @@ export default async function PublicListingPage({
 }: ListingPageProps) {
   const { id } = await params;
   const { from } = await searchParams;
-
   const backHref =
     from === "dashboard"
       ? "/dashboard/landlord/listings"

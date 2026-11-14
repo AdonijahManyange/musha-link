@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
   async function handleSubmit(
   e: FormEvent<HTMLFormElement>
 ) {
@@ -43,6 +42,13 @@ export default function LoginPage() {
     );
 
     const session = await sessionResponse.json();
+
+    const requestedCallback = new URLSearchParams(window.location.search).get("callbackUrl");
+    const callbackUrl = requestedCallback?.startsWith("/") && !requestedCallback.startsWith("//") ? requestedCallback : null;
+    if (callbackUrl) {
+      router.push(callbackUrl);
+      return;
+    }
 
     if (session?.user?.role === "LANDLORD") {
       router.push("/dashboard/landlord");
@@ -164,6 +170,13 @@ export default function LoginPage() {
           Don't have an account?{" "}
           <Link
             href="/auth/signup"
+            onClick={(event) => {
+              const requested = new URLSearchParams(window.location.search).get("callbackUrl");
+              if (requested?.startsWith("/") && !requested.startsWith("//")) {
+                event.preventDefault();
+                router.push(`/auth/signup?callbackUrl=${encodeURIComponent(requested)}`);
+              }
+            }}
             className="font-semibold text-brand-blue hover:underline"
           >
             Create one

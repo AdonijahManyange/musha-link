@@ -14,7 +14,6 @@ export default async function ListingPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
   const listing = listings.find(
     (listing) => listing.slug === slug
   );

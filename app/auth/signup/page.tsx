@@ -16,6 +16,11 @@ import {
 export default function SignupPage() {
   const router = useRouter();
 
+  function getCallbackUrl() {
+    const callbackUrl = new URLSearchParams(window.location.search).get("callbackUrl");
+    return callbackUrl?.startsWith("/") && !callbackUrl.startsWith("//") ? callbackUrl : null;
+  }
+
   const [role, setRole] = useState<"STUDENT" | "LANDLORD" | null>(null);
   const [method, setMethod] = useState<"GOOGLE" | "EMAIL" | null>(null);
   const [universities, setUniversities] = useState<{ id: string; name: string; city: string }[]>([]);
@@ -83,7 +88,8 @@ export default function SignupPage() {
 
       alert("Account created successfully!");
 
-      router.push("/auth/login");
+      const callbackUrl = getCallbackUrl();
+      router.push(callbackUrl ? `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/auth/login");
     } catch (error) {
       console.error(error);
       alert("Something went wrong.");
@@ -118,10 +124,7 @@ export default function SignupPage() {
       }
 
       await signIn("google", {
-        callbackUrl:
-          role === "LANDLORD"
-            ? "/dashboard/landlord"
-            : "/dashboard/student",
+        callbackUrl: getCallbackUrl() || (role === "LANDLORD" ? "/dashboard/landlord" : "/dashboard/student"),
       });
     } catch (error) {
       console.error(error);

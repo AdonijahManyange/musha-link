@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import ContactLandlordButton from "@/components/ContactLandlordButton";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 type LandlordPageProps = {
   params: Promise<{
@@ -25,6 +27,11 @@ export default async function LandlordProfilePage({
   searchParams,
 }: LandlordPageProps) {
   const [{ id }, { fromListing }] = await Promise.all([params, searchParams]);
+  const session = await auth();
+  if (!session?.user) {
+    const callbackUrl = `/landlords/${encodeURIComponent(id)}${fromListing ? `?fromListing=${encodeURIComponent(fromListing)}` : ""}`;
+    redirect(`/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+  }
 
   const landlord = await prisma.user.findUnique({
     where: {
