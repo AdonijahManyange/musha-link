@@ -200,6 +200,7 @@ model Listing {
   photos                 ListingPhoto[]
   conversations          Conversation[]
   viewingRequests        ViewingRequest[]
+  analyticsEvents        ListingAnalyticsEvent[]
 
   @@index([landlordId])
   @@index([universityId])
@@ -209,6 +210,25 @@ model Listing {
   @@index([propertyType])
   @@index([status])
   @@index([isActive])
+}
+
+model ListingAnalyticsEvent {
+  id        String   @id @default(cuid())
+  listingId String
+  type      ListingAnalyticsEventType
+  visitorKey String?
+  createdAt DateTime @default(now())
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, type, createdAt])
+  @@unique([listingId, type, visitorKey])
+}
+
+enum ListingAnalyticsEventType {
+  IMPRESSION
+  VIEW
+  ENQUIRY
+  VIEWING_REQUEST
 }
 
 model ListingAmenity {

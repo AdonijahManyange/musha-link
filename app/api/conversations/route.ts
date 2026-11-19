@@ -161,6 +161,9 @@ export async function POST(request: Request) {
       });
 
     if (existingConversation) {
+      await prisma.listingAnalyticsEvent.create({
+        data: { listingId: listing.id, type: "ENQUIRY", visitorKey: user.id },
+      }).catch(() => undefined);
       return NextResponse.json({
         conversation: existingConversation,
         existing: true,
@@ -197,6 +200,10 @@ export async function POST(request: Request) {
           messages: true,
         },
       });
+
+    await prisma.listingAnalyticsEvent.create({
+      data: { listingId: listing.id, type: "ENQUIRY", visitorKey: user.id },
+    }).catch(() => undefined);
 
     // ----------------------------------------------------------
     // Success

@@ -49,7 +49,7 @@ export default function ListingCard({
     >
       {/* PROPERTY IMAGE */}
       <div className="relative overflow-hidden">
-        <Link href={listingUrl}>
+        <Link href={listingUrl} prefetch={false}>
           <Image
             src={
               listing.images?.[0] ||
@@ -112,7 +112,7 @@ export default function ListingCard({
         `}
       >
         {/* PROPERTY TITLE */}
-        <Link href={listingUrl}>
+        <Link href={listingUrl} prefetch={false}>
           <h3
             className={`
               font-bold text-text-primary
@@ -244,6 +244,7 @@ export default function ListingCard({
             {/* View details */}
             <Link
               href={listingUrl}
+              prefetch={false}
               className={`
                 inline-flex shrink-0 items-center justify-center
                 whitespace-nowrap rounded-xl font-semibold text-white

@@ -321,6 +321,18 @@ export async function POST(request: Request) {
         },
       });
 
+      await tx.listingAnalyticsEvent.upsert({
+        where: {
+          listingId_type_visitorKey: {
+            listingId: listing.id,
+            type: "VIEWING_REQUEST",
+            visitorKey: user.id,
+          },
+        },
+        create: { listingId: listing.id, type: "VIEWING_REQUEST", visitorKey: user.id },
+        update: {},
+      });
+
       const notification = await tx.notification.create({
         data: {
           userId: listing.landlordId,

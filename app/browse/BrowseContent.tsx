@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import ListingCard from "@/components/listing/ListingCard";
 import BrowseFilters from "@/components/browse/BrowseFilters";
+import { useEffect as useAnalyticsEffect } from "react";
 
 const BrowseMap = dynamic(
   () => import("./BrowseMap"),
@@ -308,6 +309,31 @@ export default function BrowseContent() {
       };
     }
   );
+
+  useAnalyticsEffect(() => {
+    if (typeof window === "undefined" || listingCards.length === 0) return;
+    const storageKey = "musha-analytics-visitor";
+    const createVisitorKey = () =>
+      typeof window.crypto.randomUUID === "function"
+        ? window.crypto.randomUUID()
+        : `visitor-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    let visitorKey: string;
+    try {
+      visitorKey = window.localStorage.getItem(storageKey) ?? "";
+      if (!visitorKey) {
+        visitorKey = createVisitorKey();
+        window.localStorage.setItem(storageKey, visitorKey);
+      }
+    } catch {
+      visitorKey = createVisitorKey();
+    }
+    void fetch("/api/analytics/listings/impressions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ visitorKey, listingIds: listingCards.map((item) => item.id) }),
+      keepalive: true,
+    });
+  }, [listingCards.map((item) => item.id).join(",")]);
 
   return (
     <main className="min-h-screen bg-slate-50">

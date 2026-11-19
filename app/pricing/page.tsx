@@ -258,13 +258,13 @@ export default function PricingPage() {
                     </h4>
 
                     <p className="mt-1 text-sm text-text-secondary">
-                      Get your property online.
+                      Get your property online for free.
                     </p>
                   </div>
 
                   <div className="text-right">
                     <p className="text-3xl font-bold text-text-primary">
-                      $6
+                      $0
                     </p>
 
                     <p className="text-xs text-text-muted">/month</p>
@@ -277,14 +277,14 @@ export default function PricingPage() {
                   <li>✓ Receive student enquiries</li>
                   <li>✓ Standard search placement</li>
                   <li>✓ Manage your listing</li>
-                  <li>✓ Basic listing analytics</li>
+                  <li>✓ 30-day totals for views, impressions, enquiries, and viewings</li>
                 </ul>
 
                 <Link
                   href="/auth/signup"
                   className="mt-8 block rounded-xl border border-blue-400 bg-transparent px-5 py-3 text-center text-sm font-semibold text-blue-400 transition hover:bg-blue-400/10"
                 >
-                  Get Started
+                  Start for Free
                 </Link>
               </div>
 
@@ -319,7 +319,8 @@ export default function PricingPage() {
                   <li>✓ Featured listing badge</li>
                   <li>✓ Higher search position</li>
                   <li>✓ More photos and videos</li>
-                  <li>✓ Listing analytics</li>
+                  <li>✓ View trends and conversion rates</li>
+                  <li>✓ Compare listing performance</li>
                   <li>✓ Priority support</li>
                 </ul>
 
@@ -367,7 +368,7 @@ export default function PricingPage() {
                   <li>✓ University-specific targeting</li>
                   <li>✓ Spotlight badge</li>
                   <li>✓ Push notifications</li>
-                  <li>✓ Detailed analytics</li>
+                  <li>✓ Extended analytics history</li>
                   <li>✓ Priority support</li>
                 </ul>
 

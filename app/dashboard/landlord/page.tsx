@@ -7,6 +7,7 @@ import {
   Clock,
   ArrowRight,
   Sparkles,
+  BarChart3,
 } from "lucide-react";
 
 export default async function LandlordDashboard() {
@@ -113,6 +114,22 @@ export default async function LandlordDashboard() {
         {/* ================================================== */}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+
+          <div className={cardClass}>
+            <div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-brand-blue dark:bg-blue-950/40 dark:text-blue-300">
+                <BarChart3 size={22} />
+              </div>
+              <h2 className={`${headingClass} mt-4`}>Listing Performance</h2>
+              <p className={descriptionClass}>
+                See how many students discover, view, and contact you about your listings.
+              </p>
+            </div>
+            <Link href="/dashboard/landlord/analytics" className={primaryButtonClass}>
+              View Analytics
+              <ArrowRight size={17} />
+            </Link>
+          </div>
 
           {/* ================================================== */}
           {/* MY LISTINGS */}

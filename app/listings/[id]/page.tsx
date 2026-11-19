@@ -11,6 +11,8 @@ import { prisma } from "@/lib/prisma";
 import ListingGallery from "@/components/ListingGallery";
 import ContactLandlordButton from "@/components/ContactLandlordButton";
 import DatabaseListingActions from "@/components/listing/DatabaseListingActions";
+import TrackListingEvent from "@/components/listing/TrackListingEvent";
+import { getCurrentUser } from "@/lib/auth";
 
 type ListingPageProps = {
   params: Promise<{
@@ -131,12 +133,28 @@ export default async function PublicListingPage({
     notFound();
   }
 
+  const viewer = await getCurrentUser();
+  if (viewer && viewer.id !== listing.landlordId) {
+    await prisma.listingAnalyticsEvent.upsert({
+      where: {
+        listingId_type_visitorKey: {
+          listingId: listing.id,
+          type: "VIEW",
+          visitorKey: viewer.id,
+        },
+      },
+      create: { listingId: listing.id, type: "VIEW", visitorKey: viewer.id },
+      update: {},
+    });
+  }
+
   // ============================================================
   // RENDER
   // ============================================================
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
+      <TrackListingEvent listingId={listing.id} type="VIEW" />
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
 
         {/* BACK LINK */}
