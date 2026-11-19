@@ -162,7 +162,7 @@ export default async function LandlordAnalyticsPage() {
           {listings.length ? (
             <div className="divide-y divide-border">
               {listings.map((listing) => {
-                const listingCounts = counts.get(listing.id) ?? {};
+                const listingCounts = counts.get(listing.id);
                 return (
                   <article key={listing.id} className="grid gap-3 px-5 py-5 md:grid-cols-[minmax(0,1fr)_repeat(4,minmax(90px,auto))] md:items-center">
                     <div>
@@ -172,7 +172,7 @@ export default async function LandlordAnalyticsPage() {
                     {eventLabels.map(({ type, label }) => (
                       <div key={type} className="flex justify-between gap-3 text-sm md:block">
                         <span className="text-text-secondary md:hidden">{label}</span>
-                        <span className="font-semibold text-text-primary">{listingCounts[type] ?? 0}</span>
+                        <span className="font-semibold text-text-primary">{listingCounts?.[type] ?? 0}</span>
                       </div>
                     ))}
                   </article>
